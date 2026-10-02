@@ -1,4 +1,4 @@
-# GoRocketLeague — Contexto do Projeto
+# Kartaz — Contexto do Projeto
 
 > Documento de referência para a IA do editor de código. Descreve o produto, as regras de jogo, as decisões já tomadas e o que ainda está em aberto.
 > **Parte visual:** o código HTML/React exportado do Figma, importado neste workspace, é a **fonte da verdade para layout, cores, tipografia e componentes**. Este documento cobre o comportamento, as regras e a arquitetura.
@@ -7,7 +7,7 @@
 
 ## 1. Visão geral
 
-GoRocketLeague é um jogo mobile de exploração de mapa, no estilo Pokémon GO, **sem AR** e **sem exigir deslocamento físico**. O jogador navega virtualmente por um mapa-múndi, encontra cartas colecionáveis de jogadores das seleções da Copa do Mundo 2026, monta sua coleção e troca cartas com outros jogadores.
+Kartaz é um jogo mobile de exploração de mapa, no estilo Pokémon GO, **sem AR** e **sem exigir deslocamento físico**. O jogador navega virtualmente por um mapa-múndi, encontra cartas colecionáveis de jogadores das seleções da Copa do Mundo 2026, monta sua coleção e troca cartas com outros jogadores.
 
 - Plataforma: React Native (iOS e Android).
 - Tema: futebol + foguete + exploração espacial.
