@@ -1,0 +1,10 @@
+{
+  "description": "Explore a dynamic world map in a football-themed mobile game, collect unique player cards, and track achievements in an engaging, modern interface.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
