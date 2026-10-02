@@ -17,7 +17,7 @@ type ActivityIndicatorDotProps = {
 export function ActivityIndicatorDot({
   active,
   color = colors.primary,
-  size = 5,
+  size = 8.4375,
 }: ActivityIndicatorDotProps) {
   const progress = useSharedValue(active ? 1 : 0);
 

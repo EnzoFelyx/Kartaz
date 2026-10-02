@@ -22,6 +22,8 @@ type ActiveIndicatorRadarProps = {
   size?: number;
   /** Duração de um ciclo completo de cada onda (ms). */
   duration?: number;
+  /** Opacidade do preenchimento da onda (mesma cor da borda). */
+  fillOpacity?: number;
 };
 
 /**
@@ -32,7 +34,8 @@ type ActiveIndicatorRadarProps = {
 export function ActiveIndicatorRadar({
   color = colors.primary,
   size = 44,
-  duration = 2500,
+  duration = 2600,
+  fillOpacity = 0.8,
 }: ActiveIndicatorRadarProps) {
   const clock = useSharedValue(0);
 
@@ -50,6 +53,7 @@ export function ActiveIndicatorRadar({
           phase={index / WAVE_COUNT}
           color={color}
           size={size}
+          fillOpacity={fillOpacity}
         />
       ))}
     </View>
@@ -62,9 +66,10 @@ type RadarWaveProps = {
   phase: number;
   color: ColorValue;
   size: number;
+  fillOpacity: number;
 };
 
-function RadarWave({ clock, phase, color, size }: RadarWaveProps) {
+function RadarWave({ clock, phase, color, size, fillOpacity }: RadarWaveProps) {
   const animatedStyle = useAnimatedStyle(() => {
     const progress = (clock.value + phase) % 1;
     return {
@@ -77,12 +82,24 @@ function RadarWave({ clock, phase, color, size }: RadarWaveProps) {
 
   return (
     <Animated.View
-      style={[
-        styles.wave,
-        { width: size, height: size, borderRadius: size / 2, borderColor: color },
-        animatedStyle,
-      ]}
-    />
+      style={[styles.wave, { width: size, height: size, borderRadius: size / 2 }, animatedStyle]}>
+      {/* Preenchimento na cor do radar (translúcido para o ícone continuar visível por cima). */}
+      <View
+        style={[
+          styles.layer,
+          { width: size, height: size, borderRadius: size / 2 },
+          { backgroundColor: color, opacity: fillOpacity },
+        ]}
+      />
+      {/* Borda da onda. */}
+      <View
+        style={[
+          styles.layer,
+          styles.border,
+          { width: size, height: size, borderRadius: size / 2, borderColor: color },
+        ]}
+      />
+    </Animated.View>
   );
 }
 
@@ -94,6 +111,13 @@ const styles = StyleSheet.create({
   },
   wave: {
     position: 'absolute',
+  },
+  layer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+  },
+  border: {
     borderWidth: 1.5,
   },
 });

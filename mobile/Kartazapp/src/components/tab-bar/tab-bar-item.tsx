@@ -31,8 +31,10 @@ export function TabBarItem({
       <View style={styles.iconWrapper}>
         {focused && <ActiveIndicatorRadar />}
         {icon}
+        <View style={styles.dot}>
+          <ActivityIndicatorDot active={focused} />
+        </View>
       </View>
-      <ActivityIndicatorDot active={focused} />
     </Pressable>
   );
 }
@@ -42,12 +44,19 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
     paddingHorizontal: 8,
   },
   iconWrapper: {
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  // Canto superior direito: o centro do dot (≈8.4px) fica sobre a quina do ícone,
+  // deslocado um pouco para fora, para encostar sem cobrir o desenho.
+  dot: {
+    position: 'absolute',
+    top: -4,
+    right: -5,
+    zIndex: 1,
   },
   pressed: {
     opacity: 0.6,
