@@ -1,29 +1,74 @@
 import { Tabs } from 'expo-router/js-tabs';
 
+import { TabBar, TabIcon } from '@/components/tab-bar';
 import { colors } from '@/theme/colors';
 
-// Tab bar provisória: na Fase 3 do todo vira uma TabBar 100% custom (ícones SVG próprios).
+// `title` não aparece na barra (só ícones); é usado como label de acessibilidade.
 export default function TabsLayout() {
   return (
     <Tabs
+      tabBar={(props) => <TabBar {...props} />}
       screenOptions={{
         headerShown: false,
         sceneStyle: { backgroundColor: colors.background },
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.mutedForeground,
-        tabBarStyle: {
-          backgroundColor: colors.card,
-          borderTopColor: colors.border,
-        },
-        tabBarLabelStyle: { fontSize: 10, fontWeight: '700', letterSpacing: 0.5 },
-        tabBarIconStyle: { display: 'none' },
-        tabBarIcon: () => null,
       }}>
-      <Tabs.Screen name="index" options={{ title: 'MAP' }} />
-      <Tabs.Screen name="collection" options={{ title: 'CARDS' }} />
-      <Tabs.Screen name="trades" options={{ title: 'TRADES' }} />
-      <Tabs.Screen name="achievements" options={{ title: 'ACHIEVE' }} />
-      <Tabs.Screen name="profile" options={{ title: 'PROFILE' }} />
+      <Tabs.Screen
+        name="map"
+        options={{
+          title: 'Map',
+          tabBarIcon: (props) => (
+            <TabIcon ios={{ default: 'map', selected: 'map.fill' }} android="map" {...props} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="collection"
+        options={{
+          title: 'Collection',
+          tabBarIcon: (props) => (
+            <TabIcon
+              ios={{ default: 'rectangle.stack', selected: 'rectangle.stack.fill' }}
+              android="style"
+              {...props}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="trades"
+        options={{
+          title: 'Trades',
+          tabBarIcon: (props) => (
+            <TabIcon ios="arrow.left.arrow.right" android="swap_horiz" {...props} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="achievements"
+        options={{
+          title: 'Achievements',
+          tabBarIcon: (props) => (
+            <TabIcon
+              ios={{ default: 'trophy', selected: 'trophy.fill' }}
+              android="emoji_events"
+              {...props}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Profile',
+          tabBarIcon: (props) => (
+            <TabIcon
+              ios={{ default: 'person.crop.circle', selected: 'person.crop.circle.fill' }}
+              android="account_circle"
+              {...props}
+            />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

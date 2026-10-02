@@ -20,6 +20,8 @@ export const colors = {
 
   // complementares usadas no protótipo
   deep: '#040710',
+  subtle: '#4b5563',
+  tabBarFallback: 'rgba(15, 21, 32, 0.92)',
 } as const;
 
 export type ColorToken = keyof typeof colors;

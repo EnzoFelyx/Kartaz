@@ -20,6 +20,7 @@ export default function RootLayout() {
           headerShown: false,
           contentStyle: { backgroundColor: colors.background },
         }}>
+        <Stack.Screen name="index" />
         <Stack.Screen name="(tabs)" />
       </Stack>
     </>
