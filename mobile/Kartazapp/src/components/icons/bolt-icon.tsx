@@ -1,0 +1,23 @@
+import type { ColorValue } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
+
+type BoltIconProps = {
+  color: ColorValue;
+  size?: number;
+};
+
+export function BoltIcon({ color, size = 14 }: BoltIconProps) {
+  return (
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round">
+      <Path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z" />
+    </Svg>
+  );
+}

@@ -111,7 +111,14 @@ export function TabBarShimmerBorder({
               c={center}
               origin={center}
               transform={rotation}
-              colors={['transparent', 'transparent', colors.primary, '#ffffff', colors.primary, 'transparent']}
+              colors={[
+                colors.transparent,
+                colors.transparent,
+                colors.primary,
+                colors.white,
+                colors.primary,
+                colors.transparent,
+              ]}
               positions={[0, 0.78, 0.86, 0.9, 0.94, 1]}
             />
           </RoundedRect>
@@ -149,7 +156,7 @@ export function TabBarShimmerBorder({
                 style="stroke"
                 strokeWidth={strokeWidth}
                 strokeCap="round"
-                color="#ffffff"
+                color={colors.white}
               />
             ))}
           </>

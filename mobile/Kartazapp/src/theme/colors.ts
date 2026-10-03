@@ -18,11 +18,32 @@ export const colors = {
   border: 'rgba(0, 212, 255, 0.12)',
   ring: '#00d4ff',
 
+  // neutros
+  white: '#ffffff',
+  transparent: 'transparent',
+
   // complementares usadas no protótipo
   deep: '#040710',
   subtle: '#4b5563',
   violet: '#8b5cf6',
+  magenta: '#d946ef',
+  gold: '#ffd700',
+  fuelEnd: '#ffaa00',
+  progressEnd: '#0088ff',
+  glass: 'rgba(15, 21, 32, 0.85)',
+  track: 'rgba(255, 255, 255, 0.08)',
   tabBarFallback: 'rgba(15, 21, 32, 0.92)',
+  /** Faixa de luz que percorre barras de progresso (pulso) e bordas (shimmer). */
+  highlight: 'rgba(255, 255, 255, 0.85)',
 } as const;
 
 export type ColorToken = keyof typeof colors;
+
+/** Aplica transparência a uma cor hex do tema (#rrggbb) → `rgba(r, g, b, alpha)`. */
+export function withAlpha(hex: string, alpha: number) {
+  const value = parseInt(hex.replace('#', ''), 16);
+  const r = (value >> 16) & 255;
+  const g = (value >> 8) & 255;
+  const b = value & 255;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}

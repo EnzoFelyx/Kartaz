@@ -1,6 +1,6 @@
 import type { MapStyleElement, Region } from 'react-native-maps';
 
-import { colors } from './colors';
+import { colors, withAlpha } from './colors';
 
 /**
  * Configurações customizadas do mapa (react-native-maps + PROVIDER_GOOGLE).
@@ -19,7 +19,7 @@ export const mapPalette = {
   label: '#a3a8b1',
   labelStroke: '#3f434b',
   waterLabel: '#80858f',
-  gridLine: 'rgba(0, 212, 255, 0.1)',
+  gridLine: withAlpha(colors.primary, 0.1),
 } as const;
 
 /** Estilo padrão do Kartaz: slate monocromático, sem POIs, transporte nem ícones. */

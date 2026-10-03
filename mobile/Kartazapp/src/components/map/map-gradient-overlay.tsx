@@ -2,7 +2,7 @@ import { Canvas, LinearGradient, Rect, vec } from '@shopify/react-native-skia';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { colors } from '@/theme/colors';
+import { colors, withAlpha } from '@/theme/colors';
 
 type MapGradientOverlayProps = {
   /** Cor do escurecimento (hex #rrggbb). */
@@ -14,14 +14,6 @@ type MapGradientOverlayProps = {
   /** Quanto (fração da altura) da base recebe o escurecimento. */
   bottomFade?: number;
 };
-
-function withAlpha(hex: string, alpha: number) {
-  const value = parseInt(hex.replace('#', ''), 16);
-  const r = (value >> 16) & 255;
-  const g = (value >> 8) & 255;
-  const b = value & 255;
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-}
 
 /**
  * Gradiente vertical por cima do mapa (Skia): escurece o topo (HUD) e a base
