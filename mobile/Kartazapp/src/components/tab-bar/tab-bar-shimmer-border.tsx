@@ -70,17 +70,17 @@ export function TabBarShimmerBorder({
   };
   const center = vec(width / 2, height / 2);
 
-  const borderPath = useMemo(() => {
-    const path = Skia.Path.Make();
-    path.addRRect(
-      Skia.RRectXY(
-        Skia.XYWHRect(inset, inset, width - strokeWidth, height - strokeWidth),
-        radius - inset,
-        radius - inset,
+  const borderPath = useMemo(
+    () =>
+      Skia.Path.RRect(
+        Skia.RRectXY(
+          Skia.XYWHRect(inset, inset, width - strokeWidth, height - strokeWidth),
+          radius - inset,
+          radius - inset,
+        ),
       ),
-    );
-    return path;
-  }, [width, height, radius, inset, strokeWidth]);
+    [width, height, radius, inset, strokeWidth],
+  );
 
   // Modo `trace`: o trecho [clock, clock + segmentLength] percorre o caminho.
   // Quando passa do fim (1), a sobra é desenhada a partir do início (0) num segundo Path.
