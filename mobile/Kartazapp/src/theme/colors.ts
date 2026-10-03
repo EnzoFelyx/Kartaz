@@ -1,3 +1,5 @@
+import type { Rarity } from '@/types/player-card';
+
 /**
  * Paleta principal — tokens do `@theme` de UI_REACT_para_referencia/src/index.css.
  * Fonte única de cores do app (será lida pelo tailwind.config na Fase 1).
@@ -29,6 +31,9 @@ export const colors = {
   violet: '#8b5cf6',
   magenta: '#d946ef',
   gold: '#ffd700',
+  success: '#22c55e',
+  danger: '#ef4444',
+  info: '#3b82f6',
   fuelEnd: '#ffaa00',
   progressEnd: '#0088ff',
   glass: 'rgba(15, 21, 32, 0.85)',
@@ -39,6 +44,14 @@ export const colors = {
 } as const;
 
 export type ColorToken = keyof typeof colors;
+
+/** Cor de cada raridade de carta (protótipo: common/rare/epic/legendary). */
+export const rarityColors: Record<Rarity, string> = {
+  common: '#6b7280',
+  rare: colors.info,
+  epic: colors.violet,
+  legendary: colors.gold,
+};
 
 /** Aplica transparência a uma cor hex do tema (#rrggbb) → `rgba(r, g, b, alpha)`. */
 export function withAlpha(hex: string, alpha: number) {

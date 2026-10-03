@@ -23,7 +23,7 @@ export function TabBar({ state, descriptors, navigation, insets }: BottomTabBarP
   const items = state.routes.map((route, index) => {
     const { options } = descriptors[route.key];
     const focused = state.index === index;
-    const color = focused ? colors.primary : colors.subtle;
+    const color = focused ? colors.primary : colors.white;
 
     const onPress = () => {
       const event = navigation.emit({

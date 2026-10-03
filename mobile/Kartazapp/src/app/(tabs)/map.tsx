@@ -1,6 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
+import Animated, { Easing, withTiming, type EntryAnimationsValues } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { FuelGauge } from '@/components/hud/fuel-gauge';
@@ -28,9 +30,34 @@ const MOCK_RADAR_SEARCH_MS = 1200;
 /** Distância entre o painel e a tab bar. */
 const DASHBOARD_GAP = 12;
 
+/** Entrada do HUD do topo: escorrega um pouco de cima até a posição, sem mola. */
+const HUD_SLIDE_DISTANCE = 32;
+const HUD_SLIDE_MS = 600;
+
+function hudTopEntering(_values: EntryAnimationsValues) {
+  'worklet';
+  const config = { duration: HUD_SLIDE_MS, easing: Easing.out(Easing.cubic) };
+  return {
+    initialValues: { opacity: 0, transform: [{ translateY: -HUD_SLIDE_DISTANCE }] },
+    animations: {
+      opacity: withTiming(1, config),
+      transform: [{ translateY: withTiming(0, config) }],
+    },
+  };
+}
+
 export default function MapScreen() {
   const insets = useSafeAreaInsets();
   const [radarSearching, setRadarSearching] = useState(false);
+  // Muda a cada vez que a aba ganha foco; usado como `key` do HUD do topo para
+  // remontá-lo e reiniciar a animação de entrada.
+  const [focusCount, setFocusCount] = useState(0);
+
+  useFocusEffect(
+    useCallback(() => {
+      setFocusCount((count) => count + 1);
+    }, []),
+  );
   const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => () => {
@@ -56,14 +83,18 @@ export default function MapScreen() {
       <MapGridOverlay />
 
       {/* HUD do topo: Fuel à esquerda (ocupa o espaço livre) e Level/XP à direita. */}
-      <View style={[styles.hudTop, { top: insets.top + 8 }]} pointerEvents="box-none">
+      <Animated.View
+        key={focusCount}
+        entering={hudTopEntering}
+        style={[styles.hudTop, { top: insets.top + 8 }]}
+        pointerEvents="box-none">
         <FuelGauge
           fuel={MOCK_PLAYER.fuel}
           maxFuel={MOCK_PLAYER.maxFuel}
           style={styles.fuel}
         />
         <LevelCard level={MOCK_PLAYER.level} xp={MOCK_PLAYER.xp} />
-      </View>
+      </Animated.View>
 
       <MapDashboard
         {...MOCK_ZONE}
