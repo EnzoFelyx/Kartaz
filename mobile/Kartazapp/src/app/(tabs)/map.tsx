@@ -1,19 +1,47 @@
+import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { FuelGauge } from '@/components/hud/fuel-gauge';
 import { LevelCard } from '@/components/hud/level-card';
+import { MapDashboard } from '@/components/map-dashboard';
 import { MapGradientOverlay } from '@/components/map/map-gradient-overlay';
 import { MapGridOverlay } from '@/components/map/map-grid-overlay';
+import { TAB_BAR_BOTTOM_GAP, TAB_BAR_HEIGHT } from '@/components/tab-bar';
 import { colors } from '@/theme/colors';
 import { initialMapRegion, kartazMapStyle, mapViewConfig } from '@/theme/map-styles';
 
 // Mock até termos a store do jogador (Fase 4 do todo).
 const MOCK_PLAYER = { fuel: 78, maxFuel: 100, level: 12, xp: 2450 };
+const MOCK_ZONE = {
+  zone: 'South America',
+  difficulty: 'medium' as const,
+  discovered: 0,
+  totalCards: 5,
+  heat: 78,
+  xpReward: 350,
+  multiplier: 1.5,
+};
+/** Tempo da busca do radar (só visual, até a resposta vir do servidor). */
+const MOCK_RADAR_SEARCH_MS = 1200;
+/** Distância entre o painel e a tab bar. */
+const DASHBOARD_GAP = 12;
 
 export default function MapScreen() {
   const insets = useSafeAreaInsets();
+  const [radarSearching, setRadarSearching] = useState(false);
+  const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => {
+    if (searchTimeout.current) clearTimeout(searchTimeout.current);
+  }, []);
+
+  // Intenção de busca: no futuro vira uma chamada ao servidor, que decide o resultado.
+  const handleRadarSearch = () => {
+    setRadarSearching(true);
+    searchTimeout.current = setTimeout(() => setRadarSearching(false), MOCK_RADAR_SEARCH_MS);
+  };
 
   return (
     <View style={styles.container}>
@@ -36,6 +64,17 @@ export default function MapScreen() {
         />
         <LevelCard level={MOCK_PLAYER.level} xp={MOCK_PLAYER.xp} />
       </View>
+
+      <MapDashboard
+        {...MOCK_ZONE}
+        searching={radarSearching}
+        canSearch={MOCK_PLAYER.fuel >= 1}
+        onRadarSearch={handleRadarSearch}
+        style={[
+          styles.dashboard,
+          { bottom: insets.bottom + TAB_BAR_BOTTOM_GAP + TAB_BAR_HEIGHT + DASHBOARD_GAP },
+        ]}
+      />
     </View>
   );
 }
@@ -56,5 +95,10 @@ const styles = StyleSheet.create({
   fuel: {
     flex: 1,
     justifyContent: 'center',
+  },
+  dashboard: {
+    position: 'absolute',
+    left: 16,
+    right: 16,
   },
 });
