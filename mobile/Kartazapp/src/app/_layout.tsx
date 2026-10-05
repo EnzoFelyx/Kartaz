@@ -23,6 +23,8 @@ export default function RootLayout() {
         <Stack.Screen name="index" />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="card/[id]" />
+        <Stack.Screen name="my-collection" />
+        <Stack.Screen name="nation/[code]" />
       </Stack>
     </>
   );

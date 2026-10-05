@@ -1,20 +1,15 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { StarIcon } from '@/components/icons/star-icon';
-import type { PlayerCard, Rarity } from '@/types/player-card';
+import type { Player } from '@/types/player-card';
+import { RARITY_LABEL } from '@/utils/card-labels';
 import { colors, rarityColors } from '@/theme/colors';
 
 import { CardArt } from './card-art';
 
-const RARITY_LABEL: Record<Rarity, string> = {
-  common: 'Common',
-  rare: 'Rare',
-  epic: 'Epic',
-  legendary: 'Legendary',
-};
-
 type PlayerCardRowProps = {
-  card: PlayerCard;
+  /** Aceita qualquer jogador (catálogo) ou cópia da coleção. */
+  card: Player;
   onPress?: () => void;
 };
 
@@ -28,7 +23,7 @@ export function PlayerCardRow({ card, onPress }: PlayerCardRowProps) {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`${card.name}, ${card.nation}, ${RARITY_LABEL[card.rarity]}, rating ${card.rating}`}
+      accessibilityLabel={`${card.name}, ${card.nation}, ${RARITY_LABEL[card.rarity]}, rating ${card.rating}, ${card.copiesFound} of ${card.totalCopies} copies found`}
       onPress={onPress}
       style={({ pressed }) => [
         styles.row,
@@ -54,6 +49,9 @@ export function PlayerCardRow({ card, onPress }: PlayerCardRowProps) {
           <StarIcon color={tint} size={13} />
           <Text style={styles.rarity}>{RARITY_LABEL[card.rarity]}</Text>
         </View>
+        <Text style={styles.found}>
+          {formatCount(card.copiesFound)} / {formatCount(card.totalCopies)} found
+        </Text>
       </View>
 
       <View style={styles.ratingBox}>
@@ -61,6 +59,10 @@ export function PlayerCardRow({ card, onPress }: PlayerCardRowProps) {
       </View>
     </Pressable>
   );
+}
+
+function formatCount(value: number) {
+  return value.toLocaleString('en-US');
 }
 
 const styles = StyleSheet.create({
@@ -80,8 +82,8 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.98 }],
   },
   thumb: {
-    width: 84,
-    height: 100,
+    width: 88,
+    height: 88,
     borderRadius: 14,
   },
   info: {
@@ -108,6 +110,11 @@ const styles = StyleSheet.create({
     color: colors.secondaryForeground,
     fontSize: 13,
     fontWeight: '600',
+  },
+  found: {
+    color: colors.secondaryForeground,
+    fontSize: 13,
+    fontWeight: '500',
   },
   ratingBox: {
     width: 60,

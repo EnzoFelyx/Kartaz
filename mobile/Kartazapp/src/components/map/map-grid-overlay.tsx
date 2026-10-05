@@ -3,11 +3,15 @@ import Svg, { Defs, Path, Pattern, Rect } from 'react-native-svg';
 
 import { mapPalette } from '@/theme/map-styles';
 
+import { GridLineShimmer } from './grid-line-shimmer';
+
 type MapGridOverlayProps = {
   /** Tamanho de cada célula do grid (px). */
   cellSize?: number;
   color?: string;
   strokeWidth?: number;
+  /** Pulso de luz percorrendo uma linha aleatória do grid. */
+  shimmer?: boolean;
 };
 
 /**
@@ -18,6 +22,7 @@ export function MapGridOverlay({
   cellSize = 40,
   color = mapPalette.gridLine,
   strokeWidth = 1,
+  shimmer = true,
 }: MapGridOverlayProps) {
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill}>
@@ -35,6 +40,7 @@ export function MapGridOverlay({
         </Defs>
         <Rect width="100%" height="100%" fill="url(#map-grid)" />
       </Svg>
+      {shimmer && <GridLineShimmer cellSize={cellSize} />}
     </View>
   );
 }

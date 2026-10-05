@@ -4,15 +4,17 @@ import { StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { MyCollectionButton } from '@/components/collection/my-collection-button';
+import { NationRow } from '@/components/collection/nation-row';
 import { PlayerCardRow } from '@/components/collection/player-card-row';
 import { PlayerCardTile } from '@/components/collection/player-card-tile';
-import { StatCard } from '@/components/collection/stat-card';
 import { ViewModeToggle, type ViewMode } from '@/components/collection/view-mode-toggle';
 import { TAB_BAR_BOTTOM_GAP, TAB_BAR_HEIGHT } from '@/components/tab-bar';
 import { SearchInput } from '@/components/ui/search-input';
+import { MOCK_NATIONS, type Nation } from '@/mocks/nations';
 import { MOCK_PLAYER_CARDS } from '@/mocks/player-cards';
 import type { PlayerCard } from '@/types/player-card';
-import { colors, rarityColors } from '@/theme/colors';
+import { colors } from '@/theme/colors';
 
 const GAP = 12;
 const H_PADDING = 20;
@@ -34,43 +36,53 @@ const cardExiting = FadeOutDown.duration(CARD_EXIT_MS);
  * Montamos as linhas à mão (em vez de trocar `numColumns`) porque mudar `numColumns`
  * exige remontar o FlatList — o que remontaria o header e cortaria a animação do toggle.
  */
-type CollectionRow = { key: string; cards: PlayerCard[] };
+type CollectionRow =
+  | { type: 'cards'; key: string; cards: PlayerCard[] }
+  | { type: 'nation'; key: string; nation: Nation };
 
-function toRows(cards: PlayerCard[], perRow: number): CollectionRow[] {
+function toCardRows(cards: PlayerCard[], perRow: number): CollectionRow[] {
   const rows: CollectionRow[] = [];
   for (let i = 0; i < cards.length; i += perRow) {
     const chunk = cards.slice(i, i + perRow);
-    rows.push({ key: chunk.map((card) => card.id).join('-'), cards: chunk });
+    rows.push({ type: 'cards', key: chunk.map((card) => card.id).join('-'), cards: chunk });
   }
   return rows;
 }
+
+/** Seleções em ordem alfabética. */
+const SORTED_NATIONS = [...MOCK_NATIONS].sort((a, b) => a.name.localeCompare(b.name));
 
 export default function CollectionScreen() {
   const insets = useSafeAreaInsets();
   const [query, setQuery] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
 
-  // Stats calculados do mock (no futuro vêm da store/servidor).
-  const stats = useMemo(
-    () => ({
-      total: MOCK_PLAYER_CARDS.length,
-      legendary: MOCK_PLAYER_CARDS.filter((card) => card.rarity === 'legendary').length,
-      rare: MOCK_PLAYER_CARDS.filter((card) => card.rarity === 'rare').length,
-    }),
-    [],
-  );
-
-  const cards = useMemo(() => {
-    const term = query.trim().toLowerCase();
-    if (!term) return MOCK_PLAYER_CARDS;
-    return MOCK_PLAYER_CARDS.filter(
-      (card) => card.name.toLowerCase().includes(term) || card.nation.toLowerCase().includes(term),
-    );
-  }, [query]);
-
   const isGrid = viewMode === 'grid';
+  const isNations = viewMode === 'nations';
   const openCard = (id: string) => router.push({ pathname: '/card/[id]', params: { id } });
-  const rows = useMemo(() => toRows(cards, isGrid ? GRID_COLUMNS : 1), [cards, isGrid]);
+
+  // Jogadores (grade/lista) e seleções (globo) são buscas diferentes: ao cruzar entre
+  // esses dois grupos, limpa o campo. Entre grade e lista a busca é mantida.
+  const changeViewMode = (mode: ViewMode) => {
+    if ((mode === 'nations') !== isNations) setQuery('');
+    setViewMode(mode);
+  };
+
+  // A mesma busca filtra jogadores (grade/lista) ou seleções (países).
+  const rows = useMemo<CollectionRow[]>(() => {
+    const term = query.trim().toLowerCase();
+    if (isNations) {
+      return SORTED_NATIONS.filter((nation) => nation.name.toLowerCase().includes(term)).map(
+        (nation) => ({ type: 'nation', key: nation.code, nation }),
+      );
+    }
+    const cards = term
+      ? MOCK_PLAYER_CARDS.filter(
+          (card) => card.name.toLowerCase().includes(term) || card.nation.toLowerCase().includes(term),
+        )
+      : MOCK_PLAYER_CARDS;
+    return toCardRows(cards, isGrid ? GRID_COLUMNS : 1);
+  }, [query, isGrid, isNations]);
 
   // Elemento (não função) para o TextInput não perder o foco a cada letra digitada.
   const header = (
@@ -79,20 +91,24 @@ export default function CollectionScreen() {
         {/* Toggle na mesma linha do título, centralizado com ele. */}
         <View style={styles.titleRow}>
           <Text style={styles.title} accessibilityRole="header">
-            Collection
+            Cards
           </Text>
-          <ViewModeToggle value={viewMode} onChange={setViewMode} />
+          <ViewModeToggle value={viewMode} onChange={changeViewMode} />
         </View>
-        <Text style={styles.subtitle}>Manage your player cards</Text>
+        <Text style={styles.subtitle}>Explore all player cards</Text>
       </View>
 
-      <SearchInput value={query} onChangeText={setQuery} placeholder="Search players..." />
+      {/* Contagem vem do mock da coleção. */}
+      <MyCollectionButton
+        count={MOCK_PLAYER_CARDS.length}
+        onPress={() => router.push('/my-collection')}
+      />
 
-      <View style={styles.stats}>
-        <StatCard value={stats.total} label="Total Cards" />
-        <StatCard value={stats.legendary} label="Legendary" valueColor={rarityColors.legendary} />
-        <StatCard value={stats.rare} label="Rare" valueColor={rarityColors.rare} />
-      </View>
+      <SearchInput
+        value={query}
+        onChangeText={setQuery}
+        placeholder={isNations ? 'Search team...' : 'Search players...'}
+      />
     </View>
   );
 
@@ -102,9 +118,20 @@ export default function CollectionScreen() {
         data={rows}
         keyExtractor={(row) => `${viewMode}-${row.key}`}
         ListHeaderComponent={header}
-        ListEmptyComponent={<Text style={styles.empty}>No players found</Text>}
+        ListEmptyComponent={
+          <Text style={styles.empty}>{isNations ? 'No teams found' : 'No players found'}</Text>
+        }
         renderItem={({ item: row, index }) =>
-          isGrid ? (
+          row.type === 'nation' ? (
+            <Animated.View entering={cardEntering(index)} exiting={cardExiting}>
+              <NationRow
+                name={row.nation.name}
+                onPress={() =>
+                  router.push({ pathname: '/nation/[code]', params: { code: row.nation.code } })
+                }
+              />
+            </Animated.View>
+          ) : isGrid ? (
             <View style={styles.gridRow}>
               {row.cards.map((card, column) => (
                 <Animated.View
@@ -169,10 +196,6 @@ const styles = StyleSheet.create({
   subtitle: {
     color: colors.secondaryForeground,
     fontSize: 16,
-  },
-  stats: {
-    flexDirection: 'row',
-    gap: GAP,
   },
   gridRow: {
     flexDirection: 'row',

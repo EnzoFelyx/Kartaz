@@ -2,11 +2,15 @@ import { useEffect, type ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
+import { GlobeIcon } from '@/components/icons/globe-icon';
 import { GridIcon } from '@/components/icons/grid-icon';
 import { ListIcon } from '@/components/icons/list-icon';
 import { colors } from '@/theme/colors';
 
-export type ViewMode = 'grid' | 'list';
+export type ViewMode = 'grid' | 'list' | 'nations';
+
+/** Ordem dos botões no toggle (define a posição do fundo deslizante). */
+const MODES: ViewMode[] = ['grid', 'list', 'nations'];
 
 const BUTTON_WIDTH = 44;
 const BUTTON_HEIGHT = 36;
@@ -39,14 +43,14 @@ function ToggleButton({ active, label, onPress, renderIcon }: ToggleButtonProps)
 }
 
 /**
- * Alternância entre visualização em grade e em lista (só ícones).
+ * Alternância entre visualização em grade, em lista e por seleções (só ícones).
  * O fundo ciano desliza suavemente até o botão selecionado.
  */
 export function ViewModeToggle({ value, onChange }: ViewModeToggleProps) {
-  const position = useSharedValue(value === 'grid' ? 0 : 1);
+  const position = useSharedValue(MODES.indexOf(value));
 
   useEffect(() => {
-    position.value = withTiming(value === 'grid' ? 0 : 1, {
+    position.value = withTiming(MODES.indexOf(value), {
       duration: 260,
       easing: Easing.out(Easing.cubic),
     });
@@ -70,6 +74,12 @@ export function ViewModeToggle({ value, onChange }: ViewModeToggleProps) {
         active={value === 'list'}
         onPress={() => onChange('list')}
         renderIcon={(color) => <ListIcon color={color} size={18} />}
+      />
+      <ToggleButton
+        label="Nations view"
+        active={value === 'nations'}
+        onPress={() => onChange('nations')}
+        renderIcon={(color) => <GlobeIcon color={color} size={18} />}
       />
     </View>
   );
