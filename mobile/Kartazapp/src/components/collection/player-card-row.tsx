@@ -1,8 +1,9 @@
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { StarIcon } from '@/components/icons/star-icon';
 import type { Player } from '@/types/player-card';
-import { RARITY_LABEL } from '@/utils/card-labels';
+import { formatNumber, getNationName } from '@/utils/card-labels';
 import { colors, rarityColors } from '@/theme/colors';
 
 import { CardArt } from './card-art';
@@ -18,12 +19,21 @@ type PlayerCardRowProps = {
  * no meio e o overall em destaque à direita. Borda na cor da raridade.
  */
 export function PlayerCardRow({ card, onPress }: PlayerCardRowProps) {
+  const { t } = useTranslation();
   const tint = rarityColors[card.rarity];
+  const rarity = t(`rarity.${card.rarity}`);
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`${card.name}, ${card.nation}, ${RARITY_LABEL[card.rarity]}, rating ${card.rating}, ${card.copiesFound} of ${card.totalCopies} copies found`}
+      accessibilityLabel={t('cards.rowA11y', {
+        name: card.name,
+        nation: getNationName(card.nationCode),
+        rarity,
+        rating: card.rating,
+        found: card.copiesFound,
+        total: card.totalCopies,
+      })}
       onPress={onPress}
       style={({ pressed }) => [
         styles.row,
@@ -43,14 +53,17 @@ export function PlayerCardRow({ card, onPress }: PlayerCardRowProps) {
           {card.name}
         </Text>
         <Text style={styles.nation} numberOfLines={1}>
-          {card.nation}
+          {getNationName(card.nationCode)}
         </Text>
         <View style={styles.rarityRow}>
           <StarIcon color={tint} size={13} />
-          <Text style={styles.rarity}>{RARITY_LABEL[card.rarity]}</Text>
+          <Text style={styles.rarity}>{rarity}</Text>
         </View>
         <Text style={styles.found}>
-          {formatCount(card.copiesFound)} / {formatCount(card.totalCopies)} found
+          {t('cards.found', {
+            found: formatNumber(card.copiesFound),
+            total: formatNumber(card.totalCopies),
+          })}
         </Text>
       </View>
 
@@ -59,10 +72,6 @@ export function PlayerCardRow({ card, onPress }: PlayerCardRowProps) {
       </View>
     </Pressable>
   );
-}
-
-function formatCount(value: number) {
-  return value.toLocaleString('en-US');
 }
 
 const styles = StyleSheet.create({

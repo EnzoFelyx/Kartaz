@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { ChevronRightIcon } from '@/components/icons/chevron-right-icon';
@@ -12,18 +13,21 @@ type MyCollectionButtonProps = {
 
 /** Atalho para a coleção do jogador (por enquanto demonstrativo, sem navegação). */
 export function MyCollectionButton({ count, onPress }: MyCollectionButtonProps) {
+  const { t } = useTranslation();
+  const countLabel = t('common.cardsCount', { count });
+
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`My Collection, ${count} cards`}
+      accessibilityLabel={`${t('cards.myCollection')}, ${countLabel}`}
       onPress={onPress}
       style={({ pressed }) => [styles.button, pressed && styles.pressed]}>
       <View style={styles.iconBox}>
         <LayersIcon color={colors.primary} size={24} />
       </View>
       <View style={styles.texts}>
-        <Text style={styles.title}>My Collection</Text>
-        <Text style={styles.subtitle}>{count} cards</Text>
+        <Text style={styles.title}>{t('cards.myCollection')}</Text>
+        <Text style={styles.subtitle}>{countLabel}</Text>
       </View>
       <ChevronRightIcon color={colors.secondaryForeground} size={20} />
     </Pressable>

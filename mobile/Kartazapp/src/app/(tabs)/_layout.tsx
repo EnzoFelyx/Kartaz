@@ -1,11 +1,15 @@
 import { Tabs } from 'expo-router/js-tabs';
+import { useTranslation } from 'react-i18next';
 
+import { CardsIcon } from '@/components/icons/cards-icon';
 import { TabBar, TabIcon } from '@/components/tab-bar';
 import { colors } from '@/theme/colors';
 
 // `title` não aparece na barra (só ícones); é usado como label de acessibilidade.
 // Ícones sempre em outline (vazados), inclusive na aba ativa.
 export default function TabsLayout() {
+  const { t } = useTranslation();
+
   return (
     <Tabs
       tabBar={(props) => <TabBar {...props} />}
@@ -16,7 +20,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="map"
         options={{
-          title: 'Map',
+          title: t('tabs.map'),
           tabBarIcon: (props) => (
             <TabIcon ios="map" android="map" {...props} />
           ),
@@ -25,20 +29,15 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="collection"
         options={{
-          title: 'Collection',
-          tabBarIcon: (props) => (
-            <TabIcon
-              ios="rectangle.stack"
-              android="style"
-              {...props}
-            />
-          ),
+          title: t('tabs.collection'),
+          // Ícone próprio (SVG): nenhum SF Symbol tem a carta inclinada do protótipo.
+          tabBarIcon: ({ color, size }) => <CardsIcon color={color} size={size} />,
         }}
       />
       <Tabs.Screen
         name="achievements"
         options={{
-          title: 'Achievements',
+          title: t('tabs.achievements'),
           tabBarIcon: (props) => (
             <TabIcon
               ios="trophy"
@@ -51,7 +50,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="trades"
         options={{
-          title: 'Trades',
+          title: t('tabs.trades'),
           tabBarIcon: (props) => (
             <TabIcon ios="arrow.left.arrow.right" android="swap_horiz" {...props} />
           ),
@@ -60,7 +59,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
+          title: t('tabs.profile'),
           tabBarIcon: (props) => (
             <TabIcon
               ios="person.crop.circle"

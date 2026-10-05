@@ -1,5 +1,10 @@
+import { useTranslation } from 'react-i18next';
+
 import { ScreenPlaceholder } from '@/components/screen-placeholder';
 
 export default function AchievementsScreen() {
-  return <ScreenPlaceholder title="ACHIEVEMENTS" subtitle="PROGRESS AND REWARDS" />;
+  const { t } = useTranslation();
+  return (
+    <ScreenPlaceholder title={t('placeholders.achievementsTitle')} subtitle={t('placeholders.achievementsSubtitle')} />
+  );
 }

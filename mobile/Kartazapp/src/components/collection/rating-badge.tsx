@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { colors } from '@/theme/colors';
@@ -9,11 +10,12 @@ type RatingBadgeProps = {
 
 /** Círculo com o overall da carta (aro ciano). */
 export function RatingBadge({ rating, size = 40 }: RatingBadgeProps) {
+  const { t } = useTranslation();
   return (
     <View
       style={[styles.badge, { width: size, height: size, borderRadius: size / 2 }]}
       accessible
-      accessibilityLabel={`Rating ${rating}`}>
+      accessibilityLabel={t('common.ratingA11y', { rating })}>
       <Text style={[styles.text, { fontSize: size * 0.4 }]}>{rating}</Text>
     </View>
   );

@@ -36,6 +36,9 @@ export const colors = {
   info: '#3b82f6',
   fuelEnd: '#ffaa00',
   progressEnd: '#0088ff',
+  /** Gradiente diagonal do selo de overall (OVR): azul aço (sup. esq.) → azul profundo (inf. dir.). */
+  overallTop: '#4f88b6',
+  overallBottom: '#2a58a3',
   glass: 'rgba(15, 21, 32, 0.85)',
   track: 'rgba(255, 255, 255, 0.08)',
   tabBarFallback: 'rgba(15, 21, 32, 0.92)',

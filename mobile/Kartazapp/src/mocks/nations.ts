@@ -1,32 +1,34 @@
 /**
  * Seleções para a lista demonstrativa da aba Cards (sem backend por enquanto).
- * Ordenadas alfabeticamente por quem consome a lista.
+ * Ordenadas alfabeticamente (no idioma atual) por quem consome a lista.
  */
+import type { NationCode } from '@/types/player-card';
+
+/** O nome traduzido vem de `getNationName(code)`. */
 export type Nation = {
-  code: string;
-  name: string;
+  code: NationCode;
 };
 
 export const MOCK_NATIONS: Nation[] = [
-  { code: 'ARG', name: 'Argentina' },
-  { code: 'AUS', name: 'Australia' },
-  { code: 'BEL', name: 'Belgium' },
-  { code: 'BRA', name: 'Brazil' },
-  { code: 'CAN', name: 'Canada' },
-  { code: 'COL', name: 'Colombia' },
-  { code: 'CRO', name: 'Croatia' },
-  { code: 'ENG', name: 'England' },
-  { code: 'FRA', name: 'France' },
-  { code: 'GER', name: 'Germany' },
-  { code: 'JPN', name: 'Japan' },
-  { code: 'KOR', name: 'South Korea' },
-  { code: 'MAR', name: 'Morocco' },
-  { code: 'MEX', name: 'Mexico' },
-  { code: 'NED', name: 'Netherlands' },
-  { code: 'NGA', name: 'Nigeria' },
-  { code: 'POR', name: 'Portugal' },
-  { code: 'SEN', name: 'Senegal' },
-  { code: 'ESP', name: 'Spain' },
-  { code: 'URU', name: 'Uruguay' },
-  { code: 'USA', name: 'United States' },
+  { code: 'ARG' },
+  { code: 'AUS' },
+  { code: 'BEL' },
+  { code: 'BRA' },
+  { code: 'CAN' },
+  { code: 'COL' },
+  { code: 'CRO' },
+  { code: 'ENG' },
+  { code: 'FRA' },
+  { code: 'GER' },
+  { code: 'JPN' },
+  { code: 'KOR' },
+  { code: 'MAR' },
+  { code: 'MEX' },
+  { code: 'NED' },
+  { code: 'NGA' },
+  { code: 'POR' },
+  { code: 'SEN' },
+  { code: 'ESP' },
+  { code: 'URU' },
+  { code: 'USA' },
 ];

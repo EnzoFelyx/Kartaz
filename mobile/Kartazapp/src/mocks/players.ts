@@ -1,4 +1,6 @@
-import type { Player, PlayerStats, Rarity } from '@/types/player-card';
+import type { NationCode, Player, PlayerStats, Position, Rarity } from '@/types/player-card';
+
+import { ROLE_BY_POSITION } from '@/utils/card-labels';
 
 import { MOCK_NATIONS } from './nations';
 import { MOCK_PLAYER_CARDS } from './player-cards';
@@ -8,7 +10,7 @@ import { MOCK_PLAYER_CARDS } from './player-cards';
  * os da coleção). Nomes fictícios — não usamos nomes reais (licenciamento).
  * Os jogadores da coleção (MOCK_PLAYER_CARDS) também aparecem aqui, na sua seleção.
  */
-const NAMES_BY_NATION: Record<string, string[]> = {
+const NAMES_BY_NATION: Record<NationCode, string[]> = {
   ARG: ['Mateo Ibarra', 'Santiago Rojas', 'Bruno Calvete', 'Nicolás Ferré', 'Tomás Aguirre'],
   AUS: ['Liam Hartley', 'Noah Fairbank', 'Cooper Mills', 'Jack Doolan'],
   BEL: ['Arne Vermeer', 'Lucas Desmet', 'Thibo Claes', 'Jens Wouters'],
@@ -32,10 +34,10 @@ const NAMES_BY_NATION: Record<string, string[]> = {
   USA: ['Tyler Brooks', 'Weston Hayes', 'Christian Ford', 'Gio Martinez'],
 };
 
-const POSITIONS = ['ST', 'LW', 'CAM', 'CM', 'CB', 'GK', 'RW', 'LB'];
+const POSITIONS: Position[] = ['ST', 'LW', 'CAM', 'CM', 'CB', 'GK', 'RW', 'LB'];
 
 /** Número pseudoaleatório determinístico (mesmo resultado a cada execução). */
-function seeded(seed: string, salt: number) {
+export function seeded(seed: string, salt: number) {
   let hash = salt * 2654435761;
   for (let i = 0; i < seed.length; i++) hash = Math.imul(hash ^ seed.charCodeAt(i), 2246822519);
   return ((hash >>> 0) % 1000) / 1000;
@@ -72,7 +74,7 @@ function buildCatalog(): Player[] {
   const owned = new Map(MOCK_PLAYER_CARDS.map((card) => [card.name, card]));
 
   return MOCK_NATIONS.flatMap((nation) =>
-    (NAMES_BY_NATION[nation.code] ?? []).map((name, index) => {
+    NAMES_BY_NATION[nation.code].map((name, index) => {
       const ownedCard = owned.get(name);
       // Jogador da coleção: mantém os mesmos dados da carta.
       if (ownedCard) {
@@ -80,7 +82,6 @@ function buildCatalog(): Player[] {
         return {
           id,
           name,
-          nation: nation.name,
           nationCode: nation.code,
           position,
           rating,
@@ -95,7 +96,6 @@ function buildCatalog(): Player[] {
       return {
         id,
         name,
-        nation: nation.name,
         nationCode: nation.code,
         position: POSITIONS[index % POSITIONS.length],
         rating,
@@ -119,4 +119,25 @@ export function getPlayersByNation(nationCode: string) {
 
 export function getNationByCode(code: string) {
   return MOCK_NATIONS.find((nation) => nation.code === code);
+}
+
+export function getPlayerById(id: string) {
+  return MOCK_PLAYERS.find((player) => player.id === id);
+}
+
+/**
+ * Jogadores parecidos (mock): mesma função em campo primeiro, depois overall mais próximo
+ * e, no empate, o maior overall.
+ */
+export function getSimilarPlayers(player: Player, limit = 6) {
+  const role = ROLE_BY_POSITION[player.position];
+  return MOCK_PLAYERS.filter((other) => other.id !== player.id)
+    .sort((a, b) => {
+      const sameRoleA = ROLE_BY_POSITION[a.position] === role ? 0 : 1;
+      const sameRoleB = ROLE_BY_POSITION[b.position] === role ? 0 : 1;
+      if (sameRoleA !== sameRoleB) return sameRoleA - sameRoleB;
+      const diff = Math.abs(a.rating - player.rating) - Math.abs(b.rating - player.rating);
+      return diff !== 0 ? diff : b.rating - a.rating;
+    })
+    .slice(0, limit);
 }

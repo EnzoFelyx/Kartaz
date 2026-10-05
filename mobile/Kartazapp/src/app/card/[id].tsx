@@ -1,10 +1,14 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, Share, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { FlatList, Pressable, ScrollView, Share, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { GlobalDiscoveryButton } from '@/components/card-details/global-discovery-button';
 import { CardHero } from '@/components/card-details/card-hero';
+import { OverallBadge } from '@/components/card-details/overall-badge';
+import { SimilarCardTile } from '@/components/card-details/similar-card-tile';
 import { StatRow } from '@/components/card-details/stat-row';
 import { ArrowLeftIcon } from '@/components/icons/arrow-left-icon';
 import { HeartIcon } from '@/components/icons/heart-icon';
@@ -14,21 +18,9 @@ import { EdgeFade } from '@/components/ui/edge-fade';
 import { IconButton } from '@/components/ui/icon-button';
 import { STAT_CONFIG } from '@/components/card-details/stat-config';
 import { getPlayerCardById } from '@/mocks/player-cards';
-import { formatShortDate, RARITY_LABEL } from '@/utils/card-labels';
+import { getSimilarPlayers } from '@/mocks/players';
+import { formatShortDate, getNationName, getPositionName, ROLE_BY_POSITION } from '@/utils/card-labels';
 import { colors, rarityColors } from '@/theme/colors';
-
-const POSITION_ROLE: Record<string, string> = {
-  GK: 'Goalkeeper',
-  CB: 'Defender',
-  LB: 'Defender',
-  RB: 'Defender',
-  CDM: 'Midfielder',
-  CM: 'Midfielder',
-  CAM: 'Midfielder',
-  LW: 'Forward',
-  RW: 'Forward',
-  ST: 'Forward',
-};
 
 const STAT_ICON_SIZE = 20;
 
@@ -38,6 +30,7 @@ const SCROLL_FADE_HEIGHT = 36;
 
 export default function CardDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { height: windowHeight } = useWindowDimensions();
   // Favorito local por enquanto (no futuro: intenção enviada ao servidor).
@@ -50,10 +43,10 @@ export default function CardDetailsScreen() {
   if (!card) {
     return (
       <View style={[styles.container, styles.notFound]}>
-        <Text style={styles.notFoundText}>Card not found</Text>
+        <Text style={styles.notFoundText}>{t('cardDetails.notFound')}</Text>
         <IconButton
           icon={<ArrowLeftIcon color={colors.foreground} />}
-          accessibilityLabel="Go back"
+          accessibilityLabel={t('common.goBack')}
           onPress={goBack}
         />
       </View>
@@ -61,10 +54,26 @@ export default function CardDetailsScreen() {
   }
 
   const tint = rarityColors[card.rarity];
+  const rarity = t(`rarity.${card.rarity}`);
+  const role = ROLE_BY_POSITION[card.position];
+
+  const similarPlayers = getSimilarPlayers(card);
+
+  // Carta da coleção abre os detalhes; as demais abrem as cópias encontradas no jogo.
+  const openSimilar = (playerId: string) =>
+    getPlayerCardById(playerId)
+      ? router.push({ pathname: '/card/[id]', params: { id: playerId } })
+      : router.push({ pathname: '/found-copies/[id]', params: { id: playerId } });
 
   const handleShare = () => {
     Share.share({
-      message: `${card.name} (${card.nation}) — ${RARITY_LABEL[card.rarity]} #${card.serial}/${card.maxSerial} on Kartaz`,
+      message: t('cardDetails.shareMessage', {
+        name: card.name,
+        nation: getNationName(card.nationCode),
+        rarity,
+        serial: card.serial,
+        total: card.maxSerial,
+      }),
     });
   };
 
@@ -75,10 +84,10 @@ export default function CardDetailsScreen() {
         <View style={styles.badges}>
           <View style={[styles.rarityPill, { backgroundColor: tint }]}>
             <StarIcon color={colors.background} size={12} />
-            <Text style={styles.rarityText}>{RARITY_LABEL[card.rarity]}</Text>
+            <Text style={styles.rarityText}>{rarity}</Text>
           </View>
           <View style={styles.rolePill}>
-            <Text style={styles.roleText}>{POSITION_ROLE[card.position] ?? card.position}</Text>
+            <Text style={styles.roleText}>{t(`roles.${role}`)}</Text>
           </View>
         </View>
 
@@ -87,23 +96,28 @@ export default function CardDetailsScreen() {
             <Text style={styles.name} accessibilityRole="header" numberOfLines={2}>
               {card.name}
             </Text>
-            <Text style={styles.nation}>{card.nation}</Text>
+            <Text style={styles.nation}>{getNationName(card.nationCode)}</Text>
           </View>
-          <View style={styles.ratingBox} accessible accessibilityLabel={`Rating ${card.rating}`}>
-            <Text style={styles.rating}>{card.rating}</Text>
-          </View>
+          <OverallBadge rating={card.rating} />
         </View>
+
+        {/* Raridade global do jogador: abre as cópias já encontradas. */}
+        <GlobalDiscoveryButton
+          found={card.copiesFound}
+          total={card.totalCopies}
+          onPress={() => router.push({ pathname: '/found-copies/[id]', params: { id: card.id } })}
+        />
       </CardHero>
 
       <View style={styles.scrollArea}>
         <ScrollView
           contentContainerStyle={[styles.body, { paddingBottom: insets.bottom + 32 }]}
           showsVerticalScrollIndicator={false}>
-          <Text style={styles.sectionTitle}>Statistics</Text>
+          <Text style={styles.sectionTitle}>{t('cardDetails.statistics')}</Text>
           {STAT_CONFIG.map((stat, index) => (
             <Animated.View key={stat.key} entering={FadeInDown.delay(index * STAT_STAGGER_MS).duration(350)}>
               <StatRow
-                label={stat.label}
+                label={t(`stats.${stat.key}`)}
                 value={card.stats[stat.key]}
                 color={stat.color}
                 icon={stat.renderIcon(STAT_ICON_SIZE)}
@@ -111,11 +125,37 @@ export default function CardDetailsScreen() {
             </Animated.View>
           ))}
 
-          <Text style={[styles.sectionTitle, styles.sectionSpacing]}>Card info</Text>
+          <Text style={[styles.sectionTitle, styles.sectionSpacing]}>{t('cardDetails.cardInfo')}</Text>
           <View style={styles.infoCard}>
-            <InfoRow label="Serial" value={`#${card.serial} / ${card.maxSerial}`} />
-            <InfoRow label="Position" value={card.position} />
-            <InfoRow label="Collected" value={formatShortDate(card.collectedAt)} last />
+            <InfoRow label={t('cardDetails.serial')} value={`#${card.serial} / ${card.maxSerial}`} />
+            <InfoRow label={t('cardDetails.position')} value={getPositionName(card.position)} />
+            <InfoRow label={t('cardDetails.collected')} value={formatShortDate(card.collectedAt)} last />
+          </View>
+
+          <Text style={[styles.sectionTitle, styles.sectionSpacing]}>{t('cardDetails.similarCards')}</Text>
+          {/* Sangra até as bordas da tela: a última carta aparece cortada, indicando rolagem. */}
+          <FlatList
+            horizontal
+            data={similarPlayers}
+            keyExtractor={(player) => player.id}
+            renderItem={({ item }) => <SimilarCardTile player={item} onPress={() => openSimilar(item.id)} />}
+            showsHorizontalScrollIndicator={false}
+            style={styles.similarList}
+            contentContainerStyle={styles.similarContent}
+          />
+
+          {/* Ações demonstrativas: as telas de troca e de mercado ainda não existem. */}
+          <View style={styles.actions}>
+            <Pressable
+              accessibilityRole="button"
+              style={({ pressed }) => [styles.actionButton, styles.tradeButton, pressed && styles.actionPressed]}>
+              <Text style={styles.tradeText}>{t('cardDetails.tradeCard')}</Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              style={({ pressed }) => [styles.actionButton, styles.marketButton, pressed && styles.actionPressed]}>
+              <Text style={styles.marketText}>{t('cardDetails.viewOnMarket')}</Text>
+            </Pressable>
           </View>
         </ScrollView>
 
@@ -127,19 +167,19 @@ export default function CardDetailsScreen() {
       <View style={[styles.topBar, { top: insets.top + 8 }]} pointerEvents="box-none">
         <IconButton
           icon={<ArrowLeftIcon color={colors.foreground} />}
-          accessibilityLabel="Go back"
+          accessibilityLabel={t('common.goBack')}
           onPress={goBack}
         />
         <View style={styles.topActions}>
           <IconButton
             icon={<HeartIcon color={favorite ? colors.danger : colors.foreground} filled={favorite} />}
-            accessibilityLabel={favorite ? 'Remove from favorites' : 'Add to favorites'}
+            accessibilityLabel={favorite ? t('cardDetails.removeFavorite') : t('cardDetails.addFavorite')}
             selected={favorite}
             onPress={() => setFavorite((value) => !value)}
           />
           <IconButton
             icon={<ShareIcon color={colors.foreground} />}
-            accessibilityLabel="Share card"
+            accessibilityLabel={t('cardDetails.share')}
             onPress={handleShare}
           />
         </View>
@@ -217,6 +257,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-end',
     gap: 16,
+    marginBottom: 20,
   },
   names: {
     flex: 1,
@@ -231,25 +272,6 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontSize: 18,
     fontWeight: '700',
-  },
-  ratingBox: {
-    width: 76,
-    height: 76,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.primary,
-    borderWidth: 3,
-    borderColor: colors.background,
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.45,
-    shadowRadius: 12,
-  },
-  rating: {
-    color: colors.white,
-    fontSize: 30,
-    fontWeight: '900',
   },
   scrollArea: {
     flex: 1,
@@ -267,6 +289,47 @@ const styles = StyleSheet.create({
   },
   sectionSpacing: {
     marginTop: 16,
+  },
+  similarList: {
+    marginHorizontal: -20,
+  },
+  similarContent: {
+    gap: 14,
+    paddingHorizontal: 20,
+  },
+  actions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 20,
+  },
+  actionButton: {
+    flex: 1,
+    height: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 12,
+    borderRadius: 18,
+  },
+  actionPressed: {
+    transform: [{ scale: 0.97 }],
+  },
+  tradeButton: {
+    backgroundColor: colors.primary,
+  },
+  tradeText: {
+    color: colors.primaryForeground,
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  marketButton: {
+    backgroundColor: colors.secondary,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  marketText: {
+    color: colors.primary,
+    fontSize: 16,
+    fontWeight: '800',
   },
   infoCard: {
     paddingHorizontal: 16,

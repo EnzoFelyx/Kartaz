@@ -1,8 +1,10 @@
 import { Canvas, LinearGradient, RoundedRect, vec } from '@shopify/react-native-skia';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { BoltIcon } from '@/components/icons/bolt-icon';
 import { colors } from '@/theme/colors';
+import { formatNumber } from '@/utils/card-labels';
 
 const BADGE_SIZE = 44;
 const BADGE_RADIUS = 12;
@@ -18,11 +20,12 @@ type LevelCardProps = {
  * e o XP total ao lado. Os valores vêm de fora (store/servidor).
  */
 export function LevelCard({ level, xp, style }: LevelCardProps) {
+  const { t } = useTranslation();
   return (
     <View
       style={[styles.panel, style]}
       accessible
-      accessibilityLabel={`Level ${level}, ${xp} XP`}>
+      accessibilityLabel={t('hud.levelA11y', { level, xp: formatNumber(xp) })}>
       <View style={styles.badge}>
         <Canvas style={StyleSheet.absoluteFill}>
           <RoundedRect x={0} y={0} width={BADGE_SIZE} height={BADGE_SIZE} r={BADGE_RADIUS}>
@@ -39,9 +42,9 @@ export function LevelCard({ level, xp, style }: LevelCardProps) {
       <View style={styles.info}>
         <View style={styles.xpLabel}>
           <BoltIcon color={colors.violet} size={14} />
-          <Text style={styles.xpText}>XP</Text>
+          <Text style={styles.xpText}>{t('hud.xp')}</Text>
         </View>
-        <Text style={styles.xpValue}>{xp.toLocaleString('en-US')}</Text>
+        <Text style={styles.xpValue}>{formatNumber(xp)}</Text>
       </View>
     </View>
   );

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, { FadeInDown, FadeOutDown, ZoomIn, ZoomOut } from 'react-native-reanimated';
 
@@ -14,12 +15,6 @@ import { RadarFab } from './radar-fab';
 import { ZoneStat } from './zone-stat';
 
 export type ZoneDifficulty = 'low' | 'medium' | 'high';
-
-const DIFFICULTY_LABEL: Record<ZoneDifficulty, string> = {
-  low: 'Low',
-  medium: 'Medium',
-  high: 'High',
-};
 
 const DIFFICULTY_COLOR: Record<ZoneDifficulty, string> = {
   low: colors.primary,
@@ -65,6 +60,7 @@ export function MapDashboard({
   onRadarSearch,
   style,
 }: MapDashboardProps) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -77,7 +73,7 @@ export function MapDashboard({
           style={styles.panel}>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Collapse zone dashboard"
+            accessibilityLabel={t('mapDashboard.collapse')}
             onPress={() => setExpanded(false)}
             hitSlop={8}
             style={styles.grabberArea}>
@@ -97,28 +93,28 @@ export function MapDashboard({
                 <ZoneStat
                   icon={<TargetIcon color={colors.violet} size={STAT_ICON_SIZE} />}
                   value={`${discovered}/${totalCards}`}
-                  accessibilityLabel={`${discovered} of ${totalCards} cards discovered`}
+                  accessibilityLabel={t('mapDashboard.discoveredA11y', { discovered, total: totalCards })}
                 />
                 <ZoneStat
                   icon={<FlameIcon color={colors.accent} size={STAT_ICON_SIZE} />}
                   value={`${heat}%`}
-                  accessibilityLabel={`Zone heat ${heat} percent`}
+                  accessibilityLabel={t('mapDashboard.heatA11y', { heat })}
                 />
                 <ZoneStat
                   icon={<BoltIcon color={colors.gold} size={STAT_ICON_SIZE} />}
                   value={`+${xpReward}`}
-                  accessibilityLabel={`${xpReward} XP reward`}
+                  accessibilityLabel={t('mapDashboard.xpRewardA11y', { xp: xpReward })}
                 />
                 <ZoneStat
                   icon={<TrendingUpIcon color={colors.primary} size={STAT_ICON_SIZE} />}
                   value={`x${multiplier}`}
-                  accessibilityLabel={`Reward multiplier ${multiplier}`}
+                  accessibilityLabel={t('mapDashboard.multiplierA11y', { multiplier })}
                 />
               </View>
             </View>
 
             <Text style={[styles.difficulty, { color: DIFFICULTY_COLOR[difficulty] }]}>
-              {DIFFICULTY_LABEL[difficulty]}
+              {t(`mapDashboard.difficulty.${difficulty}`)}
             </Text>
 
             <RadarButton searching={searching} disabled={!canSearch} onPress={onRadarSearch} />

@@ -1,4 +1,5 @@
 import { useEffect, type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
@@ -47,6 +48,7 @@ function ToggleButton({ active, label, onPress, renderIcon }: ToggleButtonProps)
  * O fundo ciano desliza suavemente até o botão selecionado.
  */
 export function ViewModeToggle({ value, onChange }: ViewModeToggleProps) {
+  const { t } = useTranslation();
   const position = useSharedValue(MODES.indexOf(value));
 
   useEffect(() => {
@@ -64,19 +66,19 @@ export function ViewModeToggle({ value, onChange }: ViewModeToggleProps) {
     <View style={styles.container}>
       <Animated.View style={[styles.indicator, indicatorStyle]} />
       <ToggleButton
-        label="Grid view"
+        label={t('cards.gridView')}
         active={value === 'grid'}
         onPress={() => onChange('grid')}
         renderIcon={(color) => <GridIcon color={color} size={18} />}
       />
       <ToggleButton
-        label="List view"
+        label={t('cards.listView')}
         active={value === 'list'}
         onPress={() => onChange('list')}
         renderIcon={(color) => <ListIcon color={color} size={18} />}
       />
       <ToggleButton
-        label="Nations view"
+        label={t('cards.nationsView')}
         active={value === 'nations'}
         onPress={() => onChange('nations')}
         renderIcon={(color) => <GlobeIcon color={color} size={18} />}

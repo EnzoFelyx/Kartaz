@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, TextInput, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { CloseIcon } from '@/components/icons/close-icon';
@@ -12,7 +13,8 @@ type SearchInputProps = {
 };
 
 /** Campo de busca do app: ícone de lupa, texto e botão para limpar. */
-export function SearchInput({ value, onChangeText, placeholder = 'Search…', style }: SearchInputProps) {
+export function SearchInput({ value, onChangeText, placeholder, style }: SearchInputProps) {
+  const { t } = useTranslation();
   return (
     <View style={[styles.container, style]}>
       <SearchIcon color={colors.mutedForeground} size={18} />
@@ -32,7 +34,7 @@ export function SearchInput({ value, onChangeText, placeholder = 'Search…', st
       {value.length > 0 && (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Clear search"
+          accessibilityLabel={t('common.clearSearch')}
           onPress={() => onChangeText('')}
           hitSlop={8}>
           <CloseIcon color={colors.mutedForeground} size={16} />

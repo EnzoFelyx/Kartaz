@@ -11,17 +11,16 @@ import { colors } from '@/theme/colors';
 
 export type StatConfig = {
   key: keyof PlayerStats;
-  label: string;
   color: string;
   renderIcon: (size: number) => ReactNode;
 };
 
-/** Ordem, nome, cor e ícone de cada atributo — compartilhado entre telas. */
+/** Ordem, cor e ícone de cada atributo — compartilhado entre telas (nome vem de `stats.<key>` no i18n). */
 export const STAT_CONFIG: StatConfig[] = [
-  { key: 'speed', label: 'Speed', color: colors.gold, renderIcon: (s) => <BoltIcon color={colors.gold} size={s} /> },
-  { key: 'shooting', label: 'Shooting', color: colors.danger, renderIcon: (s) => <TargetIcon color={colors.danger} size={s} /> },
-  { key: 'passing', label: 'Passing', color: colors.success, renderIcon: (s) => <ShareIcon color={colors.success} size={s} /> },
-  { key: 'dribbling', label: 'Dribbling', color: colors.violet, renderIcon: (s) => <StarIcon color={colors.violet} size={s} /> },
-  { key: 'defense', label: 'Defense', color: colors.info, renderIcon: (s) => <ShieldIcon color={colors.info} size={s} /> },
-  { key: 'physical', label: 'Physical', color: colors.accent, renderIcon: (s) => <ActivityIcon color={colors.accent} size={s} /> },
+  { key: 'speed', color: colors.gold, renderIcon: (s) => <BoltIcon color={colors.gold} size={s} /> },
+  { key: 'shooting', color: colors.danger, renderIcon: (s) => <TargetIcon color={colors.danger} size={s} /> },
+  { key: 'passing', color: colors.success, renderIcon: (s) => <ShareIcon color={colors.success} size={s} /> },
+  { key: 'dribbling', color: colors.violet, renderIcon: (s) => <StarIcon color={colors.violet} size={s} /> },
+  { key: 'defense', color: colors.info, renderIcon: (s) => <ShieldIcon color={colors.info} size={s} /> },
+  { key: 'physical', color: colors.accent, renderIcon: (s) => <ActivityIcon color={colors.accent} size={s} /> },
 ];

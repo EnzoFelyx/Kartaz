@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet } from 'react-native';
 
 import { RadarIcon } from '@/components/icons/radar-icon';
@@ -13,12 +14,13 @@ type RadarButtonProps = {
 
 /** Botão de radar do card da zona: dispara a busca na zona atual. */
 export function RadarButton({ searching, disabled = false, onPress }: RadarButtonProps) {
+  const { t } = useTranslation();
   const inactive = disabled || searching;
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel="Search current zone with radar"
+      accessibilityLabel={t('mapDashboard.searchZone')}
       accessibilityState={{ disabled: inactive, busy: searching }}
       disabled={inactive}
       onPress={onPress}

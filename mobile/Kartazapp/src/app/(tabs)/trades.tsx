@@ -1,5 +1,10 @@
+import { useTranslation } from 'react-i18next';
+
 import { ScreenPlaceholder } from '@/components/screen-placeholder';
 
 export default function TradesScreen() {
-  return <ScreenPlaceholder title="TRADES" subtitle="EXCHANGE CARDS WORLDWIDE" />;
+  const { t } = useTranslation();
+  return (
+    <ScreenPlaceholder title={t('placeholders.tradesTitle')} subtitle={t('placeholders.tradesSubtitle')} />
+  );
 }

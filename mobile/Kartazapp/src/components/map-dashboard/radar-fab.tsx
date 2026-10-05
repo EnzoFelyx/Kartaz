@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet } from 'react-native';
 
 import { RadarIcon } from '@/components/icons/radar-icon';
@@ -11,10 +12,11 @@ type RadarFabProps = {
 
 /** Estado recolhido do MapDashboard: um botão de radar que abre o painel ao tocar. */
 export function RadarFab({ onPress }: RadarFabProps) {
+  const { t } = useTranslation();
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel="Open mission dashboard"
+      accessibilityLabel={t('mapDashboard.open')}
       onPress={onPress}
       hitSlop={6}
       style={({ pressed }) => [styles.fab, pressed && styles.pressed]}>

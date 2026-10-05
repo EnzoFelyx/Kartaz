@@ -1,7 +1,9 @@
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { PlayerCard } from '@/types/player-card';
 import { colors, rarityColors } from '@/theme/colors';
+import { getNationName } from '@/utils/card-labels';
 
 import { CardArt } from './card-art';
 import { RarityBadge } from './rarity-badge';
@@ -14,12 +16,18 @@ type PlayerCardTileProps = {
 
 /** Carta na visualização em grade. */
 export function PlayerCardTile({ card, onPress }: PlayerCardTileProps) {
+  const { t } = useTranslation();
   const tint = rarityColors[card.rarity];
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`${card.name}, ${card.nation}, rating ${card.rating}, ${card.rarity}`}
+      accessibilityLabel={t('cards.tileA11y', {
+        name: card.name,
+        nation: getNationName(card.nationCode),
+        rating: card.rating,
+        rarity: t(`rarity.${card.rarity}`),
+      })}
       onPress={onPress}
       style={({ pressed }) => [
         styles.tile,
@@ -41,7 +49,7 @@ export function PlayerCardTile({ card, onPress }: PlayerCardTileProps) {
           {card.name}
         </Text>
         <Text style={styles.nation} numberOfLines={1}>
-          {card.nation}
+          {getNationName(card.nationCode)}
         </Text>
       </View>
     </Pressable>

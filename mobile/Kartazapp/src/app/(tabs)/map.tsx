@@ -1,5 +1,6 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import Animated, { Easing, withTiming, type EntryAnimationsValues } from 'react-native-reanimated';
@@ -16,8 +17,9 @@ import { initialMapRegion, kartazMapStyle, mapViewConfig } from '@/theme/map-sty
 
 // Mock até termos a store do jogador (Fase 4 do todo).
 const MOCK_PLAYER = { fuel: 78, maxFuel: 100, level: 12, xp: 2450 };
+// `zoneId` é a chave de tradução do nome da zona (`zones.<id>`).
 const MOCK_ZONE = {
-  zone: 'South America',
+  zoneId: 'southAmerica' as const,
   difficulty: 'medium' as const,
   discovered: 0,
   totalCards: 5,
@@ -48,6 +50,8 @@ function hudTopEntering(_values: EntryAnimationsValues) {
 
 export default function MapScreen() {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
+  const { zoneId, ...zone } = MOCK_ZONE;
   const [radarSearching, setRadarSearching] = useState(false);
   // Muda a cada vez que a aba ganha foco; usado como `key` do HUD do topo para
   // remontá-lo e reiniciar a animação de entrada.
@@ -97,7 +101,8 @@ export default function MapScreen() {
       </Animated.View>
 
       <MapDashboard
-        {...MOCK_ZONE}
+        {...zone}
+        zone={t(`zones.${zoneId}`)}
         searching={radarSearching}
         canSearch={MOCK_PLAYER.fuel >= 1}
         onRadarSearch={handleRadarSearch}

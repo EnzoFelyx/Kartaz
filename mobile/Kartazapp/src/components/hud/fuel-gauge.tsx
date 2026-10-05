@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { BoltIcon } from '@/components/icons/bolt-icon';
@@ -17,6 +18,7 @@ type FuelGaugeProps = {
  * Os valores vêm de fora (store/servidor); o componente só exibe.
  */
 export function FuelGauge({ fuel, maxFuel, lowThreshold = 0.3, style }: FuelGaugeProps) {
+  const { t } = useTranslation();
   const ratio = maxFuel > 0 ? fuel / maxFuel : 0;
   const percent = Math.round(Math.min(Math.max(ratio, 0), 1) * 100);
   const isLow = ratio < lowThreshold;
@@ -28,12 +30,12 @@ export function FuelGauge({ fuel, maxFuel, lowThreshold = 0.3, style }: FuelGaug
       style={[styles.panel, style]}
       accessible
       accessibilityRole="progressbar"
-      accessibilityLabel="Energy"
+      accessibilityLabel={t('hud.energyA11y')}
       accessibilityValue={{ min: 0, max: 100, now: percent }}>
       <View style={styles.header}>
         <View style={styles.title}>
           <BoltIcon color={tint} size={18} />
-          <Text style={[styles.label, { color: tint }]}>ENERGY</Text>
+          <Text style={[styles.label, { color: tint }]}>{t('hud.energy')}</Text>
         </View>
         <Text style={[styles.value, isLow && { color: colors.accent }]}>{percent}%</Text>
       </View>

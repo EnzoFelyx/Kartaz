@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -15,6 +16,7 @@ import { MOCK_NATIONS, type Nation } from '@/mocks/nations';
 import { MOCK_PLAYER_CARDS } from '@/mocks/player-cards';
 import type { PlayerCard } from '@/types/player-card';
 import { colors } from '@/theme/colors';
+import { compareLocale, getNationName } from '@/utils/card-labels';
 
 const GAP = 12;
 const H_PADDING = 20;
@@ -38,7 +40,7 @@ const cardExiting = FadeOutDown.duration(CARD_EXIT_MS);
  */
 type CollectionRow =
   | { type: 'cards'; key: string; cards: PlayerCard[] }
-  | { type: 'nation'; key: string; nation: Nation };
+  | { type: 'nation'; key: string; nation: Nation; name: string };
 
 function toCardRows(cards: PlayerCard[], perRow: number): CollectionRow[] {
   const rows: CollectionRow[] = [];
@@ -49,11 +51,9 @@ function toCardRows(cards: PlayerCard[], perRow: number): CollectionRow[] {
   return rows;
 }
 
-/** Seleções em ordem alfabética. */
-const SORTED_NATIONS = [...MOCK_NATIONS].sort((a, b) => a.name.localeCompare(b.name));
-
 export default function CollectionScreen() {
   const insets = useSafeAreaInsets();
+  const { t, i18n } = useTranslation();
   const [query, setQuery] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
 
@@ -68,21 +68,31 @@ export default function CollectionScreen() {
     setViewMode(mode);
   };
 
+  // Seleções com o nome no idioma atual, em ordem alfabética desse idioma.
+  const sortedNations = useMemo(
+    () =>
+      MOCK_NATIONS.map((nation) => ({ nation, name: getNationName(nation.code) })).sort((a, b) =>
+        compareLocale(a.name, b.name),
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- recalcula ao trocar o idioma
+    [i18n.language],
+  );
+
   // A mesma busca filtra jogadores (grade/lista) ou seleções (países).
   const rows = useMemo<CollectionRow[]>(() => {
     const term = query.trim().toLowerCase();
     if (isNations) {
-      return SORTED_NATIONS.filter((nation) => nation.name.toLowerCase().includes(term)).map(
-        (nation) => ({ type: 'nation', key: nation.code, nation }),
-      );
+      return sortedNations
+        .filter(({ name }) => name.toLowerCase().includes(term))
+        .map(({ nation, name }) => ({ type: 'nation', key: nation.code, nation, name }));
     }
     const cards = term
       ? MOCK_PLAYER_CARDS.filter(
-          (card) => card.name.toLowerCase().includes(term) || card.nation.toLowerCase().includes(term),
+          (card) => card.name.toLowerCase().includes(term) || getNationName(card.nationCode).toLowerCase().includes(term),
         )
       : MOCK_PLAYER_CARDS;
     return toCardRows(cards, isGrid ? GRID_COLUMNS : 1);
-  }, [query, isGrid, isNations]);
+  }, [query, isGrid, isNations, sortedNations]);
 
   // Elemento (não função) para o TextInput não perder o foco a cada letra digitada.
   const header = (
@@ -91,11 +101,11 @@ export default function CollectionScreen() {
         {/* Toggle na mesma linha do título, centralizado com ele. */}
         <View style={styles.titleRow}>
           <Text style={styles.title} accessibilityRole="header">
-            Cards
+            {t('cards.title')}
           </Text>
           <ViewModeToggle value={viewMode} onChange={changeViewMode} />
         </View>
-        <Text style={styles.subtitle}>Explore all player cards</Text>
+        <Text style={styles.subtitle}>{t('cards.subtitle')}</Text>
       </View>
 
       {/* Contagem vem do mock da coleção. */}
@@ -107,7 +117,7 @@ export default function CollectionScreen() {
       <SearchInput
         value={query}
         onChangeText={setQuery}
-        placeholder={isNations ? 'Search team...' : 'Search players...'}
+        placeholder={isNations ? t('cards.searchTeam') : t('cards.searchPlayers')}
       />
     </View>
   );
@@ -119,13 +129,13 @@ export default function CollectionScreen() {
         keyExtractor={(row) => `${viewMode}-${row.key}`}
         ListHeaderComponent={header}
         ListEmptyComponent={
-          <Text style={styles.empty}>{isNations ? 'No teams found' : 'No players found'}</Text>
+          <Text style={styles.empty}>{isNations ? t('cards.noTeams') : t('cards.noPlayers')}</Text>
         }
         renderItem={({ item: row, index }) =>
           row.type === 'nation' ? (
             <Animated.View entering={cardEntering(index)} exiting={cardExiting}>
               <NationRow
-                name={row.nation.name}
+                name={row.name}
                 onPress={() =>
                   router.push({ pathname: '/nation/[code]', params: { code: row.nation.code } })
                 }

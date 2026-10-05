@@ -1,0 +1,185 @@
+{
+  "common": {
+    "goBack": "Voltar",
+    "clearSearch": "Limpar busca",
+    "cardsCount_one": "{{count}} carta",
+    "cardsCount_other": "{{count}} cartas",
+    "playersCount_one": "{{count}} jogador",
+    "playersCount_other": "{{count}} jogadores",
+    "ratingA11y": "Overall {{rating}}",
+    "location": "{{city}}, {{nation}}",
+    "overallShort": "OVR"
+  },
+  "tabs": {
+    "map": "Mapa",
+    "collection": "Cartas",
+    "achievements": "Conquistas",
+    "trades": "Trocas",
+    "profile": "Perfil"
+  },
+  "placeholders": {
+    "achievementsTitle": "CONQUISTAS",
+    "achievementsSubtitle": "PROGRESSO E RECOMPENSAS",
+    "tradesTitle": "TROCAS",
+    "tradesSubtitle": "TROQUE CARTAS PELO MUNDO",
+    "profileTitle": "PERFIL",
+    "profileSubtitle": "SUA IDENTIDADE DE OLHEIRO"
+  },
+  "rarity": {
+    "common": "Comum",
+    "rare": "Rara",
+    "epic": "Épica",
+    "legendary": "Lendária"
+  },
+  "roles": {
+    "goalkeeper": "Goleiro",
+    "defender": "Defensor",
+    "midfielder": "Meio-campista",
+    "forward": "Atacante"
+  },
+  "stats": {
+    "speed": "Velocidade",
+    "shooting": "Finalização",
+    "passing": "Passe",
+    "dribbling": "Drible",
+    "defense": "Defesa",
+    "physical": "Físico"
+  },
+  "hud": {
+    "energy": "ENERGIA",
+    "energyA11y": "Energia",
+    "xp": "XP",
+    "levelA11y": "Nível {{level}}, {{xp}} XP"
+  },
+  "mapDashboard": {
+    "open": "Abrir painel da zona",
+    "collapse": "Recolher painel da zona",
+    "searchZone": "Buscar na zona atual com o radar",
+    "difficulty": {
+      "low": "Baixa",
+      "medium": "Média",
+      "high": "Alta"
+    },
+    "discoveredA11y": "{{discovered}} de {{total}} cartas descobertas",
+    "heatA11y": "Calor da zona {{heat}} por cento",
+    "xpRewardA11y": "Recompensa de {{xp}} XP",
+    "multiplierA11y": "Multiplicador de recompensa {{multiplier}}"
+  },
+  "cards": {
+    "title": "Cartas",
+    "subtitle": "Explore todas as cartas de jogadores",
+    "searchPlayers": "Buscar jogadores...",
+    "searchTeam": "Buscar seleção...",
+    "noPlayers": "Nenhum jogador encontrado",
+    "noTeams": "Nenhuma seleção encontrada",
+    "gridView": "Visualização em grade",
+    "listView": "Visualização em lista",
+    "nationsView": "Visualização por seleções",
+    "myCollection": "Minha Coleção",
+    "found": "{{found}} / {{total}} encontradas",
+    "rowA11y": "{{name}}, {{nation}}, {{rarity}}, overall {{rating}}, {{found}} de {{total}} cópias encontradas",
+    "tileA11y": "{{name}}, {{nation}}, overall {{rating}}, {{rarity}}",
+    "rarityBadgeA11y": "Carta {{rarity}}"
+  },
+  "myCollection": {
+    "title": "Minha Coleção",
+    "search": "Buscar por jogador ou seleção...",
+    "empty": "Nenhuma carta encontrada",
+    "viewOffers": "Ver propostas",
+    "viewOffersA11y": "Ver {{count}} propostas de troca",
+    "cardA11y": "{{name}}, {{rarity}}, cópia {{serial}} de {{total}}, overall {{rating}}"
+  },
+  "cardDetails": {
+    "notFound": "Carta não encontrada",
+    "statistics": "Estatísticas",
+    "cardInfo": "Informações da carta",
+    "serial": "Serial",
+    "position": "Posição",
+    "collected": "Coletada em",
+    "share": "Compartilhar carta",
+    "addFavorite": "Adicionar aos favoritos",
+    "removeFavorite": "Remover dos favoritos",
+    "shareMessage": "{{name}} ({{nation}}) — {{rarity}} #{{serial}}/{{total}} no Kartaz",
+    "globalDiscovery": "Global",
+    "percentFound": "{{percent}} encontradas",
+    "similarCards": "Cartas similares",
+    "tradeCard": "Trocar carta",
+    "viewOnMarket": "Ver no mercado"
+  },
+  "nation": {
+    "unknown": "Seleção desconhecida"
+  },
+  "nations": {
+    "ARG": "Argentina",
+    "AUS": "Austrália",
+    "BEL": "Bélgica",
+    "BRA": "Brasil",
+    "CAN": "Canadá",
+    "COL": "Colômbia",
+    "CRO": "Croácia",
+    "ENG": "Inglaterra",
+    "FRA": "França",
+    "GER": "Alemanha",
+    "JPN": "Japão",
+    "KOR": "Coreia do Sul",
+    "MAR": "Marrocos",
+    "MEX": "México",
+    "NED": "Holanda",
+    "NGA": "Nigéria",
+    "POR": "Portugal",
+    "SEN": "Senegal",
+    "ESP": "Espanha",
+    "URU": "Uruguai",
+    "USA": "Estados Unidos"
+  },
+  "cities": {
+    "saoPaulo": "São Paulo",
+    "paris": "Paris",
+    "buenosAires": "Buenos Aires",
+    "munich": "Munique",
+    "madrid": "Madri",
+    "lisbon": "Lisboa",
+    "tokyo": "Tóquio",
+    "lagos": "Lagos",
+    "london": "Londres",
+    "mexicoCity": "Cidade do México"
+  },
+  "zones": {
+    "southAmerica": "América do Sul"
+  },
+  "positions": {
+    "GK": "GOL",
+    "CB": "ZAG",
+    "LB": "LE",
+    "RB": "LD",
+    "CDM": "VOL",
+    "CM": "MC",
+    "CAM": "MEI",
+    "LW": "PE",
+    "RW": "PD",
+    "ST": "ATA"
+  },
+  "positionNames": {
+    "GK": "Goleiro",
+    "CB": "Zagueiro",
+    "LB": "Lateral esquerdo",
+    "RB": "Lateral direito",
+    "CDM": "Volante",
+    "CM": "Meio-campista",
+    "CAM": "Meia ofensivo",
+    "LW": "Ponta esquerda",
+    "RW": "Ponta direita",
+    "ST": "Centroavante"
+  },
+  "foundCopies": {
+    "title": "Encontradas",
+    "owner": "Proprietário",
+    "foundAt": "Encontrada",
+    "foundWhere": "Local",
+    "offers": "Propostas",
+    "makeOffer": "Fazer proposta de troca",
+    "makeOfferA11y": "Fazer proposta de troca pela cópia {{serial}} de {{total}}",
+    "empty": "Nenhuma cópia encontrada ainda",
+    "notFound": "Jogador não encontrado"
+  }
+}

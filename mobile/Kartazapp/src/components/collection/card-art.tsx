@@ -2,15 +2,16 @@ import { Canvas, LinearGradient, Line, Rect, vec } from '@shopify/react-native-s
 import { useState } from 'react';
 import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
-import type { Rarity } from '@/types/player-card';
+import type { Position, Rarity } from '@/types/player-card';
 import { colors, rarityColors, withAlpha } from '@/theme/colors';
+import { getPositionLabel } from '@/utils/card-labels';
 
 const GRID_STEP = 20;
 
 type CardArtProps = {
   rarity: Rarity;
   nationCode: string;
-  position: string;
+  position: Position;
   /** Tamanho do código da seleção (escala com o tamanho da arte). */
   codeSize?: number;
   style?: StyleProp<ViewStyle>;
@@ -51,7 +52,7 @@ export function CardArt({ rarity, nationCode, position, codeSize = 44, style }: 
       )}
 
       <Text style={[styles.code, { fontSize: codeSize, color: withAlpha(tint, 0.35) }]}>{nationCode}</Text>
-      <Text style={[styles.position, { color: tint }]}>{position}</Text>
+      <Text style={[styles.position, { color: tint }]}>{getPositionLabel(position)}</Text>
     </View>
   );
 }

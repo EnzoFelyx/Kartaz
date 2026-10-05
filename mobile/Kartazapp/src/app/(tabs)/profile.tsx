@@ -1,5 +1,10 @@
+import { useTranslation } from 'react-i18next';
+
 import { ScreenPlaceholder } from '@/components/screen-placeholder';
 
 export default function ProfileScreen() {
-  return <ScreenPlaceholder title="PROFILE" subtitle="YOUR SCOUT IDENTITY" />;
+  const { t } = useTranslation();
+  return (
+    <ScreenPlaceholder title={t('placeholders.profileTitle')} subtitle={t('placeholders.profileSubtitle')} />
+  );
 }

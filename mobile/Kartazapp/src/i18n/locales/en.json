@@ -1,0 +1,185 @@
+{
+  "common": {
+    "goBack": "Go back",
+    "clearSearch": "Clear search",
+    "cardsCount_one": "{{count}} card",
+    "cardsCount_other": "{{count}} cards",
+    "playersCount_one": "{{count}} player",
+    "playersCount_other": "{{count}} players",
+    "ratingA11y": "Rating {{rating}}",
+    "location": "{{city}}, {{nation}}",
+    "overallShort": "OVR"
+  },
+  "tabs": {
+    "map": "Map",
+    "collection": "Cards",
+    "achievements": "Achievements",
+    "trades": "Trades",
+    "profile": "Profile"
+  },
+  "placeholders": {
+    "achievementsTitle": "ACHIEVEMENTS",
+    "achievementsSubtitle": "PROGRESS AND REWARDS",
+    "tradesTitle": "TRADES",
+    "tradesSubtitle": "EXCHANGE CARDS WORLDWIDE",
+    "profileTitle": "PROFILE",
+    "profileSubtitle": "YOUR SCOUT IDENTITY"
+  },
+  "rarity": {
+    "common": "Common",
+    "rare": "Rare",
+    "epic": "Epic",
+    "legendary": "Legendary"
+  },
+  "roles": {
+    "goalkeeper": "Goalkeeper",
+    "defender": "Defender",
+    "midfielder": "Midfielder",
+    "forward": "Forward"
+  },
+  "stats": {
+    "speed": "Speed",
+    "shooting": "Shooting",
+    "passing": "Passing",
+    "dribbling": "Dribbling",
+    "defense": "Defense",
+    "physical": "Physical"
+  },
+  "hud": {
+    "energy": "ENERGY",
+    "energyA11y": "Energy",
+    "xp": "XP",
+    "levelA11y": "Level {{level}}, {{xp}} XP"
+  },
+  "mapDashboard": {
+    "open": "Open zone dashboard",
+    "collapse": "Collapse zone dashboard",
+    "searchZone": "Search current zone with radar",
+    "difficulty": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "discoveredA11y": "{{discovered}} of {{total}} cards discovered",
+    "heatA11y": "Zone heat {{heat}} percent",
+    "xpRewardA11y": "{{xp}} XP reward",
+    "multiplierA11y": "Reward multiplier {{multiplier}}"
+  },
+  "cards": {
+    "title": "Cards",
+    "subtitle": "Explore all player cards",
+    "searchPlayers": "Search players...",
+    "searchTeam": "Search team...",
+    "noPlayers": "No players found",
+    "noTeams": "No teams found",
+    "gridView": "Grid view",
+    "listView": "List view",
+    "nationsView": "Nations view",
+    "myCollection": "My Collection",
+    "found": "{{found}} / {{total}} found",
+    "rowA11y": "{{name}}, {{nation}}, {{rarity}}, rating {{rating}}, {{found}} of {{total}} copies found",
+    "tileA11y": "{{name}}, {{nation}}, rating {{rating}}, {{rarity}}",
+    "rarityBadgeA11y": "{{rarity}} card"
+  },
+  "myCollection": {
+    "title": "My Collection",
+    "search": "Search by player or team...",
+    "empty": "No cards found",
+    "viewOffers": "View offers",
+    "viewOffersA11y": "View {{count}} trade offers",
+    "cardA11y": "{{name}}, {{rarity}}, copy {{serial}} of {{total}}, rating {{rating}}"
+  },
+  "cardDetails": {
+    "notFound": "Card not found",
+    "statistics": "Statistics",
+    "cardInfo": "Card info",
+    "serial": "Serial",
+    "position": "Position",
+    "collected": "Collected",
+    "share": "Share card",
+    "addFavorite": "Add to favorites",
+    "removeFavorite": "Remove from favorites",
+    "shareMessage": "{{name}} ({{nation}}) — {{rarity}} #{{serial}}/{{total}} on Kartaz",
+    "globalDiscovery": "Global discovery",
+    "percentFound": "{{percent}} found",
+    "similarCards": "Similar cards",
+    "tradeCard": "Trade card",
+    "viewOnMarket": "View on market"
+  },
+  "nation": {
+    "unknown": "Unknown team"
+  },
+  "nations": {
+    "ARG": "Argentina",
+    "AUS": "Australia",
+    "BEL": "Belgium",
+    "BRA": "Brazil",
+    "CAN": "Canada",
+    "COL": "Colombia",
+    "CRO": "Croatia",
+    "ENG": "England",
+    "FRA": "France",
+    "GER": "Germany",
+    "JPN": "Japan",
+    "KOR": "South Korea",
+    "MAR": "Morocco",
+    "MEX": "Mexico",
+    "NED": "Netherlands",
+    "NGA": "Nigeria",
+    "POR": "Portugal",
+    "SEN": "Senegal",
+    "ESP": "Spain",
+    "URU": "Uruguay",
+    "USA": "United States"
+  },
+  "cities": {
+    "saoPaulo": "São Paulo",
+    "paris": "Paris",
+    "buenosAires": "Buenos Aires",
+    "munich": "Munich",
+    "madrid": "Madrid",
+    "lisbon": "Lisbon",
+    "tokyo": "Tokyo",
+    "lagos": "Lagos",
+    "london": "London",
+    "mexicoCity": "Mexico City"
+  },
+  "zones": {
+    "southAmerica": "South America"
+  },
+  "positions": {
+    "GK": "GK",
+    "CB": "CB",
+    "LB": "LB",
+    "RB": "RB",
+    "CDM": "CDM",
+    "CM": "CM",
+    "CAM": "CAM",
+    "LW": "LW",
+    "RW": "RW",
+    "ST": "ST"
+  },
+  "positionNames": {
+    "GK": "Goalkeeper",
+    "CB": "Center Back",
+    "LB": "Left Back",
+    "RB": "Right Back",
+    "CDM": "Defensive Midfielder",
+    "CM": "Central Midfielder",
+    "CAM": "Attacking Midfielder",
+    "LW": "Left Winger",
+    "RW": "Right Winger",
+    "ST": "Striker"
+  },
+  "foundCopies": {
+    "title": "Found",
+    "owner": "Owner",
+    "foundAt": "Found on",
+    "foundWhere": "Found at",
+    "offers": "Offers",
+    "makeOffer": "Make a trade offer",
+    "makeOfferA11y": "Make a trade offer for copy {{serial}} of {{total}}",
+    "empty": "No copies found yet",
+    "notFound": "Player not found"
+  }
+}

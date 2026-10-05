@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { STAT_CONFIG } from '@/components/card-details/stat-config';
@@ -6,7 +7,7 @@ import { ChevronRightIcon } from '@/components/icons/chevron-right-icon';
 import { MapPinIcon } from '@/components/icons/map-pin-icon';
 import { MessageCircleIcon } from '@/components/icons/message-circle-icon';
 import type { PlayerCard } from '@/types/player-card';
-import { formatShortDate, RARITY_LABEL } from '@/utils/card-labels';
+import { formatLocation, formatShortDate } from '@/utils/card-labels';
 import { colors, rarityColors, withAlpha } from '@/theme/colors';
 
 import { CardArt } from './card-art';
@@ -28,12 +29,20 @@ type OwnedCardItemProps = {
  * de troca e os atributos resumidos.
  */
 export function OwnedCardItem({ card, onPress, onViewOffers }: OwnedCardItemProps) {
+  const { t } = useTranslation();
   const tint = rarityColors[card.rarity];
+  const rarity = t(`rarity.${card.rarity}`);
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`${card.name}, ${RARITY_LABEL[card.rarity]}, copy ${card.serial} of ${card.maxSerial}, rating ${card.rating}`}
+      accessibilityLabel={t('myCollection.cardA11y', {
+        name: card.name,
+        rarity,
+        serial: card.serial,
+        total: card.maxSerial,
+        rating: card.rating,
+      })}
       onPress={onPress}
       style={({ pressed }) => [styles.card, pressed && styles.pressed]}>
       <View style={styles.header}>
@@ -42,7 +51,7 @@ export function OwnedCardItem({ card, onPress, onViewOffers }: OwnedCardItemProp
         </Text>
         <Text style={styles.rating}>{card.rating}</Text>
         <View style={[styles.rarityPill, { backgroundColor: tint }]}>
-          <Text style={styles.rarityText}>{RARITY_LABEL[card.rarity]}</Text>
+          <Text style={styles.rarityText}>{rarity}</Text>
         </View>
       </View>
 
@@ -71,7 +80,7 @@ export function OwnedCardItem({ card, onPress, onViewOffers }: OwnedCardItemProp
           <View style={styles.metaRow}>
             <MapPinIcon color={colors.secondaryForeground} size={META_ICON_SIZE} />
             <Text style={styles.metaText} numberOfLines={1}>
-              {card.collectedLocation}
+              {formatLocation(card.collectedLocation)}
             </Text>
           </View>
           <View style={styles.metaRow}>
@@ -79,11 +88,11 @@ export function OwnedCardItem({ card, onPress, onViewOffers }: OwnedCardItemProp
             <Text style={styles.metaText}>{card.tradeOffers}</Text>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel={`View ${card.tradeOffers} trade offers`}
+              accessibilityLabel={t('myCollection.viewOffersA11y', { count: card.tradeOffers })}
               onPress={onViewOffers}
               hitSlop={8}
               style={styles.offersLink}>
-              <Text style={styles.offersText}>View offers</Text>
+              <Text style={styles.offersText}>{t('myCollection.viewOffers')}</Text>
               <ChevronRightIcon color={colors.primary} size={14} />
             </Pressable>
           </View>
@@ -92,7 +101,7 @@ export function OwnedCardItem({ card, onPress, onViewOffers }: OwnedCardItemProp
 
       <View style={styles.stats}>
         {STAT_CONFIG.map((stat) => (
-          <View key={stat.key} style={styles.stat} accessible accessibilityLabel={`${stat.label} ${card.stats[stat.key]}`}>
+          <View key={stat.key} style={styles.stat} accessible accessibilityLabel={`${t(`stats.${stat.key}`)} ${card.stats[stat.key]}`}>
             {stat.renderIcon(STAT_ICON_SIZE)}
             <Text style={styles.statValue}>{card.stats[stat.key]}</Text>
           </View>

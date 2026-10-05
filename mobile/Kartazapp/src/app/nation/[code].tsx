@@ -1,5 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -11,6 +12,7 @@ import { SearchInput } from '@/components/ui/search-input';
 import { getPlayerCardById } from '@/mocks/player-cards';
 import { getNationByCode, getPlayersByNation } from '@/mocks/players';
 import { colors } from '@/theme/colors';
+import { getNationName } from '@/utils/card-labels';
 
 const GAP = 12;
 const H_PADDING = 20;
@@ -28,6 +30,7 @@ const cardExiting = FadeOutDown.duration(200);
 export default function NationScreen() {
   const { code } = useLocalSearchParams<{ code: string }>();
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   const [query, setQuery] = useState('');
 
   const nation = code ? getNationByCode(code) : undefined;
@@ -51,14 +54,14 @@ export default function NationScreen() {
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
         <IconButton
           icon={<ArrowLeftIcon color={colors.foreground} />}
-          accessibilityLabel="Go back"
+          accessibilityLabel={t('common.goBack')}
           onPress={goBack}
         />
         <View style={styles.titles}>
           <Text style={styles.title} accessibilityRole="header" numberOfLines={1}>
-            {nation?.name ?? 'Unknown team'}
+            {nation ? getNationName(nation.code) : t('nation.unknown')}
           </Text>
-          <Text style={styles.subtitle}>{allPlayers.length} players</Text>
+          <Text style={styles.subtitle}>{t('common.playersCount', { count: allPlayers.length })}</Text>
         </View>
       </View>
 
@@ -69,11 +72,11 @@ export default function NationScreen() {
           <SearchInput
             value={query}
             onChangeText={setQuery}
-            placeholder="Search players..."
+            placeholder={t('cards.searchPlayers')}
             style={styles.search}
           />
         }
-        ListEmptyComponent={<Text style={styles.empty}>No players found</Text>}
+        ListEmptyComponent={<Text style={styles.empty}>{t('cards.noPlayers')}</Text>}
         renderItem={({ item, index }) => (
           <Animated.View entering={cardEntering(index)} exiting={cardExiting}>
             <PlayerCardRow card={item} onPress={() => openIfOwned(item.id)} />

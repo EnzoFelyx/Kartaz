@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,6 +11,7 @@ import { IconButton } from '@/components/ui/icon-button';
 import { SearchInput } from '@/components/ui/search-input';
 import { MOCK_PLAYER_CARDS } from '@/mocks/player-cards';
 import { colors } from '@/theme/colors';
+import { getNationName } from '@/utils/card-labels';
 
 const GAP = 14;
 const H_PADDING = 20;
@@ -26,6 +28,7 @@ const cardExiting = FadeOutDown.duration(200);
 /** Coleção do jogador: as cópias de carta que ele possui. */
 export default function MyCollectionScreen() {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   const [query, setQuery] = useState('');
 
   // Mock: por enquanto, todas as cartas do mock são da coleção do jogador.
@@ -36,7 +39,7 @@ export default function MyCollectionScreen() {
     const term = query.trim().toLowerCase();
     if (!term) return ownedCards;
     return ownedCards.filter(
-      (card) => card.name.toLowerCase().includes(term) || card.nation.toLowerCase().includes(term),
+      (card) => card.name.toLowerCase().includes(term) || getNationName(card.nationCode).toLowerCase().includes(term),
     );
   }, [query, ownedCards]);
 
@@ -48,14 +51,14 @@ export default function MyCollectionScreen() {
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
         <IconButton
           icon={<ArrowLeftIcon color={colors.foreground} />}
-          accessibilityLabel="Go back"
+          accessibilityLabel={t('common.goBack')}
           onPress={goBack}
         />
         <View style={styles.titles}>
           <Text style={styles.title} accessibilityRole="header">
-            My Collection
+            {t('myCollection.title')}
           </Text>
-          <Text style={styles.subtitle}>{ownedCards.length} cards</Text>
+          <Text style={styles.subtitle}>{t('common.cardsCount', { count: ownedCards.length })}</Text>
         </View>
       </View>
 
@@ -66,11 +69,11 @@ export default function MyCollectionScreen() {
           <SearchInput
             value={query}
             onChangeText={setQuery}
-            placeholder="Search by player or team..."
+            placeholder={t('myCollection.search')}
             style={styles.search}
           />
         }
-        ListEmptyComponent={<Text style={styles.empty}>No cards found</Text>}
+        ListEmptyComponent={<Text style={styles.empty}>{t('myCollection.empty')}</Text>}
         renderItem={({ item, index }) => (
           <Animated.View entering={cardEntering(index)} exiting={cardExiting}>
             <OwnedCardItem card={item} onPress={() => openCard(item.id)} />
