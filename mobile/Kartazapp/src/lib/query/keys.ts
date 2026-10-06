@@ -5,6 +5,7 @@
 export const queryKeys = {
   session: ['session'] as const,
   playersSync: ['playersSync'] as const,
+  cardsProgressSync: ['cardsProgressSync'] as const,
 
   players: {
     all: ['players'] as const,

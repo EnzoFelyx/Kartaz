@@ -7,8 +7,10 @@ import {
 } from '@/lib/api/players-sync-api';
 import {
   applyPlayersProgressUpdates,
+  getCardsProgressVersion,
   getLocalPlayersVersion,
   initPlayersDb,
+  setCardsProgressVersion,
   setLocalPlayersVersion,
   upsertPlayers,
 } from '@/lib/db/playersDb';
@@ -16,13 +18,18 @@ import type { PlayerRow } from '@/types/player';
 
 const BATCH_SIZE = 500;
 
+/**
+ * Quantas versões antes do cursor pedir de novo. Transações podem commitar fora de ordem
+ * (a versão 101 aparecer depois da 102); reler essa janela evita perder o update.
+ * É seguro repetir porque `found_count` é valor absoluto.
+ */
+const PROGRESS_OVERLAP = 50;
+
 export type PlayersSyncResult = {
   /** Versão local da base depois do sync. */
   version: number;
   /** Jogadores gravados a partir de uma versão nova do servidor (0 se já estava em dia). */
   imported: number;
-  /** Jogadores com found/total atualizados. */
-  progressUpdated: number;
 };
 
 /**
@@ -68,22 +75,28 @@ async function syncPlayersVersion(): Promise<{ version: number; imported: number
   return { version: info.version, imported: rows.length };
 }
 
-/** Atualiza found/total das cartas com o progresso do servidor. */
-async function syncPlayersProgress(): Promise<number> {
-  const updates = await getPlayersProgress();
-  applyPlayersProgressUpdates(
-    updates.map((u) => ({ id: u.id, maxSupply: u.max_supply ?? null, foundCount: u.found_count ?? null })),
-  );
-  return updates.length;
-}
-
 /**
- * Mantém o SQLite em dia com o backend: versão da base + progresso das cartas.
+ * Mantém o SQLite em dia com a versão da base de jogadores.
  * Roda via React Query (`usePlayersSync`), que controla o intervalo (6h) e o refetch ao voltar o app.
  */
 export async function syncPlayersDatabase(): Promise<PlayersSyncResult> {
   initPlayersDb();
-  const { version, imported } = await syncPlayersVersion();
-  const progressUpdated = await syncPlayersProgress();
-  return { version, imported, progressUpdated };
+  return syncPlayersVersion();
+}
+
+/**
+ * Delta sync do found/total das cartas: manda o cursor local e grava só o que mudou.
+ * Cursor 0 (instalação nova) traz todas as cartas já encontradas.
+ * Roda via React Query (`useCardsProgressSync`) a cada 60s. Retorna quantas cartas mudaram.
+ */
+export async function syncCardsProgress(): Promise<number> {
+  initPlayersDb();
+  const cursor = getCardsProgressVersion();
+  const res = await getPlayersProgress(Math.max(0, cursor - PROGRESS_OVERLAP));
+  applyPlayersProgressUpdates(
+    res.items.map((u) => ({ id: u.id, maxSupply: u.max_supply ?? null, foundCount: u.found_count ?? null })),
+  );
+  const version = Math.max(cursor, Number(res.version) || 0);
+  if (version !== cursor) setCardsProgressVersion(version);
+  return res.items.length;
 }

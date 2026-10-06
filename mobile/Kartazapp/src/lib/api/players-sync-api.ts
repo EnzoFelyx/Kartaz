@@ -9,9 +9,14 @@ export type PlayersVersionResponse = {
 
 export type PlayerProgressDto = {
   id: number;
-  progress_version: string;
   max_supply: number;
   found_count: number;
+};
+
+export type PlayersProgressResponse = {
+  /** Cursor (BIGINT como string): maior `progress_version` retornado, ou o próprio `sinceVersion`. */
+  version: string;
+  items: PlayerProgressDto[];
 };
 
 /** GET /players/version — versão atual da base de jogadores no servidor. */
@@ -28,9 +33,11 @@ export async function downloadPlayersVersionFile(version: number): Promise<Array
 }
 
 /**
- * GET /admin/players/progress — `found_count`/`max_supply` dos jogadores que já tiveram cópias encontradas.
- * Sempre a partir da versão 0: o `progress_version` é por jogador, então usar o maior como cursor perderia updates.
+ * GET /players/progress — delta de `found_count`/`max_supply`: só as cartas que mudaram
+ * depois de `sinceVersion` (versão global, vinda de uma SEQUENCE no Postgres).
  */
-export function getPlayersProgress() {
-  return apiJson<PlayerProgressDto[]>('/admin/players/progress?version=0', { auth: 'admin' });
+export function getPlayersProgress(sinceVersion: number) {
+  return apiJson<PlayersProgressResponse>(`/players/progress${toQueryString({ sinceVersion })}`, {
+    auth: 'admin',
+  });
 }

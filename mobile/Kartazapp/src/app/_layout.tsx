@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 
 import { DatabaseInitSplash } from '@/components/database-init-splash';
+import { useCardsProgressSync } from '@/hooks/queries/use-cards-progress-sync';
 import { usePlayersSync } from '@/hooks/queries/use-players-sync';
 import { useSession } from '@/hooks/queries/use-session';
 import '@/i18n';
@@ -17,12 +18,14 @@ SplashScreen.preventAutoHideAsync();
 
 /**
  * Tarefas de dados em segundo plano, depois da base local pronta:
- * cria/recupera a sessão no backend e sincroniza a base de jogadores (a cada 6h).
+ * cria/recupera a sessão no backend, sincroniza a base de jogadores (a cada 6h)
+ * e o found/total das cartas por delta (a cada 1 min).
  * Não bloqueia a UI: o catálogo funciona offline pelo SQLite.
  */
 function BackgroundSync() {
   const session = useSession();
   usePlayersSync(session.isReady);
+  useCardsProgressSync(session.isReady);
 
   useEffect(() => {
     console.log(`[RootLayout] backend: ${apiConfig.baseUrl}`);
