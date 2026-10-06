@@ -27,6 +27,8 @@ export type Player = {
   nation: string;
   /** Bandeira em emoji da seleção, quando conhecida. */
   flagEmoji: string | null;
+  /** Clube do jogador (ex.: "Liverpool"); vazio quando a base não informa. */
+  team: string;
   /** Sigla da posição como vem do backend (ex.: ST, LM). */
   position: string;
   /** Posição no ranking geral (1 = melhor). */

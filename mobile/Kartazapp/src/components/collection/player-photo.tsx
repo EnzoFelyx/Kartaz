@@ -20,17 +20,22 @@ const SHIMMER_STEP_MS = 700;
  */
 const SHIMMER_DELAY_MS = 150;
 
+/** Intensidade da sombra: `card` para as cartas das listas, `hero` para a foto grande dos detalhes. */
+type PhotoDepth = 'card' | 'hero';
+
 type PlayerPhotoProps = {
   uri?: string;
   contentFit?: ImageContentFit;
+  depth?: PhotoDepth;
 };
 
 /**
  * Foto do jogador com o loading do projeto de referência: uma faixa de brilho sobe e desce
  * pela arte enquanto a foto carrega; ao carregar (ou falhar), o brilho some.
+ * A foto projeta uma sombra no fundo seguindo o contorno do jogador (efeito de profundidade).
  * Ocupa todo o pai (absoluteFill): o fundo da carta fica por conta de quem usa.
  */
-export function PlayerPhoto({ uri, contentFit = 'cover' }: PlayerPhotoProps) {
+export function PlayerPhoto({ uri, contentFit = 'cover', depth = 'card' }: PlayerPhotoProps) {
   // Fim do carregamento (sucesso ou erro).
   const [settled, setSettled] = useState(!uri);
   const [showShimmer, setShowShimmer] = useState(false);
@@ -44,16 +49,25 @@ export function PlayerPhoto({ uri, contentFit = 'cover' }: PlayerPhotoProps) {
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill}>
       {uri && (
-        <Image
-          source={{ uri }}
-          style={StyleSheet.absoluteFill}
-          contentFit={contentFit}
-          // Memória + disco: ao trocar grade/lista a foto volta sem decodificar de novo.
-          cachePolicy="memory-disk"
-          transition={150}
-          onLoad={() => setSettled(true)}
-          onError={() => setSettled(true)}
-        />
+        /*
+         * Sombra no contorno do jogador: sem cor de fundo, o iOS calcula a sombra pelos pixels
+         * da foto (que é transparente em volta do jogador), não pelo retângulo.
+         * Essa sombra é cara de desenhar, então `shouldRasterizeIOS` guarda o resultado como
+         * bitmap; o brilho de loading fica fora desta view para não invalidar esse cache.
+         * (No Android a sombra não segue o contorno; lá a foto fica sem sombra.)
+         */
+        <View style={[StyleSheet.absoluteFill, depth === 'hero' ? styles.heroShadow : styles.cardShadow]} shouldRasterizeIOS>
+          <Image
+            source={{ uri }}
+            style={StyleSheet.absoluteFill}
+            contentFit={contentFit}
+            // Memória + disco: ao trocar grade/lista a foto volta sem decodificar de novo.
+            cachePolicy="memory-disk"
+            transition={150}
+            onLoad={() => setSettled(true)}
+            onError={() => setSettled(true)}
+          />
+        </View>
       )}
       {showShimmer && <Shimmer active={!settled} />}
     </View>
@@ -116,6 +130,19 @@ function Shimmer({ active }: { active: boolean }) {
 }
 
 const styles = StyleSheet.create({
+  // Luz vindo de cima: a sombra cai para baixo, como se o jogador estivesse à frente do fundo.
+  cardShadow: {
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.75,
+    shadowRadius: 6,
+  },
+  heroShadow: {
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 14 },
+    shadowOpacity: 0.8,
+    shadowRadius: 16,
+  },
   clip: {
     overflow: 'hidden',
   },

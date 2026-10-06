@@ -28,6 +28,8 @@ type ProgressBarProps = {
    * em loop, dando a impressão de que a barra "quer" encher.
    */
   pulse?: boolean;
+  /** Atraso (ms) antes de a barra começar a encher (ex.: entrada em sequência de uma tela). */
+  fillDelay?: number;
 };
 
 /** Largura da faixa de luz do pulso (px). */
@@ -50,6 +52,7 @@ export function ProgressBar({
   glowColor = themeColors.primary,
   trackColor = themeColors.track,
   pulse = false,
+  fillDelay = 0,
 }: ProgressBarProps) {
   const [trackWidth, setTrackWidth] = useState(0);
   const animatedProgress = useSharedValue(0);
@@ -57,8 +60,9 @@ export function ProgressBar({
   const clamped = Math.min(Math.max(progress, 0), 1);
 
   useEffect(() => {
-    animatedProgress.value = withTiming(clamped, { duration: 700 });
-  }, [clamped, animatedProgress]);
+    const fill = withTiming(clamped, { duration: 700 });
+    animatedProgress.value = fillDelay > 0 ? withDelay(fillDelay, fill) : fill;
+  }, [clamped, fillDelay, animatedProgress]);
 
   useEffect(() => {
     if (!pulse || clamped === 0) {

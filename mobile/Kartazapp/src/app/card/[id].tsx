@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -12,13 +12,19 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withTiming,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { GlobalDiscoveryButton } from '@/components/card-details/global-discovery-button';
 import { CardHero } from '@/components/card-details/card-hero';
-import { OverallBadge } from '@/components/card-details/overall-badge';
 import { SimilarCardTile } from '@/components/card-details/similar-card-tile';
+import { CardArtwork } from '@/components/collection/card-artwork';
 import { StatRow } from '@/components/card-details/stat-row';
 import { ArrowLeftIcon } from '@/components/icons/arrow-left-icon';
 import { HeartIcon } from '@/components/icons/heart-icon';
@@ -29,14 +35,46 @@ import { IconButton } from '@/components/ui/icon-button';
 import { STAT_CONFIG } from '@/components/card-details/stat-config';
 import { useOwnedCopy } from '@/hooks/queries/use-my-collection';
 import { usePlayer, useSimilarPlayers } from '@/hooks/queries/use-player';
-import { formatShortDate, getNationName, getPositionName, getRole } from '@/utils/card-labels';
-import { colors, rarityColors } from '@/theme/colors';
+import { formatShortDate, getNationName, getPositionLabel, getPositionName } from '@/utils/card-labels';
+import { colors, rarityColors, withAlpha } from '@/theme/colors';
 
 const STAT_ICON_SIZE = 20;
+/** Foto da carta no topo (mesmas medidas do projeto de referência, proporção 5:7). */
+const HERO_ARTWORK_WIDTH = 80;
+const HERO_ARTWORK_HEIGHT = 112;
 
-const STAT_STAGGER_MS = 70;
 /** Altura do fade no topo da área rolável (Statistics). */
 const SCROLL_FADE_HEIGHT = 36;
+
+/**
+ * Entrada da tela, igual ao projeto de referência: cada bloco aparece subindo, em sequência.
+ * Topo: badges → linha nome/foto → descoberta global; abaixo, a seção de estatísticas,
+ * e por fim as barras dos atributos enchem.
+ */
+const ENTRANCE = {
+  badges: { delay: 100, offset: 24 },
+  identity: { delay: 220, offset: 24 },
+  discovery: { delay: 380, offset: 24 },
+  stats: { delay: 150, offset: 20, duration: 350 },
+  /** Barras dos atributos começam a encher depois que a seção já apareceu. */
+  statBarsDelay: 450,
+} as const;
+const ENTRANCE_DURATION = 320;
+
+/** Opacidade 0 → 1 subindo `offset` px, após `delay` ms, quando `ready`. */
+function useEntranceStyle(ready: boolean, delay: number, offset: number, duration: number = ENTRANCE_DURATION) {
+  const progress = useSharedValue(0);
+
+  useEffect(() => {
+    if (!ready) return;
+    progress.value = withDelay(delay, withTiming(1, { duration, easing: Easing.out(Easing.cubic) }));
+  }, [ready, delay, duration, progress]);
+
+  return useAnimatedStyle(() => ({
+    opacity: progress.value,
+    transform: [{ translateY: (progress.value - 1) * offset }],
+  }));
+}
 
 export default function CardDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -54,6 +92,13 @@ export default function CardDetailsScreen() {
 
   const card = player.data;
   const owned = ownedCopy.data;
+
+  // A sequência começa quando o jogador está pronto (não durante o loading).
+  const ready = !!card;
+  const badgesStyle = useEntranceStyle(ready, ENTRANCE.badges.delay, ENTRANCE.badges.offset);
+  const identityStyle = useEntranceStyle(ready, ENTRANCE.identity.delay, ENTRANCE.identity.offset);
+  const discoveryStyle = useEntranceStyle(ready, ENTRANCE.discovery.delay, ENTRANCE.discovery.offset);
+  const statsStyle = useEntranceStyle(ready, ENTRANCE.stats.delay, ENTRANCE.stats.offset, ENTRANCE.stats.duration);
 
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/collection'));
 
@@ -80,7 +125,7 @@ export default function CardDetailsScreen() {
 
   const tint = rarityColors[card.rarity];
   const rarity = t(`rarity.${card.rarity}`);
-  const role = getRole(card.position);
+  const nation = getNationName(card.nation);
 
   const openSimilar = (similarId: number) =>
     router.push({ pathname: '/card/[id]', params: { id: String(similarId) } });
@@ -89,7 +134,7 @@ export default function CardDetailsScreen() {
     Share.share({
       message: t('cardDetails.shareMessage', {
         name: card.name,
-        nation: getNationName(card.nation),
+        nation,
         rarity,
         serial: owned?.serial ?? '—',
         total: owned?.maxSerial ?? card.totalCopies,
@@ -99,51 +144,66 @@ export default function CardDetailsScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header fixo: arte + identidade do jogador. Só o conteúdo abaixo rola. */}
-      <CardHero card={card} height={Math.round(windowHeight * 0.48)}>
-        <View style={styles.badges}>
-          <View style={[styles.rarityPill, { backgroundColor: tint }]}>
-            <StarIcon color={colors.background} size={12} />
-            <Text style={styles.rarityText}>{rarity}</Text>
-          </View>
-          <View style={styles.rolePill}>
-            <Text style={styles.roleText}>{t(`roles.${role}`)}</Text>
-          </View>
-        </View>
-
-        <View style={styles.identity}>
+      {/* Header fixo: arena + identidade do jogador. Só o conteúdo abaixo rola. */}
+      <CardHero height={Math.round(windowHeight * 0.48)}>
+        {/* Badges, nome e clube à esquerda; a carta com a foto à direita. */}
+        <Animated.View style={[styles.identity, identityStyle]}>
           <View style={styles.names}>
-            <Text style={styles.name} accessibilityRole="header" numberOfLines={2}>
+            <Animated.View style={[styles.badges, badgesStyle]}>
+              <View style={[styles.rarityPill, { backgroundColor: tint }]}>
+                <StarIcon color={colors.background} size={12} />
+                <Text style={styles.rarityText}>{rarity}</Text>
+              </View>
+              {!!card.position && (
+                <View style={styles.infoPill}>
+                  <Text style={styles.positionText}>{getPositionLabel(card.position)}</Text>
+                </View>
+              )}
+              <View style={styles.infoPill} accessible accessibilityLabel={t('common.ratingA11y', { rating: card.rating })}>
+                <Text style={styles.ratingText}>{card.rating}</Text>
+              </View>
+            </Animated.View>
+            <Text style={styles.name} accessibilityRole="header" numberOfLines={1} adjustsFontSizeToFit>
               {card.name}
             </Text>
-            <Text style={styles.nation}>{getNationName(card.nation)}</Text>
+            {/* Clube quando a base informa; senão, a seleção. */}
+            <Text style={styles.team} numberOfLines={1}>
+              {card.team || nation}
+            </Text>
           </View>
-          <OverallBadge rating={card.rating} />
-        </View>
+
+          <View style={styles.artwork}>
+            <CardArtwork uri={card.imageUri} style={StyleSheet.absoluteFill} pointerEvents="none" />
+          </View>
+        </Animated.View>
 
         {/* Raridade global do jogador: abre as cópias já encontradas. */}
-        <GlobalDiscoveryButton
-          found={card.copiesFound}
-          total={card.totalCopies}
-          onPress={() => router.push({ pathname: '/found-copies/[id]', params: { id: String(card.id) } })}
-        />
+        <Animated.View style={discoveryStyle}>
+          <GlobalDiscoveryButton
+            found={card.copiesFound}
+            total={card.totalCopies}
+            onPress={() => router.push({ pathname: '/found-copies/[id]', params: { id: String(card.id) } })}
+          />
+        </Animated.View>
       </CardHero>
 
       <View style={styles.scrollArea}>
         <ScrollView
           contentContainerStyle={[styles.body, { paddingBottom: insets.bottom + 32 }]}
           showsVerticalScrollIndicator={false}>
-          <Text style={styles.sectionTitle}>{t('cardDetails.statistics')}</Text>
-          {STAT_CONFIG.map((stat, index) => (
-            <Animated.View key={stat.key} entering={FadeInDown.delay(index * STAT_STAGGER_MS).duration(350)}>
+          <Animated.View style={[styles.statsSection, statsStyle]}>
+            <Text style={styles.sectionTitle}>{t('cardDetails.statistics')}</Text>
+            {STAT_CONFIG.map((stat) => (
               <StatRow
+                key={stat.key}
                 label={t(`stats.${stat.key}`)}
                 value={card.stats[stat.key]}
                 color={stat.color}
                 icon={stat.renderIcon(STAT_ICON_SIZE)}
+                fillDelay={ENTRANCE.statBarsDelay}
               />
-            </Animated.View>
-          ))}
+            ))}
+          </Animated.View>
 
           <Text style={[styles.sectionTitle, styles.sectionSpacing]}>{t('cardDetails.cardInfo')}</Text>
           <View style={styles.infoCard}>
@@ -243,10 +303,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
   },
+  identity: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 16,
+    marginBottom: 16,
+  },
+  names: {
+    flex: 1,
+    minWidth: 0,
+  },
   badges: {
     flexDirection: 'row',
+    alignItems: 'center',
     gap: 8,
-    marginBottom: 12,
+    marginBottom: 10,
   },
   rarityPill: {
     flexDirection: 'row',
@@ -261,38 +332,46 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '800',
   },
-  rolePill: {
+  infoPill: {
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 999,
     backgroundColor: colors.glass,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: withAlpha(colors.primary, 0.3),
   },
-  roleText: {
+  positionText: {
     color: colors.primary,
     fontSize: 13,
     fontWeight: '700',
   },
-  identity: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    gap: 16,
-    marginBottom: 20,
-  },
-  names: {
-    flex: 1,
-    gap: 4,
+  ratingText: {
+    color: colors.foreground,
+    fontSize: 14,
+    fontWeight: '800',
   },
   name: {
+    marginBottom: 4,
     color: colors.foreground,
-    fontSize: 32,
-    fontWeight: '900',
+    fontSize: 36,
+    lineHeight: 40,
+    fontWeight: '800',
   },
-  nation: {
+  team: {
     color: colors.primary,
     fontSize: 18,
     fontWeight: '700',
+  },
+  artwork: {
+    width: HERO_ARTWORK_WIDTH,
+    height: HERO_ARTWORK_HEIGHT,
+    overflow: 'hidden',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  statsSection: {
+    gap: 12,
   },
   scrollArea: {
     flex: 1,

@@ -9,10 +9,12 @@ type StatRowProps = {
   value: number;
   color: string;
   icon: ReactNode;
+  /** Atraso (ms) para a barra começar a encher. */
+  fillDelay?: number;
 };
 
 /** Card de um atributo do jogador: ícone, nome, valor e barra na cor do atributo. */
-export function StatRow({ label, value, color, icon }: StatRowProps) {
+export function StatRow({ label, value, color, icon, fillDelay }: StatRowProps) {
   return (
     <View style={styles.card} accessible accessibilityLabel={`${label} ${value}`}>
       <View style={styles.header}>
@@ -20,7 +22,7 @@ export function StatRow({ label, value, color, icon }: StatRowProps) {
         <Text style={styles.label}>{label}</Text>
         <Text style={styles.value}>{value}</Text>
       </View>
-      <ProgressBar progress={value / 100} height={6} colors={[color, color]} glowColor={color} />
+      <ProgressBar progress={value / 100} height={6} colors={[color, color]} glowColor={color} fillDelay={fillDelay} />
     </View>
   );
 }
