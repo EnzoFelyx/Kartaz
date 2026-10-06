@@ -8,20 +8,21 @@ export function resolveApiUri(uri: string | null | undefined): string | undefine
   return `${apiConfig.baseUrl}${value.startsWith('/') ? '' : '/'}${value}`;
 }
 
-/** `url` aponta para um arquivo de imagem (e não para a página do jogador no site da EA)? */
+/** `url` aponta para um arquivo de imagem (e não para uma página web do jogador)? */
 function isImageUrl(url: string) {
   return /\.(webp|png|jpe?g|gif|avif)(\?.*)?$/i.test(url);
 }
 
 /**
- * Foto do jogador.
+ * Foto do jogador, ou `undefined` (a carta mostra o fundo padrão).
  * - Igual ao projeto de referência: usa o `url` da base, resolvido com o host da API, quando ele é uma
- *   imagem. Isso acontece depois que o backend roda o script de fotos (`/players/photos/<id>.webp`).
- * - Senão (a base embutida traz em `url` o link da página do jogador na EA, que não é imagem),
- *   usa a mesma fonte do script do backend: `<CDN da EA>/p<id>.webp`.
+ *   imagem hospedada pelo backend (`/players/photos/<id>.webp`).
+ * - Senão, usa o servidor de fotos configurado em `EXPO_PUBLIC_PLAYER_IMAGE_BASE_URL` (`<base>/p<id>.webp`),
+ *   se houver um.
  */
-export function playerPhotoUri(playerId: number, url?: string | null) {
+export function playerPhotoUri(playerId: number, url?: string | null): string | undefined {
   const value = url?.trim();
-  if (value && isImageUrl(value)) return resolveApiUri(value)!;
+  if (value && isImageUrl(value)) return resolveApiUri(value);
+  if (!apiConfig.playerImageBaseUrl) return undefined;
   return `${apiConfig.playerImageBaseUrl}/p${playerId}.webp`;
 }

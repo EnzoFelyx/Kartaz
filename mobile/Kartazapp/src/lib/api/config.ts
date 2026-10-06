@@ -52,14 +52,14 @@ function resolveApiBaseUrl(configured: string) {
 const ADMIN_API_KEY = process.env.EXPO_PUBLIC_ADMIN_API_KEY ?? '';
 
 /**
- * Origem das fotos dos jogadores quando o backend ainda não as hospeda: o mesmo CDN da EA
- * de onde o script `backend/scripts/fetch-player-photos.js` baixa (`p<id>.webp`, 120×120).
+ * Servidor de fotos dos jogadores para quando o backend ainda não as hospeda (arquivos `p<id>.webp`).
+ * Não há valor padrão: o repositório não aponta para nenhuma fonte de imagens de terceiros.
+ * Configure só com uma fonte que você tenha direito de usar; sem ela, as cartas mostram o fundo padrão.
  */
-const PLAYER_IMAGE_BASE_URL =
-  process.env.EXPO_PUBLIC_PLAYER_IMAGE_BASE_URL ?? 'https://ratings-images-prod.pulse.ea.com/FC26/components/players';
+const PLAYER_IMAGE_BASE_URL = process.env.EXPO_PUBLIC_PLAYER_IMAGE_BASE_URL?.trim() || undefined;
 
 export const apiConfig = {
   baseUrl: resolveApiBaseUrl(CONFIGURED_API_BASE_URL),
   adminKey: ADMIN_API_KEY,
-  playerImageBaseUrl: PLAYER_IMAGE_BASE_URL.replace(/\/$/, ''),
+  playerImageBaseUrl: PLAYER_IMAGE_BASE_URL?.replace(/\/$/, ''),
 } as const;

@@ -67,7 +67,7 @@ export function formatNumber(value: number) {
 /** Nome (em inglês, como vem do backend) → código da seleção com tradução no i18n. */
 const NATION_CODE_BY_NAME = new Map<string, NationCode>([
   ...(Object.entries(en.nations) as [NationCode, string][]).map(([code, name]) => [name.toLowerCase(), code] as const),
-  // Nomes usados na base da EA que diferem do i18n.
+  // Nomes usados na base de jogadores que diferem do i18n.
   ['holland', 'NED'],
   ['korea republic', 'KOR'],
 ]);

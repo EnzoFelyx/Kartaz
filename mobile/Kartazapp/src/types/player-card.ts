@@ -36,8 +36,8 @@ export type Player = {
   rating: number;
   rarity: Rarity;
   stats: PlayerStats;
-  /** Foto do jogador servida pelo backend. */
-  imageUri: string;
+  /** Foto do jogador (backend ou servidor de fotos configurado); sem foto, a carta mostra o fundo padrão. */
+  imageUri?: string;
   /** Cópias deste jogador já encontradas por todos os jogadores do jogo. */
   copiesFound: number;
   /** Total de cópias existentes (ex.: 1000). */
