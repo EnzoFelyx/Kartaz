@@ -85,7 +85,7 @@ Variáveis do `.env.local`:
 **Autor:** Enzo Felix ([@EnzoFelyx](https://github.com/EnzoFelyx)). Concepção, design do jogo e desenvolvimento do app Kartaz.
 
 **[Rocketseat](https://www.rocketseat.com.br)**, pelo curso e pelo projeto **Go Rocket League**, base deste trabalho:
-- Backend [go-rocket-league-backend](https://github.com/rocketseat-education/go-rocket-league-backend) (API, autenticação, cartas e sincronização), usado sem modificações e não incluído neste repositório.
+- Backend [go-rocket-league-backend](https://github.com/rocketseat-education/go-rocket-league-backend) (API, autenticação, cartas e sincronização), não incluído neste repositório. Usado com uma pequena modificação local: sync incremental do progresso das cartas.
 - Projeto mobile das aulas, do qual foram portados e adaptados:
   - a base local SQLite (`src/lib/db`) e a importação inicial (`src/lib/sync/seedFromBundle.ts`);
   - a sincronização com o servidor (`src/lib/sync/players-sync.ts`);

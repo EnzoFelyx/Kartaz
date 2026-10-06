@@ -6,11 +6,13 @@ import { colors, withAlpha } from '@/theme/colors';
 
 type NationRowProps = {
   name: string;
+  /** Bandeira da seleção; sem ela, fica o ícone de globo. */
+  flagEmoji?: string | null;
   onPress?: () => void;
 };
 
-/** Linha de uma seleção na visualização por países. */
-export function NationRow({ name, onPress }: NationRowProps) {
+/** Linha de uma seleção na visualização por países, com a bandeira à esquerda. */
+export function NationRow({ name, flagEmoji, onPress }: NationRowProps) {
   return (
     <Pressable
       accessibilityRole="button"
@@ -18,7 +20,11 @@ export function NationRow({ name, onPress }: NationRowProps) {
       onPress={onPress}
       style={({ pressed }) => [styles.row, pressed && styles.pressed]}>
       <View style={styles.iconBox}>
-        <GlobeIcon color={colors.primary} size={22} />
+        {flagEmoji ? (
+          <Text style={styles.flag}>{flagEmoji}</Text>
+        ) : (
+          <GlobeIcon color={colors.primary} size={22} />
+        )}
       </View>
       <Text style={styles.name} numberOfLines={1}>
         {name}
@@ -49,6 +55,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: withAlpha(colors.primary, 0.1),
+  },
+  flag: {
+    fontSize: 26,
   },
   name: {
     flex: 1,

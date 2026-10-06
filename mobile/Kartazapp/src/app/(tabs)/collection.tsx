@@ -19,6 +19,7 @@ import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import type { Player } from '@/types/player-card';
 import { colors } from '@/theme/colors';
 import { compareLocale, getNationName } from '@/utils/card-labels';
+import { getFlagEmojiForCountry } from '@/utils/flags';
 import { LIST_END_THRESHOLD, LIST_RENDER_PROPS, listItemEntering } from '@/utils/list-loading';
 
 const GAP = 12;
@@ -168,6 +169,7 @@ export default function CollectionScreen() {
             <Animated.View entering={listItemEntering(index)}>
               <NationRow
                 name={row.name}
+                flagEmoji={getFlagEmojiForCountry(row.nation)}
                 onPress={() =>
                   router.push({ pathname: '/nation/[code]', params: { code: row.nation } })
                 }

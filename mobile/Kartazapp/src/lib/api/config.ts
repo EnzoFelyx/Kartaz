@@ -52,7 +52,7 @@ function resolveApiBaseUrl(configured: string) {
 const ADMIN_API_KEY = process.env.EXPO_PUBLIC_ADMIN_API_KEY ?? '';
 
 /**
- * Servidor de fotos dos jogadores para quando o backend ainda não as hospeda (arquivos `p<id>.webp`).
+ * Servidor de fotos dos jogadores (arquivos `p<id>.webp`), ex.: `http://localhost:3000/players/photos`.
  * Não há valor padrão: o repositório não aponta para nenhuma fonte de imagens de terceiros.
  * Configure só com uma fonte que você tenha direito de usar; sem ela, as cartas mostram o fundo padrão.
  */
@@ -61,5 +61,6 @@ const PLAYER_IMAGE_BASE_URL = process.env.EXPO_PUBLIC_PLAYER_IMAGE_BASE_URL?.tri
 export const apiConfig = {
   baseUrl: resolveApiBaseUrl(CONFIGURED_API_BASE_URL),
   adminKey: ADMIN_API_KEY,
-  playerImageBaseUrl: PLAYER_IMAGE_BASE_URL?.replace(/\/$/, ''),
+  // Fotos servidas pelo backend local (`/players/photos`) também precisam do IP do Mac no iPhone físico.
+  playerImageBaseUrl: PLAYER_IMAGE_BASE_URL ? resolveApiBaseUrl(PLAYER_IMAGE_BASE_URL) : undefined,
 } as const;
