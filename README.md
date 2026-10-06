@@ -4,6 +4,8 @@ Jogo mobile de exploração de mapa com cartas colecionáveis de futebol. O joga
 
 Projeto de estudo e portfólio, feito com React Native (Expo) e um backend Node.js.
 
+**© 2026 Enzo Felix ([@EnzoFelyx](https://github.com/EnzoFelyx)).** Código aberto sob a licença [MIT](LICENSE): pode usar e modificar, desde que **mantenha os créditos ao autor**. Veja [Licença e autoria](#licença-e-autoria).
+
 > ⚠️ **Projeto sem fins comerciais e sem vínculo oficial.** Leia o [Aviso legal](#aviso-legal) antes de usar ou redistribuir qualquer parte deste repositório.
 
 ---
@@ -115,4 +117,16 @@ O app foi criado com `create-expo-app` e usa, entre outras:
 
 O backend da Rocketseat usa, entre outras, Fastify (MIT), Colyseus (MIT), Prisma (Apache-2.0) e PostgreSQL (PostgreSQL License).
 
-Cada biblioteca continua sob a sua própria licença. O arquivo `mobile/Kartazapp/LICENSE` veio do modelo do `create-expo-app` (MIT, © 650 Industries / Expo).
+Cada biblioteca continua sob a sua própria licença. Os arquivos do modelo inicial do `create-expo-app` seguem sob a licença MIT da Expo, em [`mobile/Kartazapp/LICENSE-expo-template`](mobile/Kartazapp/LICENSE-expo-template).
+
+---
+
+## Licença e autoria
+
+**© 2026 Enzo Felix.** Licenciado sob a [licença MIT](LICENSE).
+
+Kartaz (código, design de jogo, regras, textos e interface) foi criado por **Enzo Felix** ([@EnzoFelyx](https://github.com/EnzoFelyx)). Você pode usar, copiar, modificar e distribuir este código, inclusive em projetos comerciais, **desde que mantenha o aviso de copyright e o texto da licença MIT** em todas as cópias ou partes substanciais. Se usar este projeto como base, um link para este repositório é muito bem-vindo.
+
+A licença MIT vale apenas para o trabalho original do autor. O conteúdo de terceiros listado em [Créditos](#créditos) (material da Rocketseat, modelo do Expo, bibliotecas e nomes, marcas e dados de jogadores, clubes e competições) não é coberto por ela e continua pertencendo aos seus titulares.
+
+Texto completo em [`LICENSE`](LICENSE).

@@ -1,0 +1,44 @@
+MIT License
+
+Copyright (c) 2026 Enzo Felix (https://github.com/EnzoFelyx)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+--------------------------------------------------------------------------------
+Third-party content / Conteúdo de terceiros
+--------------------------------------------------------------------------------
+
+The MIT License above applies only to the original work of Enzo Felix. The
+following content is NOT covered by it and remains the property of its
+respective owners, under their own terms:
+
+A licença MIT acima vale apenas para o trabalho original de Enzo Felix. O
+conteúdo abaixo NÃO é coberto por ela e continua pertencendo aos seus
+titulares, sob os respectivos termos:
+
+  - Code excerpts and images adapted from Rocketseat's Go Rocket League project
+    (https://github.com/rocketseat-education/go-rocket-league-mobile),
+    including assets/images/bg-card.png and assets/images/bg-card-details.png.
+    See "Créditos" in README.md.
+  - Files from the create-expo-app starter template, under the MIT License
+    (c) 650 Industries, Inc. (Expo), see mobile/Kartazapp/LICENSE-expo-template.
+  - Third-party libraries, each under its own license.
+  - Names, trademarks and data of players, clubs, national teams and
+    competitions, which belong to their respective owners (see "Aviso legal"
+    in README.md).

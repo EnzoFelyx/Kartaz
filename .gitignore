@@ -4,3 +4,7 @@
 # Base de jogadores exportada do backend (dados da EA): não vai para o repositório.
 # Gere localmente: veja mobile/Kartazapp/assets/data/README.md
 mobile/Kartazapp/assets/data/*.json.gz
+
+# Backend da Rocketseat (repositório próprio, com .env local): não vai para este repositório.
+# Código original: https://github.com/rocketseat-education/go-rocket-league-backend
+backend/
