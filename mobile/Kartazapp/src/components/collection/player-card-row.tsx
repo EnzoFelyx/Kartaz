@@ -28,7 +28,7 @@ export function PlayerCardRow({ card, onPress }: PlayerCardRowProps) {
       accessibilityRole="button"
       accessibilityLabel={t('cards.rowA11y', {
         name: card.name,
-        nation: getNationName(card.nationCode),
+        nation: getNationName(card.nation),
         rarity,
         rating: card.rating,
         found: card.copiesFound,
@@ -42,8 +42,9 @@ export function PlayerCardRow({ card, onPress }: PlayerCardRowProps) {
       ]}>
       <CardArt
         rarity={card.rarity}
-        nationCode={card.nationCode}
+        nation={card.nation}
         position={card.position}
+        imageUri={card.imageUri}
         codeSize={22}
         style={styles.thumb}
       />
@@ -53,7 +54,7 @@ export function PlayerCardRow({ card, onPress }: PlayerCardRowProps) {
           {card.name}
         </Text>
         <Text style={styles.nation} numberOfLines={1}>
-          {getNationName(card.nationCode)}
+          {getNationName(card.nation)}
         </Text>
         <View style={styles.rarityRow}>
           <StarIcon color={tint} size={13} />

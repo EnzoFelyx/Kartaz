@@ -1,52 +1,44 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, View } from 'react-native';
-import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { PlayerCardRow } from '@/components/collection/player-card-row';
 import { ArrowLeftIcon } from '@/components/icons/arrow-left-icon';
 import { IconButton } from '@/components/ui/icon-button';
 import { SearchInput } from '@/components/ui/search-input';
-import { getPlayerCardById } from '@/mocks/player-cards';
-import { getNationByCode, getPlayersByNation } from '@/mocks/players';
+import { useNationPlayersCount, usePlayersCatalog } from '@/hooks/queries/use-players-catalog';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { colors } from '@/theme/colors';
+import { LIST_END_THRESHOLD, LIST_RENDER_PROPS, listItemEntering } from '@/utils/list-loading';
 import { getNationName } from '@/utils/card-labels';
 
 const GAP = 12;
 const H_PADDING = 20;
+const SEARCH_DEBOUNCE_MS = 250;
 
-/** Mesmo padrão de entrada/saída das listas da aba Cards. */
-const CARD_STAGGER_MS = 60;
-const CARD_MAX_DELAY_MS = 480;
-
-function cardEntering(index: number) {
-  return FadeInDown.delay(Math.min(index * CARD_STAGGER_MS, CARD_MAX_DELAY_MS)).duration(350);
-}
-const cardExiting = FadeOutDown.duration(200);
-
-/** Todos os jogadores de uma seleção (catálogo completo, não só a coleção). */
+/**
+ * Todos os jogadores de uma seleção (catálogo completo, não só a coleção), paginados.
+ * O parâmetro `code` é o nome da seleção como vem do backend (ex.: "Brazil").
+ */
 export default function NationScreen() {
   const { code } = useLocalSearchParams<{ code: string }>();
+  const nation = code?.trim() ?? '';
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const [query, setQuery] = useState('');
 
-  const nation = code ? getNationByCode(code) : undefined;
-  const allPlayers = useMemo(() => (code ? getPlayersByNation(code) : []), [code]);
-
-  const players = useMemo(() => {
-    const term = query.trim().toLowerCase();
-    if (!term) return allPlayers;
-    return allPlayers.filter((player) => player.name.toLowerCase().includes(term));
-  }, [query, allPlayers]);
+  const search = useDebouncedValue(query, SEARCH_DEBOUNCE_MS);
+  const catalog = usePlayersCatalog({ query: search, nation });
+  const total = useNationPlayersCount(nation);
 
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/collection'));
+  const openCard = (id: number) => router.push({ pathname: '/card/[id]', params: { id: String(id) } });
 
-  // Só jogadores da coleção têm uma cópia para abrir nos detalhes.
-  const openIfOwned = (id: string) => {
-    if (getPlayerCardById(id)) router.push({ pathname: '/card/[id]', params: { id } });
+  const loadMore = () => {
+    if (catalog.hasNextPage && !catalog.isFetchingNextPage) catalog.fetchNextPage();
   };
 
   return (
@@ -59,15 +51,15 @@ export default function NationScreen() {
         />
         <View style={styles.titles}>
           <Text style={styles.title} accessibilityRole="header" numberOfLines={1}>
-            {nation ? getNationName(nation.code) : t('nation.unknown')}
+            {nation ? getNationName(nation) : t('nation.unknown')}
           </Text>
-          <Text style={styles.subtitle}>{t('common.playersCount', { count: allPlayers.length })}</Text>
+          <Text style={styles.subtitle}>{t('common.playersCount', { count: total.data ?? 0 })}</Text>
         </View>
       </View>
 
       <Animated.FlatList
-        data={players}
-        keyExtractor={(player) => player.id}
+        data={catalog.players}
+        keyExtractor={(player) => String(player.id)}
         ListHeaderComponent={
           <SearchInput
             value={query}
@@ -76,10 +68,27 @@ export default function NationScreen() {
             style={styles.search}
           />
         }
-        ListEmptyComponent={<Text style={styles.empty}>{t('cards.noPlayers')}</Text>}
+        ListEmptyComponent={
+          catalog.isPending ? (
+            <ActivityIndicator color={colors.primary} style={styles.loading} />
+          ) : (
+            <Text style={styles.empty}>{t('cards.noPlayers')}</Text>
+          )
+        }
+        ListFooterComponent={
+          catalog.isFetchingNextPage ? (
+            <View style={styles.footer}>
+              <ActivityIndicator color={colors.primary} />
+              <Text style={styles.footerText}>{t('cards.loadingMore')}</Text>
+            </View>
+          ) : null
+        }
+        onEndReached={loadMore}
+        onEndReachedThreshold={LIST_END_THRESHOLD}
+        {...LIST_RENDER_PROPS}
         renderItem={({ item, index }) => (
-          <Animated.View entering={cardEntering(index)} exiting={cardExiting}>
-            <PlayerCardRow card={item} onPress={() => openIfOwned(item.id)} />
+          <Animated.View entering={listItemEntering(index)}>
+            <PlayerCardRow card={item} onPress={() => openCard(item.id)} />
           </Animated.View>
         )}
         ItemSeparatorComponent={() => <View style={{ height: GAP }} />}
@@ -129,6 +138,20 @@ const styles = StyleSheet.create({
   empty: {
     marginTop: 24,
     textAlign: 'center',
+    color: colors.mutedForeground,
+    fontSize: 14,
+  },
+  loading: {
+    marginTop: 32,
+  },
+  footer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 16,
+  },
+  footerText: {
     color: colors.mutedForeground,
     fontSize: 14,
   },

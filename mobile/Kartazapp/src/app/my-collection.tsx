@@ -1,50 +1,46 @@
 import { router } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, View } from 'react-native';
-import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
+import { ActivityIndicator, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { OwnedCardItem } from '@/components/collection/owned-card-item';
 import { ArrowLeftIcon } from '@/components/icons/arrow-left-icon';
 import { IconButton } from '@/components/ui/icon-button';
 import { SearchInput } from '@/components/ui/search-input';
-import { MOCK_PLAYER_CARDS } from '@/mocks/player-cards';
+import { useMyCollection } from '@/hooks/queries/use-my-collection';
+import { useSession } from '@/hooks/queries/use-session';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { colors } from '@/theme/colors';
-import { getNationName } from '@/utils/card-labels';
+import { LIST_END_THRESHOLD, LIST_RENDER_PROPS, listItemEntering } from '@/utils/list-loading';
 
 const GAP = 14;
 const H_PADDING = 20;
+/** A busca vai para o servidor: espera o usuário parar de digitar. */
+const SEARCH_DEBOUNCE_MS = 400;
 
-/** Cards entram subindo em cascata e saem descendo (mesmo padrão da aba Cards). */
-const CARD_STAGGER_MS = 60;
-const CARD_MAX_DELAY_MS = 480;
-
-function cardEntering(index: number) {
-  return FadeInDown.delay(Math.min(index * CARD_STAGGER_MS, CARD_MAX_DELAY_MS)).duration(350);
-}
-const cardExiting = FadeOutDown.duration(200);
-
-/** Coleção do jogador: as cópias de carta que ele possui. */
+/** Coleção do jogador: as cópias de carta que ele possui (`GET /user/instances`, paginado). */
 export default function MyCollectionScreen() {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const [query, setQuery] = useState('');
 
-  // Mock: por enquanto, todas as cartas do mock são da coleção do jogador.
-  const ownedCards = MOCK_PLAYER_CARDS;
+  const search = useDebouncedValue(query, SEARCH_DEBOUNCE_MS);
+  const session = useSession();
+  const collection = useMyCollection(search);
 
-  // Busca por nome do jogador ou pela seleção (time/nacionalidade).
-  const cards = useMemo(() => {
-    const term = query.trim().toLowerCase();
-    if (!term) return ownedCards;
-    return ownedCards.filter(
-      (card) => card.name.toLowerCase().includes(term) || getNationName(card.nationCode).toLowerCase().includes(term),
-    );
-  }, [query, ownedCards]);
+  // Sem sessão (backend fora do ar) ou falha ao buscar: mostra o erro com "tentar novamente".
+  const hasError = session.isError || collection.isError;
+  const isLoading = !hasError && (session.isPending || collection.isPending);
+
+  const retry = () => (session.isError ? session.refetch() : collection.refetch());
+  const loadMore = () => {
+    if (collection.hasNextPage && !collection.isFetchingNextPage) collection.fetchNextPage();
+  };
 
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/collection'));
-  const openCard = (id: string) => router.push({ pathname: '/card/[id]', params: { id } });
+  const openCard = (id: number) => router.push({ pathname: '/card/[id]', params: { id: String(id) } });
 
   return (
     <View style={styles.container}>
@@ -58,13 +54,13 @@ export default function MyCollectionScreen() {
           <Text style={styles.title} accessibilityRole="header">
             {t('myCollection.title')}
           </Text>
-          <Text style={styles.subtitle}>{t('common.cardsCount', { count: ownedCards.length })}</Text>
+          <Text style={styles.subtitle}>{t('common.cardsCount', { count: collection.total })}</Text>
         </View>
       </View>
 
       <Animated.FlatList
-        data={cards}
-        keyExtractor={(card) => card.id}
+        data={collection.cards}
+        keyExtractor={(card) => card.instanceId}
         ListHeaderComponent={
           <SearchInput
             value={query}
@@ -73,9 +69,43 @@ export default function MyCollectionScreen() {
             style={styles.search}
           />
         }
-        ListEmptyComponent={<Text style={styles.empty}>{t('myCollection.empty')}</Text>}
+        ListEmptyComponent={
+          isLoading ? (
+            <ActivityIndicator color={colors.primary} style={styles.loading} />
+          ) : hasError ? (
+            <View style={styles.error}>
+              <Text style={styles.empty}>{t('common.loadError')}</Text>
+              <Pressable
+                accessibilityRole="button"
+                onPress={retry}
+                style={({ pressed }) => [styles.retryButton, pressed && styles.retryPressed]}>
+                <Text style={styles.retryText}>{t('common.retry')}</Text>
+              </Pressable>
+            </View>
+          ) : (
+            <Text style={styles.empty}>{t('myCollection.empty')}</Text>
+          )
+        }
+        ListFooterComponent={
+          collection.isFetchingNextPage ? (
+            <View style={styles.footer}>
+              <ActivityIndicator color={colors.primary} />
+              <Text style={styles.footerText}>{t('cards.loadingMore')}</Text>
+            </View>
+          ) : null
+        }
+        onEndReached={loadMore}
+        onEndReachedThreshold={LIST_END_THRESHOLD}
+        {...LIST_RENDER_PROPS}
+        refreshControl={
+          <RefreshControl
+            refreshing={collection.isRefetching && !collection.isFetchingNextPage}
+            onRefresh={() => collection.refetch()}
+            tintColor={colors.primary}
+          />
+        }
         renderItem={({ item, index }) => (
-          <Animated.View entering={cardEntering(index)} exiting={cardExiting}>
+          <Animated.View entering={listItemEntering(index)}>
             <OwnedCardItem card={item} onPress={() => openCard(item.id)} />
           </Animated.View>
         )}
@@ -126,6 +156,40 @@ const styles = StyleSheet.create({
   empty: {
     marginTop: 24,
     textAlign: 'center',
+    color: colors.mutedForeground,
+    fontSize: 14,
+  },
+  loading: {
+    marginTop: 32,
+  },
+  error: {
+    alignItems: 'center',
+    gap: 16,
+  },
+  retryButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 14,
+    backgroundColor: colors.secondary,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  retryPressed: {
+    transform: [{ scale: 0.97 }],
+  },
+  retryText: {
+    color: colors.primary,
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  footer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 16,
+  },
+  footerText: {
     color: colors.mutedForeground,
     fontSize: 14,
   },

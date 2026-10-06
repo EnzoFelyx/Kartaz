@@ -8,7 +8,10 @@
     "playersCount_other": "{{count}} players",
     "ratingA11y": "Rating {{rating}}",
     "location": "{{city}}, {{nation}}",
-    "overallShort": "OVR"
+    "overallShort": "OVR",
+    "updatingDatabase": "Updating local database...",
+    "retry": "Try again",
+    "loadError": "Could not load. Check your connection."
   },
   "tabs": {
     "map": "Map",
@@ -79,7 +82,8 @@
     "found": "{{found}} / {{total}} found",
     "rowA11y": "{{name}}, {{nation}}, {{rarity}}, rating {{rating}}, {{found}} of {{total}} copies found",
     "tileA11y": "{{name}}, {{nation}}, rating {{rating}}, {{rarity}}",
-    "rarityBadgeA11y": "{{rarity}} card"
+    "rarityBadgeA11y": "{{rarity}} card",
+    "loadingMore": "Loading more..."
   },
   "myCollection": {
     "title": "My Collection",
@@ -155,6 +159,8 @@
     "CDM": "CDM",
     "CM": "CM",
     "CAM": "CAM",
+    "LM": "LM",
+    "RM": "RM",
     "LW": "LW",
     "RW": "RW",
     "ST": "ST"
@@ -167,6 +173,8 @@
     "CDM": "Defensive Midfielder",
     "CM": "Central Midfielder",
     "CAM": "Attacking Midfielder",
+    "LM": "Left midfielder",
+    "RM": "Right midfielder",
     "LW": "Left Winger",
     "RW": "Right Winger",
     "ST": "Striker"

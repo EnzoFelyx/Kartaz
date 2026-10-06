@@ -1,0 +1,27 @@
+/**
+ * Chaves do React Query num lugar só. Tudo que vem do SQLite fica sob `players`,
+ * então `invalidateQueries({ queryKey: queryKeys.players.all })` atualiza o catálogo inteiro.
+ */
+export const queryKeys = {
+  session: ['session'] as const,
+  playersSync: ['playersSync'] as const,
+
+  players: {
+    all: ['players'] as const,
+    search: (query: string) => ['players', 'search', query] as const,
+    nation: (nation: string, query: string) => ['players', 'nation', nation, query] as const,
+    nationCount: (nation: string) => ['players', 'nationCount', nation] as const,
+    nations: ['players', 'nations'] as const,
+    detail: (id: number) => ['players', 'detail', id] as const,
+    similar: (id: number) => ['players', 'similar', id] as const,
+  },
+
+  userInstances: {
+    all: ['userInstances'] as const,
+    list: (search: string) => ['userInstances', 'list', search] as const,
+    count: ['userInstances', 'count'] as const,
+    byCard: (cardId: number) => ['userInstances', 'byCard', cardId] as const,
+  },
+
+  playerInstances: (playerId: number) => ['playerInstances', playerId] as const,
+};

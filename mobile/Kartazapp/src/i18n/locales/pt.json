@@ -8,7 +8,10 @@
     "playersCount_other": "{{count}} jogadores",
     "ratingA11y": "Overall {{rating}}",
     "location": "{{city}}, {{nation}}",
-    "overallShort": "OVR"
+    "overallShort": "OVR",
+    "updatingDatabase": "Atualizando a base de dados local...",
+    "retry": "Tentar novamente",
+    "loadError": "Não foi possível carregar. Verifique sua conexão."
   },
   "tabs": {
     "map": "Mapa",
@@ -79,7 +82,8 @@
     "found": "{{found}} / {{total}} encontradas",
     "rowA11y": "{{name}}, {{nation}}, {{rarity}}, overall {{rating}}, {{found}} de {{total}} cópias encontradas",
     "tileA11y": "{{name}}, {{nation}}, overall {{rating}}, {{rarity}}",
-    "rarityBadgeA11y": "Carta {{rarity}}"
+    "rarityBadgeA11y": "Carta {{rarity}}",
+    "loadingMore": "Carregando mais..."
   },
   "myCollection": {
     "title": "Minha Coleção",
@@ -155,6 +159,8 @@
     "CDM": "VOL",
     "CM": "MC",
     "CAM": "MEI",
+    "LM": "ME",
+    "RM": "MD",
     "LW": "PE",
     "RW": "PD",
     "ST": "ATA"
@@ -167,6 +173,8 @@
     "CDM": "Volante",
     "CM": "Meio-campista",
     "CAM": "Meia ofensivo",
+    "LM": "Meia esquerda",
+    "RM": "Meia direita",
     "LW": "Ponta esquerda",
     "RW": "Ponta direita",
     "ST": "Centroavante"

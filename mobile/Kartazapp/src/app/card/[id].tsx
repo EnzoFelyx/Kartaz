@@ -1,7 +1,17 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FlatList, Pressable, ScrollView, Share, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  ScrollView,
+  Share,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -17,9 +27,9 @@ import { StarIcon } from '@/components/icons/star-icon';
 import { EdgeFade } from '@/components/ui/edge-fade';
 import { IconButton } from '@/components/ui/icon-button';
 import { STAT_CONFIG } from '@/components/card-details/stat-config';
-import { getPlayerCardById } from '@/mocks/player-cards';
-import { getSimilarPlayers } from '@/mocks/players';
-import { formatShortDate, getNationName, getPositionName, ROLE_BY_POSITION } from '@/utils/card-labels';
+import { useOwnedCopy } from '@/hooks/queries/use-my-collection';
+import { usePlayer, useSimilarPlayers } from '@/hooks/queries/use-player';
+import { formatShortDate, getNationName, getPositionName, getRole } from '@/utils/card-labels';
 import { colors, rarityColors } from '@/theme/colors';
 
 const STAT_ICON_SIZE = 20;
@@ -36,9 +46,24 @@ export default function CardDetailsScreen() {
   // Favorito local por enquanto (no futuro: intenção enviada ao servidor).
   const [favorite, setFavorite] = useState(false);
 
-  const card = id ? getPlayerCardById(id) : undefined;
+  // Jogador vem da base local (SQLite); a cópia do usuário (serial, coleta) vem da API.
+  const playerId = Number(id);
+  const player = usePlayer(playerId);
+  const ownedCopy = useOwnedCopy(playerId);
+  const similar = useSimilarPlayers(playerId);
+
+  const card = player.data;
+  const owned = ownedCopy.data;
 
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/collection'));
+
+  if (player.isPending && Number.isInteger(playerId) && playerId > 0) {
+    return (
+      <View style={[styles.container, styles.notFound]}>
+        <ActivityIndicator color={colors.primary} />
+      </View>
+    );
+  }
 
   if (!card) {
     return (
@@ -55,24 +80,19 @@ export default function CardDetailsScreen() {
 
   const tint = rarityColors[card.rarity];
   const rarity = t(`rarity.${card.rarity}`);
-  const role = ROLE_BY_POSITION[card.position];
+  const role = getRole(card.position);
 
-  const similarPlayers = getSimilarPlayers(card);
-
-  // Carta da coleção abre os detalhes; as demais abrem as cópias encontradas no jogo.
-  const openSimilar = (playerId: string) =>
-    getPlayerCardById(playerId)
-      ? router.push({ pathname: '/card/[id]', params: { id: playerId } })
-      : router.push({ pathname: '/found-copies/[id]', params: { id: playerId } });
+  const openSimilar = (similarId: number) =>
+    router.push({ pathname: '/card/[id]', params: { id: String(similarId) } });
 
   const handleShare = () => {
     Share.share({
       message: t('cardDetails.shareMessage', {
         name: card.name,
-        nation: getNationName(card.nationCode),
+        nation: getNationName(card.nation),
         rarity,
-        serial: card.serial,
-        total: card.maxSerial,
+        serial: owned?.serial ?? '—',
+        total: owned?.maxSerial ?? card.totalCopies,
       }),
     });
   };
@@ -96,7 +116,7 @@ export default function CardDetailsScreen() {
             <Text style={styles.name} accessibilityRole="header" numberOfLines={2}>
               {card.name}
             </Text>
-            <Text style={styles.nation}>{getNationName(card.nationCode)}</Text>
+            <Text style={styles.nation}>{getNationName(card.nation)}</Text>
           </View>
           <OverallBadge rating={card.rating} />
         </View>
@@ -105,7 +125,7 @@ export default function CardDetailsScreen() {
         <GlobalDiscoveryButton
           found={card.copiesFound}
           total={card.totalCopies}
-          onPress={() => router.push({ pathname: '/found-copies/[id]', params: { id: card.id } })}
+          onPress={() => router.push({ pathname: '/found-copies/[id]', params: { id: String(card.id) } })}
         />
       </CardHero>
 
@@ -127,17 +147,18 @@ export default function CardDetailsScreen() {
 
           <Text style={[styles.sectionTitle, styles.sectionSpacing]}>{t('cardDetails.cardInfo')}</Text>
           <View style={styles.infoCard}>
-            <InfoRow label={t('cardDetails.serial')} value={`#${card.serial} / ${card.maxSerial}`} />
-            <InfoRow label={t('cardDetails.position')} value={getPositionName(card.position)} />
-            <InfoRow label={t('cardDetails.collected')} value={formatShortDate(card.collectedAt)} last />
+            {/* Serial e data de coleta só existem quando o usuário tem uma cópia deste jogador. */}
+            {owned && <InfoRow label={t('cardDetails.serial')} value={`#${owned.serial} / ${owned.maxSerial}`} />}
+            <InfoRow label={t('cardDetails.position')} value={getPositionName(card.position)} last={!owned} />
+            {owned && <InfoRow label={t('cardDetails.collected')} value={formatShortDate(owned.collectedAt)} last />}
           </View>
 
           <Text style={[styles.sectionTitle, styles.sectionSpacing]}>{t('cardDetails.similarCards')}</Text>
           {/* Sangra até as bordas da tela: a última carta aparece cortada, indicando rolagem. */}
           <FlatList
             horizontal
-            data={similarPlayers}
-            keyExtractor={(player) => player.id}
+            data={similar.data ?? []}
+            keyExtractor={(item) => String(item.id)}
             renderItem={({ item }) => <SimilarCardTile player={item} onPress={() => openSimilar(item.id)} />}
             showsHorizontalScrollIndicator={false}
             style={styles.similarList}

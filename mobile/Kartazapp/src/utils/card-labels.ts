@@ -1,8 +1,11 @@
 import i18n, { getLocaleTag } from '@/i18n';
-import type { CityId, NationCode, Position } from '@/types/player-card';
+import en from '@/i18n/locales/en.json';
+import type { FoundLocation, KnownPosition, NationCode } from '@/types/player-card';
+
+export type Role = 'goalkeeper' | 'defender' | 'midfielder' | 'forward';
 
 /** Papel exibido para cada posição (chave de tradução em `roles`). */
-export const ROLE_BY_POSITION: Record<Position, 'goalkeeper' | 'defender' | 'midfielder' | 'forward'> = {
+const ROLE_BY_POSITION: Record<KnownPosition, Role> = {
   GK: 'goalkeeper',
   CB: 'defender',
   LB: 'defender',
@@ -10,54 +13,104 @@ export const ROLE_BY_POSITION: Record<Position, 'goalkeeper' | 'defender' | 'mid
   CDM: 'midfielder',
   CM: 'midfielder',
   CAM: 'midfielder',
+  LM: 'midfielder',
+  RM: 'midfielder',
   LW: 'forward',
   RW: 'forward',
   ST: 'forward',
 };
 
-/** Data curta no idioma atual (ex.: "14 Oct 2025" / "14 de out. de 2025"). */
+function isKnownPosition(position: string): position is KnownPosition {
+  return position in en.positions;
+}
+
+/** Papel da posição (ex.: ST → forward). Posições desconhecidas contam como meio-campo. */
+export function getRole(position: string): Role {
+  return isKnownPosition(position) ? ROLE_BY_POSITION[position] : 'midfielder';
+}
+
+/**
+ * Formatadores `Intl` por idioma, criados uma vez só. `toLocaleString`/`localeCompare` com locale
+ * criam um formatador novo a cada chamada, o que é caro no Hermes (várias chamadas por card).
+ */
+const formatters = new Map<
+  string,
+  { number: Intl.NumberFormat; percent: Intl.NumberFormat; shortDate: Intl.DateTimeFormat; collator: Intl.Collator }
+>();
+
+function getFormatters() {
+  const locale = getLocaleTag();
+  let cached = formatters.get(locale);
+  if (!cached) {
+    cached = {
+      number: new Intl.NumberFormat(locale),
+      percent: new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 1 }),
+      shortDate: new Intl.DateTimeFormat(locale, { day: '2-digit', month: 'short', year: 'numeric' }),
+      collator: new Intl.Collator(locale),
+    };
+    formatters.set(locale, cached);
+  }
+  return cached;
+}
+
+/** Data curta no idioma atual (ex.: "14 Oct 2025" / "14 de out. de 2025"). Aceita `YYYY-MM-DD` ou ISO completo. */
 export function formatShortDate(iso: string) {
-  return new Date(`${iso}T00:00:00`).toLocaleDateString(getLocaleTag(), {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  });
+  const date = /^\d{4}-\d{2}-\d{2}$/.test(iso) ? new Date(`${iso}T00:00:00`) : new Date(iso);
+  return getFormatters().shortDate.format(date);
 }
 
 /** Número com separador de milhar do idioma atual (ex.: 1,000 / 1.000). */
 export function formatNumber(value: number) {
-  return value.toLocaleString(getLocaleTag());
+  return getFormatters().number.format(value);
 }
 
-/** Nome da seleção no idioma atual (ex.: BRA → "Brasil"). */
-export function getNationName(code: NationCode) {
-  return i18n.t(`nations.${code}`);
+/** Nome (em inglês, como vem do backend) → código da seleção com tradução no i18n. */
+const NATION_CODE_BY_NAME = new Map<string, NationCode>([
+  ...(Object.entries(en.nations) as [NationCode, string][]).map(([code, name]) => [name.toLowerCase(), code] as const),
+  // Nomes usados na base da EA que diferem do i18n.
+  ['holland', 'NED'],
+  ['korea republic', 'KOR'],
+]);
+
+/**
+ * Nome da seleção no idioma atual. Aceita o código (BRA) ou o nome do backend ("Brazil");
+ * seleções sem tradução aparecem com o nome original.
+ */
+export function getNationName(nation: string) {
+  const value = nation.trim();
+  const code = value in en.nations ? (value as NationCode) : NATION_CODE_BY_NAME.get(value.toLowerCase());
+  return code ? i18n.t(`nations.${code}`) : value;
 }
 
-/** Local de coleta no idioma atual (ex.: "Munique, Alemanha"). */
-export function formatLocation(location: { city: CityId; nationCode: NationCode }) {
-  return i18n.t('common.location', {
-    city: i18n.t(`cities.${location.city}`),
-    nation: getNationName(location.nationCode),
-  });
+/** Sigla curta da seleção para a arte da carta (ex.: "Brazil" → BRA, "Norway" → NOR). */
+export function getNationShortCode(nation: string) {
+  const value = nation.trim();
+  if (value in en.nations) return value;
+  return NATION_CODE_BY_NAME.get(value.toLowerCase()) ?? value.slice(0, 3).toUpperCase();
+}
+
+/** Local de coleta (ex.: "Munique, Baviera"). Sem cidade/estado conhecidos, devolve "—". */
+export function formatLocation(location: FoundLocation) {
+  const parts = [location.city, location.state].filter((part): part is string => !!part?.trim());
+  return parts.length > 0 ? parts.join(', ') : '—';
 }
 
 /** Comparação alfabética no idioma atual. */
 export function compareLocale(a: string, b: string) {
-  return a.localeCompare(b, getLocaleTag());
+  return getFormatters().collator.compare(a, b);
 }
 
 /** Sigla da posição no idioma atual (ex.: ST → "ATA"). */
-export function getPositionLabel(position: Position) {
-  return i18n.t(`positions.${position}`);
+export function getPositionLabel(position: string) {
+  return isKnownPosition(position) ? i18n.t(`positions.${position}`) : position;
 }
 
 /** Nome completo da posição no idioma atual (ex.: ST → "Centroavante"). */
-export function getPositionName(position: Position) {
-  return i18n.t(`positionNames.${position}`);
+export function getPositionName(position: string) {
+  return isKnownPosition(position) ? i18n.t(`positionNames.${position}`) : position;
 }
 
 /** Porcentagem no idioma atual, com até 1 casa decimal (ex.: 0.001 → "0,1%"). */
 export function formatPercent(ratio: number) {
-  return ratio.toLocaleString(getLocaleTag(), { style: 'percent', maximumFractionDigits: 1 });
+  return getFormatters().percent.format(ratio);
 }

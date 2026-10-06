@@ -2,27 +2,39 @@ import { Canvas, LinearGradient, Line, Rect, vec } from '@shopify/react-native-s
 import { useState } from 'react';
 import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
-import type { Position, Rarity } from '@/types/player-card';
+import type { Rarity } from '@/types/player-card';
 import { colors, rarityColors, withAlpha } from '@/theme/colors';
-import { getPositionLabel } from '@/utils/card-labels';
+import { getNationShortCode, getPositionLabel } from '@/utils/card-labels';
+
+import { CardArtwork } from './card-artwork';
 
 const GRID_STEP = 20;
 
 type CardArtProps = {
   rarity: Rarity;
-  nationCode: string;
-  position: Position;
+  /** Seleção do jogador (nome ou código); a arte mostra a sigla. */
+  nation: string;
+  position: string;
+  /** Foto do jogador: com ela, a arte vira o fundo de carta do grid com a foto por cima. */
+  imageUri?: string;
   /** Tamanho do código da seleção (escala com o tamanho da arte). */
   codeSize?: number;
   style?: StyleProp<ViewStyle>;
 };
 
 /**
- * Arte placeholder da carta (Skia): gradiente na cor da raridade, grid sutil
- * e o código da seleção em destaque. Substitui fotos de jogadores reais (licenciamento).
+ * Arte da carta.
+ * - Com foto: o mesmo fundo do grid (`CardArtwork`, do projeto de referência), em que a foto
+ *   transparente do jogador se mistura com o fundo da carta.
+ * - Sem foto: placeholder Skia com gradiente na cor da raridade, grid sutil e a sigla da seleção.
  */
-export function CardArt({ rarity, nationCode, position, codeSize = 44, style }: CardArtProps) {
+export function CardArt({ rarity, nation, position, imageUri, codeSize = 44, style }: CardArtProps) {
   const [size, setSize] = useState({ width: 0, height: 0 });
+
+  if (imageUri) {
+    return <CardArtwork uri={imageUri} style={style} pointerEvents="none" />;
+  }
+
   const tint = rarityColors[rarity];
 
   const verticals = Array.from({ length: Math.ceil(size.width / GRID_STEP) }, (_, i) => (i + 1) * GRID_STEP);
@@ -51,7 +63,9 @@ export function CardArt({ rarity, nationCode, position, codeSize = 44, style }: 
         </Canvas>
       )}
 
-      <Text style={[styles.code, { fontSize: codeSize, color: withAlpha(tint, 0.35) }]}>{nationCode}</Text>
+      <Text style={[styles.code, { fontSize: codeSize, color: withAlpha(tint, 0.35) }]}>
+        {getNationShortCode(nation)}
+      </Text>
       <Text style={[styles.position, { color: tint }]}>{getPositionLabel(position)}</Text>
     </View>
   );

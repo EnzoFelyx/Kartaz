@@ -18,7 +18,7 @@ type SimilarCardTileProps = {
 /** Carta da lista "Cartas similares": arte com a nota no canto, nome e seleção embaixo. */
 export function SimilarCardTile({ player, onPress }: SimilarCardTileProps) {
   const { t } = useTranslation();
-  const nation = getNationName(player.nationCode);
+  const nation = getNationName(player.nation);
 
   return (
     <Pressable
@@ -34,8 +34,9 @@ export function SimilarCardTile({ player, onPress }: SimilarCardTileProps) {
       <View style={styles.art}>
         <CardArt
           rarity={player.rarity}
-          nationCode={player.nationCode}
+          nation={player.nation}
           position={player.position}
+          imageUri={player.imageUri}
           codeSize={32}
           style={StyleSheet.absoluteFill}
         />

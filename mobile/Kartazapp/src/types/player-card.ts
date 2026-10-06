@@ -1,13 +1,10 @@
 import type en from '@/i18n/locales/en.json';
 
-/** Código FIFA da seleção (ex.: BRA); o nome vem de `nations.<código>` no i18n. */
+/** Código FIFA de uma seleção com nome traduzido no i18n (ex.: BRA → `nations.BRA`). */
 export type NationCode = keyof typeof en.nations;
 
-/** Cidade conhecida (nome em `cities.<id>` no i18n). */
-export type CityId = keyof typeof en.cities;
-
-/** Sigla da posição (ex.: ST); o texto exibido vem de `positions.<sigla>` no i18n. */
-export type Position = keyof typeof en.positions;
+/** Sigla de posição com tradução no i18n (ex.: ST → `positions.ST`). */
+export type KnownPosition = keyof typeof en.positions;
 
 export type Rarity = 'common' | 'rare' | 'epic' | 'legendary';
 
@@ -23,41 +20,58 @@ export type PlayerStats = {
 
 /** Jogador do catálogo (independe de quem possui cópias dele). */
 export type Player = {
-  id: string;
+  /** Id do jogador no backend (o mesmo do SQLite local). */
+  id: number;
   name: string;
-  /** Código curto da seleção (ex.: BRA). */
-  nationCode: NationCode;
-  position: Position;
+  /** Seleção como vem do backend (nome em inglês, ex.: "Brazil"). */
+  nation: string;
+  /** Bandeira em emoji da seleção, quando conhecida. */
+  flagEmoji: string | null;
+  /** Sigla da posição como vem do backend (ex.: ST, LM). */
+  position: string;
+  /** Posição no ranking geral (1 = melhor). */
+  rank: number | null;
   rating: number;
   rarity: Rarity;
   stats: PlayerStats;
+  /** Foto do jogador servida pelo backend. */
+  imageUri: string;
   /** Cópias deste jogador já encontradas por todos os jogadores do jogo. */
   copiesFound: number;
   /** Total de cópias existentes (ex.: 1000). */
   totalCopies: number;
 };
 
-/** Cópia única de uma carta (jogador + número serial), como no contrato da API. */
+/** Onde uma cópia foi encontrada (cidade/estado reais, quando o backend souber). */
+export type FoundLocation = {
+  city: string | null;
+  state: string | null;
+};
+
+/** Cópia única de uma carta do usuário (jogador + número serial), vinda de `GET /user/instances`. */
 export type PlayerCard = Player & {
+  /** Id da cópia (`Instance.id`, uuid). */
+  instanceId: string;
   serial: number;
   maxSerial: number;
   /** ISO date de quando a carta foi coletada. */
   collectedAt: string;
-  /** Onde (no mapa virtual) a cópia foi coletada. */
-  collectedLocation: { city: CityId; nationCode: NationCode };
-  /** Propostas de troca recebidas por esta cópia. */
+  collectedLocation: FoundLocation;
+  /** Propostas de troca recebidas por esta cópia (o backend ainda não informa). */
   tradeOffers: number;
 };
 
 /** Cópia de um jogador encontrada por alguém no jogo (vista na tela "Encontradas"). */
 export type FoundCopy = {
+  /** Id da cópia (`Instance.id`, uuid). */
+  id: string;
   serial: number;
   maxSerial: number;
   /** Apelido de quem possui a cópia. */
   owner: string;
   /** ISO date de quando a cópia foi encontrada. */
   foundAt: string;
-  foundLocation: { city: CityId; nationCode: NationCode };
-  /** Propostas de troca recebidas por esta cópia. */
+  foundLocation: FoundLocation;
+  /** Propostas de troca recebidas por esta cópia (o backend ainda não informa). */
   tradeOffers: number;
 };

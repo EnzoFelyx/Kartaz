@@ -59,8 +59,9 @@ export function OwnedCardItem({ card, onPress, onViewOffers }: OwnedCardItemProp
         <View style={styles.thumb}>
           <CardArt
             rarity={card.rarity}
-            nationCode={card.nationCode}
+            nation={card.nation}
             position={card.position}
+            imageUri={card.imageUri}
             codeSize={22}
             style={StyleSheet.absoluteFill}
           />
