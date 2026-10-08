@@ -189,5 +189,29 @@
     "makeOfferA11y": "Make a trade offer for copy {{serial}} of {{total}}",
     "empty": "No copies found yet",
     "notFound": "Player not found"
+  },
+  "auth": {
+    "title": "KARTAZ",
+    "subtitle": "EXPLORE THE WORLD AND COLLECT CARDS",
+    "signIn": "Sign in",
+    "playAsGuest": "Play as guest",
+    "signOut": "Sign out",
+    "cancel": "Cancel",
+    "guestSignOutTitle": "Sign out of guest account?",
+    "guestSignOutMessage": "Your guest account isn't linked to any login. If you sign out, all your progress will be lost and can't be recovered."
+  },
+  "profile": {
+    "title": "Profile",
+    "subtitle": "User data",
+    "session": "Session",
+    "progress": "Progress",
+    "account": "Account",
+    "yes": "yes",
+    "no": "no",
+    "endSession": "End session",
+    "guestHint": "You're playing as a guest: ending the session will lose your progress.",
+    "changePhoto": "Change profile photo",
+    "photoErrorTitle": "Couldn't change the photo",
+    "photoErrorMessage": "Check your connection and try again. The photo must be at most 5 MB."
   }
 }

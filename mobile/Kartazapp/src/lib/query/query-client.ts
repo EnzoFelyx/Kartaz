@@ -1,6 +1,10 @@
 import { focusManager, QueryClient } from '@tanstack/react-query';
 import { AppState, Platform } from 'react-native';
 
+import { onSessionChange } from '@/lib/auth/session';
+
+import { queryKeys } from './keys';
+
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -8,6 +12,22 @@ export const queryClient = new QueryClient({
       retry: 1,
     },
   },
+});
+
+/**
+ * Descarta do cache os dados do usuário da sessão (perfil, fuel/xp/level, coleção),
+ * para nada de um usuário aparecer para o próximo que entrar no aparelho.
+ */
+export function clearUserQueries(client: QueryClient = queryClient) {
+  client.removeQueries({ queryKey: queryKeys.currentUser });
+  client.removeQueries({ queryKey: queryKeys.userInstances.all });
+  client.removeQueries({ queryKey: ['playerInstances'] });
+}
+
+// Sessão encerrada fora da UI (refresh recusado): limpa os dados e o app volta para o login.
+onSessionChange((session) => {
+  clearUserQueries();
+  queryClient.setQueryData(queryKeys.session, session);
 });
 
 /**

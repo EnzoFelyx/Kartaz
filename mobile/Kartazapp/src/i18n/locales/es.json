@@ -189,5 +189,29 @@
     "makeOfferA11y": "Hacer oferta de intercambio por la copia {{serial}} de {{total}}",
     "empty": "Aún no se encontraron copias",
     "notFound": "Jugador no encontrado"
+  },
+  "auth": {
+    "title": "KARTAZ",
+    "subtitle": "EXPLORA EL MUNDO Y COLECCIONA CARTAS",
+    "signIn": "Iniciar sesión",
+    "playAsGuest": "Jugar como invitado",
+    "signOut": "Cerrar sesión",
+    "cancel": "Cancelar",
+    "guestSignOutTitle": "¿Salir de la cuenta de invitado?",
+    "guestSignOutMessage": "Tu cuenta de invitado no está vinculada a ningún inicio de sesión. Si sales, perderás todo tu progreso y no podrás recuperarlo."
+  },
+  "profile": {
+    "title": "Perfil",
+    "subtitle": "Datos del usuario",
+    "session": "Sesión",
+    "progress": "Progreso",
+    "account": "Cuenta",
+    "yes": "sí",
+    "no": "no",
+    "endSession": "Cerrar sesión",
+    "guestHint": "Estás como invitado: al cerrar la sesión, perderás tu progreso.",
+    "changePhoto": "Cambiar foto de perfil",
+    "photoErrorTitle": "No se pudo cambiar la foto",
+    "photoErrorMessage": "Revisa tu conexión e inténtalo de nuevo. La foto debe tener como máximo 5 MB."
   }
 }

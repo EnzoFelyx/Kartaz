@@ -1,5 +1,8 @@
 import { Redirect } from 'expo-router';
 
+import { useSession } from '@/hooks/queries/use-session';
+
 export default function Index() {
-  return <Redirect href="/map" />;
+  const { isReady } = useSession();
+  return <Redirect href={isReady ? '/map' : '/login'} />;
 }

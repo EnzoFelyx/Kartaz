@@ -4,17 +4,34 @@ import { AuthRequestError, createGuest, refreshTokens } from '@/lib/api/auth-api
 
 const SESSION_KEY = 'kartaz_session';
 
+/** Dados básicos do usuário: iguais para convidado e logado, só muda `isGuest`. */
 export type Session = {
   userId: string;
   username: string;
   accessToken: string;
   refreshToken: string;
+  avatarId: number;
+  /** Segundos até o access token expirar (retornado pelo backend). */
+  expiresIn: number;
+  /** Convidado ainda não vinculado a uma conta: ao sair, perde o acesso de vez. */
+  isGuest: boolean;
 };
 
 /** Sessão em memória (lida pelo `apiFetch`) e persistida no SecureStore. */
 let current: Session | null = null;
-let pending: Promise<Session> | null = null;
+let pending: Promise<Session | null> | null = null;
 let refreshing: Promise<boolean> | null = null;
+
+type SessionListener = (session: Session | null) => void;
+const listeners = new Set<SessionListener>();
+
+/** Avisa quando a sessão muda fora da UI (ex.: refresh recusado → sessão encerrada). */
+export function onSessionChange(listener: SessionListener) {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
 
 export function getSession() {
   return current;
@@ -29,68 +46,93 @@ async function loadSession(): Promise<Session | null> {
   const raw = await SecureStore.getItemAsync(SESSION_KEY);
   if (!raw) return null;
   try {
-    return JSON.parse(raw) as Session;
+    const stored = JSON.parse(raw) as Partial<Session>;
+    if (!stored.userId || !stored.accessToken || !stored.refreshToken) return null;
+    // Sessões salvas antes destes campos existirem eram todas de convidado.
+    return {
+      userId: stored.userId,
+      username: stored.username ?? '',
+      accessToken: stored.accessToken,
+      refreshToken: stored.refreshToken,
+      avatarId: stored.avatarId ?? 0,
+      expiresIn: stored.expiresIn ?? 0,
+      isGuest: stored.isGuest ?? true,
+    };
   } catch {
     return null;
   }
 }
 
-async function createGuestSession(): Promise<Session> {
+/**
+ * Recupera a sessão salva no aparelho (sem criar nenhuma).
+ * Chamadas simultâneas compartilham a mesma promessa.
+ */
+export function restoreSession(): Promise<Session | null> {
+  if (current) return Promise.resolve(current);
+  if (!pending) {
+    pending = loadSession()
+      .then((stored) => {
+        current = stored;
+        return stored;
+      })
+      .finally(() => {
+        pending = null;
+      });
+  }
+  return pending;
+}
+
+/** Cria um convidado no backend e salva a sessão no aparelho. */
+export async function signInAsGuest(): Promise<Session> {
   const data = await createGuest();
   const session: Session = {
     userId: data.id,
     username: data.username,
     accessToken: data.access_token,
     refreshToken: data.refresh_token,
+    avatarId: data.avatarId,
+    expiresIn: data.expires_in,
+    isGuest: true,
   };
   await saveSession(session);
   return session;
 }
 
-/**
- * Garante uma sessão: usa a salva no aparelho ou cria um convidado no backend.
- * Chamadas simultâneas compartilham a mesma promessa.
- */
-export function ensureSession(): Promise<Session> {
-  if (current) return Promise.resolve(current);
-  if (!pending) {
-    pending = (async () => {
-      const stored = await loadSession();
-      if (stored) {
-        current = stored;
-        return stored;
-      }
-      return createGuestSession();
-    })().finally(() => {
-      pending = null;
-    });
-  }
-  return pending;
+/** Apaga a sessão do aparelho. Para um convidado, não há como recuperar a conta depois. */
+export async function signOut() {
+  current = null;
+  await SecureStore.deleteItemAsync(SESSION_KEY);
 }
 
 /**
  * Renova o access token com o refresh token (um por vez, mesmo com várias requisições 401).
- * Se o backend recusar o refresh (expira em 30 dias), cria um novo convidado.
- * Retorna `false` se não deu para renovar.
+ * Se o backend recusar o refresh (expira em 30 dias), encerra a sessão e avisa os listeners
+ * (o app volta para o login). Retorna `false` se não deu para renovar.
  */
 export function refreshSession(): Promise<boolean> {
   if (!refreshing) {
     refreshing = (async () => {
-      if (!current) return false;
+      const session = current;
+      if (!session) return false;
       try {
-        const data = await refreshTokens(current.refreshToken);
-        await saveSession({ ...current, accessToken: data.access_token, refreshToken: data.refresh_token });
+        const data = await refreshTokens(session.refreshToken);
+        // A sessão mudou durante o refresh (saiu ou entrou outro usuário): descarta os tokens.
+        if (current?.userId !== session.userId) return false;
+        await saveSession({
+          ...session,
+          accessToken: data.access_token,
+          refreshToken: data.refresh_token,
+          expiresIn: data.expires_in,
+        });
         return true;
       } catch (error) {
-        // Só recria o convidado quando o backend recusou o refresh (expirado/revogado);
+        // Só encerra quando o backend recusou o refresh (expirado/revogado);
         // em erro de rede mantém a sessão atual para tentar de novo depois.
-        if (!(error instanceof AuthRequestError) || error.status !== 401) return false;
-        try {
-          await createGuestSession();
-          return true;
-        } catch {
-          return false;
+        if (error instanceof AuthRequestError && error.status === 401 && current?.userId === session.userId) {
+          await signOut();
+          listeners.forEach((listener) => listener(null));
         }
+        return false;
       }
     })().finally(() => {
       refreshing = null;

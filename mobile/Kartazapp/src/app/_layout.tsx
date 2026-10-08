@@ -17,8 +17,8 @@ import { colors } from '@/theme/colors';
 SplashScreen.preventAutoHideAsync();
 
 /**
- * Tarefas de dados em segundo plano, depois da base local pronta:
- * cria/recupera a sessão no backend, sincroniza a base de jogadores (a cada 6h)
+ * Tarefas de dados em segundo plano, depois da base local pronta e com sessão:
+ * sincroniza a base de jogadores (a cada 6h)
  * e o found/total das cartas por delta (a cada 1 min).
  * Não bloqueia a UI: o catálogo funciona offline pelo SQLite.
  */
@@ -31,16 +31,41 @@ function BackgroundSync() {
     console.log(`[RootLayout] backend: ${apiConfig.baseUrl}`);
   }, []);
 
-  // Depende só da mensagem: as novas tentativas com o mesmo erro não repetem o log.
-  const sessionError = session.error?.message;
-  useEffect(() => {
-    if (!sessionError) return;
-    console.log(
-      `[RootLayout] sem sessão com o backend em ${apiConfig.baseUrl} (o backend está rodando?): ${sessionError}`,
-    );
-  }, [sessionError]);
-
   return null;
+}
+
+/**
+ * Rotas do jogo só existem com sessão (convidado ou logado); sem sessão, só o login.
+ * Enquanto a sessão é lida do aparelho, o splash continua cobrindo a tela.
+ */
+function RootNavigator() {
+  const session = useSession();
+  const signedIn = session.isReady;
+
+  if (session.isPending) return <DatabaseInitSplash />;
+
+  return (
+    <>
+      {signedIn && <BackgroundSync />}
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: colors.background },
+        }}>
+        <Stack.Screen name="index" />
+        <Stack.Protected guard={signedIn}>
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="card/[id]" />
+          <Stack.Screen name="my-collection" />
+          <Stack.Screen name="nation/[code]" />
+          <Stack.Screen name="found-copies/[id]" />
+        </Stack.Protected>
+        <Stack.Protected guard={!signedIn}>
+          <Stack.Screen name="login" />
+        </Stack.Protected>
+      </Stack>
+    </>
+  );
 }
 
 export default function RootLayout() {
@@ -64,24 +89,7 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <StatusBar style="light" />
-      {!initializing && (
-        <>
-          <BackgroundSync />
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              contentStyle: { backgroundColor: colors.background },
-            }}>
-            <Stack.Screen name="index" />
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="card/[id]" />
-            <Stack.Screen name="my-collection" />
-            <Stack.Screen name="nation/[code]" />
-            <Stack.Screen name="found-copies/[id]" />
-          </Stack>
-        </>
-      )}
-      {initializing && <DatabaseInitSplash />}
+      {initializing ? <DatabaseInitSplash /> : <RootNavigator />}
     </QueryClientProvider>
   );
 }
