@@ -212,6 +212,10 @@
     "guestHint": "You're playing as a guest: ending the session will lose your progress.",
     "changePhoto": "Change profile photo",
     "photoErrorTitle": "Couldn't change the photo",
-    "photoErrorMessage": "Check your connection and try again. The photo must be at most 5 MB."
+    "photoErrorMessage": "Check your connection and try again."
+  },
+  "map": {
+    "youAreHere": "You are here",
+    "playerHere": "{{name}} is here"
   }
 }

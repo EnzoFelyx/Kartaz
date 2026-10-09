@@ -61,7 +61,8 @@ export default function ProfileScreen() {
       mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [1, 1],
-      quality: 0.7,
+      // A compressão acontece uma vez só, ao reduzir a foto para 512px.
+      quality: 1,
     });
     if (result.canceled) return;
     uploadAvatar.mutate(result.assets[0], {

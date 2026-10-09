@@ -1,3 +1,5 @@
+import { File } from 'expo-file-system';
+
 import { apiJson } from './client';
 
 /** Usuário autenticado como devolvido por `GET /user`. */
@@ -26,14 +28,13 @@ export type UploadAvatarResponse = {
   avatar: string;
 };
 
-/** PUT /user/avatar — envia a foto de perfil (multipart, campo `file`). */
-export function uploadAvatar(photo: { uri: string; mimeType?: string | null; fileName?: string | null }) {
+/**
+ * PUT /user/avatar — envia a foto de perfil (multipart, campo `file`).
+ * O `fetch` global do Expo (`expo/fetch`) não aceita o `{ uri, name, type }` do React Native
+ * no FormData: a foto vai como `File` do expo-file-system, que ele lê pelos bytes.
+ */
+export function uploadAvatar(photo: { uri: string }) {
   const body = new FormData();
-  // No React Native o FormData aceita `{ uri, name, type }` para enviar um arquivo local.
-  body.append('file', {
-    uri: photo.uri,
-    name: photo.fileName ?? 'avatar.jpg',
-    type: photo.mimeType ?? 'image/jpeg',
-  } as unknown as Blob);
+  body.append('file', new File(photo.uri));
   return apiJson<UploadAvatarResponse>('/user/avatar', { method: 'PUT', body, auth: 'user' });
 }

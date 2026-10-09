@@ -212,6 +212,10 @@
     "guestHint": "Você está como convidado: ao encerrar a sessão, o progresso será perdido.",
     "changePhoto": "Trocar foto de perfil",
     "photoErrorTitle": "Não foi possível trocar a foto",
-    "photoErrorMessage": "Verifique sua conexão e tente novamente. A foto deve ter até 5 MB."
+    "photoErrorMessage": "Verifique sua conexão e tente novamente."
+  },
+  "map": {
+    "youAreHere": "Você está aqui",
+    "playerHere": "{{name}} está aqui"
   }
 }

@@ -45,6 +45,12 @@
           "cameraPermission": false,
           "microphonePermission": false
         }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "O Kartaz usa sua localização para mostrar você no mapa e encontrar cartas por perto."
+        }
       ]
     ],
     "experiments": {

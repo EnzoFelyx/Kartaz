@@ -212,6 +212,10 @@
     "guestHint": "Estás como invitado: al cerrar la sesión, perderás tu progreso.",
     "changePhoto": "Cambiar foto de perfil",
     "photoErrorTitle": "No se pudo cambiar la foto",
-    "photoErrorMessage": "Revisa tu conexión e inténtalo de nuevo. La foto debe tener como máximo 5 MB."
+    "photoErrorMessage": "Revisa tu conexión e inténtalo de nuevo."
+  },
+  "map": {
+    "youAreHere": "Estás aquí",
+    "playerHere": "{{name}} está aquí"
   }
 }
