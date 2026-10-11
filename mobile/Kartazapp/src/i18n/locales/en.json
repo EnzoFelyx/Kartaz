@@ -207,7 +207,6 @@
     "title": "Profile",
     "subtitle": "View your stats and progress",
     "settings": "Settings",
-    "editName": "Edit name",
     "share": "Share profile",
     "levelTitle": "Level {{level}} Explorer",
     "friends_one": "+{{count}} friend",
@@ -219,7 +218,7 @@
       "locations": "Locations"
     },
     "endSession": "End session",
-    "changePhoto": "Change profile photo",
+    "editProfile": "Edit profile",
     "photoErrorTitle": "Couldn't change the photo",
     "photoErrorMessage": "Check your connection and try again."
   },
@@ -234,5 +233,16 @@
     "infoTitle": "Explorer mode",
     "infoBody": "When zoomed in, explorer mode is on: you play in your area, see other players and cards, and every kilometer you travel costs 1% energy.\n\nWhen zoomed out, it turns off: you can move quickly anywhere without spending energy, but you're outside the rooms — you won't see players or cards, and areas, kilometers and nearby players aren't counted.",
     "close": "Close"
+  },
+  "editProfile": {
+    "title": "Edit Profile",
+    "save": "Save profile",
+    "changeAvatar": "Tap to change avatar",
+    "username": "Username",
+    "email": "Email",
+    "emailPlaceholder": "you@email.com",
+    "bio": "Bio",
+    "bioPlaceholder": "Tell a bit about yourself",
+    "mockBio": "Level {{level}} Explorer | Card Collector"
   }
 }

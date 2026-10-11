@@ -1,16 +1,20 @@
-import { Image } from 'expo-image';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { EditIcon } from '@/components/icons/edit-icon';
 import { ShareIcon } from '@/components/icons/share-icon';
 import { GradientBox } from '@/components/ui/gradient-box';
 import { IconButton } from '@/components/ui/icon-button';
+
+import { UserAvatar } from './user-avatar';
 import { colors, withAlpha } from '@/theme/colors';
 
 const AVATAR_SIZE = 88;
 const AVATAR_RADIUS = 22;
 const LEVEL_BADGE_SIZE = 34;
+/** Selo de nível retangular (cantos arredondados), encaixado no canto inferior direito da foto. */
+const LEVEL_BADGE_RADIUS = 10;
+const LEVEL_BADGE_OFFSET = 3;
 const FRIEND_DOT_SIZE = 24;
 const EDIT_BUTTON_SIZE = 28;
 
@@ -19,11 +23,10 @@ type ProfileHeaderCardProps = {
   level: number;
   /** Foto já resolvida com o host da API; sem ela mostra a inicial do nome. */
   avatarUri?: string;
-  uploadingAvatar?: boolean;
   /** Quantidade de amigos (prévia com até 3 bolinhas + "+N amigos"). */
   friendsCount: number;
-  onPressAvatar: () => void;
-  onPressEditName: () => void;
+  /** Abre o Editar Perfil (toque na foto ou no lápis). */
+  onPressEdit: () => void;
   onPressShare: () => void;
 };
 
@@ -32,66 +35,52 @@ export function ProfileHeaderCard({
   username,
   level,
   avatarUri,
-  uploadingAvatar,
   friendsCount,
-  onPressAvatar,
-  onPressEditName,
+  onPressEdit,
   onPressShare,
 }: ProfileHeaderCardProps) {
   const { t } = useTranslation();
-  const initial = username.trim().charAt(0).toUpperCase() || '?';
   const friendDots = Math.min(friendsCount, 3);
 
   return (
     <View style={styles.card}>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={t('profile.changePhoto')}
-        accessibilityState={{ busy: uploadingAvatar, disabled: uploadingAvatar }}
-        disabled={uploadingAvatar}
-        onPress={onPressAvatar}
-        style={({ pressed }) => [styles.avatarWrap, pressed && styles.pressed]}>
-        <View style={styles.avatar}>
-          {avatarUri ? (
-            <Image source={{ uri: avatarUri }} style={StyleSheet.absoluteFill} contentFit="cover" transition={200} />
-          ) : (
+        accessibilityLabel={t('profile.editProfile')}
+        onPress={onPressEdit}
+        style={({ pressed }) => pressed && styles.pressed}>
+        <UserAvatar
+          size={AVATAR_SIZE}
+          radius={AVATAR_RADIUS}
+          uri={avatarUri}
+          name={username}
+          badgeOffset={LEVEL_BADGE_OFFSET}
+          badge={
             <GradientBox
-              width={AVATAR_SIZE}
-              height={AVATAR_SIZE}
-              radius={AVATAR_RADIUS}
-              colors={[colors.primarySoft, colors.info]}>
-              <Text style={styles.initial}>{initial}</Text>
+              width={LEVEL_BADGE_SIZE}
+              height={LEVEL_BADGE_SIZE}
+              radius={LEVEL_BADGE_RADIUS}
+              colors={[colors.magenta, colors.violet]}
+              style={styles.levelBadge}>
+              <Text style={styles.levelBadgeText} accessibilityElementsHidden>
+                {level}
+              </Text>
             </GradientBox>
-          )}
-          {uploadingAvatar && (
-            <View style={styles.avatarOverlay}>
-              <ActivityIndicator color={colors.white} />
-            </View>
-          )}
-        </View>
-
-        <GradientBox
-          width={LEVEL_BADGE_SIZE}
-          height={LEVEL_BADGE_SIZE}
-          radius={LEVEL_BADGE_SIZE / 2}
-          colors={[colors.magenta, colors.violet]}
-          style={styles.levelBadge}>
-          <Text style={styles.levelBadgeText} accessibilityElementsHidden>
-            {level}
-          </Text>
-        </GradientBox>
+          }
+        />
       </Pressable>
 
       <View style={styles.info}>
         <View style={styles.nameRow}>
-          <Text style={styles.name} numberOfLines={1}>
+          {/* Nomes longos: diminui a fonte até 80% antes de cortar com "…". */}
+          <Text style={styles.name} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
             {username}
           </Text>
           <IconButton
             size={EDIT_BUTTON_SIZE}
             icon={<EditIcon color={colors.secondaryForeground} size={14} />}
-            accessibilityLabel={t('profile.editName')}
-            onPress={onPressEditName}
+            accessibilityLabel={t('profile.editProfile')}
+            onPress={onPressEdit}
           />
         </View>
 
@@ -122,8 +111,9 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 18,
-    padding: 22,
+    gap: 14,
+    paddingVertical: 22,
+    paddingHorizontal: 18,
     borderRadius: 26,
     backgroundColor: withAlpha(colors.info, 0.08),
     borderWidth: 1,
@@ -136,35 +126,8 @@ const styles = StyleSheet.create({
   pressed: {
     opacity: 0.8,
   },
-  avatarWrap: {
-    width: AVATAR_SIZE,
-    height: AVATAR_SIZE,
-  },
-  avatar: {
-    width: AVATAR_SIZE,
-    height: AVATAR_SIZE,
-    borderRadius: AVATAR_RADIUS,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-    backgroundColor: colors.card,
-  },
-  initial: {
-    color: colors.white,
-    fontSize: 32,
-    fontWeight: '800',
-  },
-  avatarOverlay: {
-    ...StyleSheet.absoluteFill,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: withAlpha(colors.background, 0.6),
-  },
   levelBadge: {
-    position: 'absolute',
-    right: -8,
-    bottom: -8,
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: colors.background,
   },
   levelBadgeText: {
@@ -179,7 +142,7 @@ const styles = StyleSheet.create({
   nameRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
   },
   name: {
     flexShrink: 1,

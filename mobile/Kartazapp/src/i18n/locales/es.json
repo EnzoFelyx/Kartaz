@@ -207,7 +207,6 @@
     "title": "Perfil",
     "subtitle": "Mira tus estadísticas y tu progreso",
     "settings": "Configuración",
-    "editName": "Editar nombre",
     "share": "Compartir perfil",
     "levelTitle": "Nivel {{level}} Explorador",
     "friends_one": "+{{count}} amigo",
@@ -219,7 +218,7 @@
       "locations": "Lugares"
     },
     "endSession": "Cerrar sesión",
-    "changePhoto": "Cambiar foto de perfil",
+    "editProfile": "Editar perfil",
     "photoErrorTitle": "No se pudo cambiar la foto",
     "photoErrorMessage": "Revisa tu conexión e inténtalo de nuevo."
   },
@@ -234,5 +233,16 @@
     "infoTitle": "Modo explorador",
     "infoBody": "Con el zoom cercano, el modo explorador está activado: juegas en tu área, ves a otros jugadores y cartas, y cada kilómetro recorrido gasta 1% de energía.\n\nCon el zoom alejado, se desactiva: te mueves rápido a cualquier lugar sin gastar energía, pero quedas fuera de las salas — no ves jugadores ni cartas, y no se cuentan áreas, kilómetros ni jugadores cercanos.",
     "close": "Cerrar"
+  },
+  "editProfile": {
+    "title": "Editar Perfil",
+    "save": "Guardar perfil",
+    "changeAvatar": "Toca para cambiar el avatar",
+    "username": "Nombre de usuario",
+    "email": "Email",
+    "emailPlaceholder": "tu@email.com",
+    "bio": "Bio",
+    "bioPlaceholder": "Cuenta un poco sobre ti",
+    "mockBio": "Nivel {{level}} Explorador | Coleccionista de cartas"
   }
 }

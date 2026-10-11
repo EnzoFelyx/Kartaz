@@ -54,6 +54,7 @@ function RootNavigator() {
           <Stack.Screen name="my-collection" />
           <Stack.Screen name="nation/[code]" />
           <Stack.Screen name="found-copies/[id]" />
+          <Stack.Screen name="edit-profile" />
         </Stack.Protected>
         <Stack.Protected guard={!signedIn}>
           <Stack.Screen name="login" />
