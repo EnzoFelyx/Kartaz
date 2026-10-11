@@ -23,6 +23,8 @@ export const colors = {
 
   // neutros
   white: '#ffffff',
+  /** Cor das sombras (shadowColor). */
+  shadow: '#000000',
   transparent: 'transparent',
 
   // complementares usadas no protótipo

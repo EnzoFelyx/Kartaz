@@ -24,9 +24,7 @@
     "achievementsTitle": "ACHIEVEMENTS",
     "achievementsSubtitle": "PROGRESS AND REWARDS",
     "tradesTitle": "TRADES",
-    "tradesSubtitle": "EXCHANGE CARDS WORLDWIDE",
-    "profileTitle": "PROFILE",
-    "profileSubtitle": "YOUR SCOUT IDENTITY"
+    "tradesSubtitle": "EXCHANGE CARDS WORLDWIDE"
   },
   "rarity": {
     "common": "Common",
@@ -63,8 +61,6 @@
       "medium": "Medium",
       "high": "High"
     },
-    "discoveredA11y": "{{discovered}} of {{total}} cards discovered",
-    "heatA11y": "Zone heat {{heat}} percent",
     "xpRewardA11y": "{{xp}} XP reward",
     "multiplierA11y": "Reward multiplier {{multiplier}}",
     "nearme": "Nearme",
@@ -158,9 +154,6 @@
     "london": "London",
     "mexicoCity": "Mexico City"
   },
-  "zones": {
-    "southAmerica": "South America"
-  },
   "positions": {
     "GK": "GK",
     "CB": "CB",
@@ -212,14 +205,20 @@
   },
   "profile": {
     "title": "Profile",
-    "subtitle": "User data",
-    "session": "Session",
-    "progress": "Progress",
-    "account": "Account",
-    "yes": "yes",
-    "no": "no",
+    "subtitle": "View your stats and progress",
+    "settings": "Settings",
+    "editName": "Edit name",
+    "share": "Share profile",
+    "levelTitle": "Level {{level}} Explorer",
+    "friends_one": "+{{count}} friend",
+    "friends_other": "+{{count}} friends",
+    "stats": {
+      "totalCards": "Total Cards",
+      "achievements": "Achievements",
+      "totalXp": "Total XP",
+      "locations": "Locations"
+    },
     "endSession": "End session",
-    "guestHint": "You're playing as a guest: ending the session will lose your progress.",
     "changePhoto": "Change profile photo",
     "photoErrorTitle": "Couldn't change the photo",
     "photoErrorMessage": "Check your connection and try again."

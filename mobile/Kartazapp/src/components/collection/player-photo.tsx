@@ -12,6 +12,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
+import { colors } from '@/theme/colors';
+
 const SHIMMER_HEIGHT = 40;
 const SHIMMER_STEP_MS = 700;
 /**
@@ -115,11 +117,11 @@ function Shimmer({ active }: { active: boolean }) {
         <Svg width="100%" height={SHIMMER_HEIGHT}>
           <Defs>
             <LinearGradient id="shimmer" x1="0" y1="0" x2="0" y2="1">
-              <Stop offset="0" stopColor="#ffffff" stopOpacity={0} />
-              <Stop offset="0.25" stopColor="#ffffff" stopOpacity={0.06} />
-              <Stop offset="0.5" stopColor="#ffffff" stopOpacity={0.3} />
-              <Stop offset="0.75" stopColor="#ffffff" stopOpacity={0.06} />
-              <Stop offset="1" stopColor="#ffffff" stopOpacity={0} />
+              <Stop offset="0" stopColor={colors.white} stopOpacity={0} />
+              <Stop offset="0.25" stopColor={colors.white} stopOpacity={0.06} />
+              <Stop offset="0.5" stopColor={colors.white} stopOpacity={0.3} />
+              <Stop offset="0.75" stopColor={colors.white} stopOpacity={0.06} />
+              <Stop offset="1" stopColor={colors.white} stopOpacity={0} />
             </LinearGradient>
           </Defs>
           <Rect x="0" y="0" width="100%" height={SHIMMER_HEIGHT} fill="url(#shimmer)" />
@@ -132,13 +134,13 @@ function Shimmer({ active }: { active: boolean }) {
 const styles = StyleSheet.create({
   // Luz vindo de cima: a sombra cai para baixo, como se o jogador estivesse à frente do fundo.
   cardShadow: {
-    shadowColor: '#000000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.75,
     shadowRadius: 6,
   },
   heroShadow: {
-    shadowColor: '#000000',
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 14 },
     shadowOpacity: 0.8,
     shadowRadius: 16,

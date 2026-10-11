@@ -35,7 +35,13 @@ export function getRole(position: string): Role {
  */
 const formatters = new Map<
   string,
-  { number: Intl.NumberFormat; percent: Intl.NumberFormat; shortDate: Intl.DateTimeFormat; collator: Intl.Collator }
+  {
+    number: Intl.NumberFormat;
+    decimal: Intl.NumberFormat;
+    percent: Intl.NumberFormat;
+    shortDate: Intl.DateTimeFormat;
+    collator: Intl.Collator;
+  }
 >();
 
 function getFormatters() {
@@ -44,6 +50,7 @@ function getFormatters() {
   if (!cached) {
     cached = {
       number: new Intl.NumberFormat(locale),
+      decimal: new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
       percent: new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 1 }),
       shortDate: new Intl.DateTimeFormat(locale, { day: '2-digit', month: 'short', year: 'numeric' }),
       collator: new Intl.Collator(locale),
@@ -62,6 +69,11 @@ export function formatShortDate(iso: string) {
 /** Número com separador de milhar do idioma atual (ex.: 1,000 / 1.000). */
 export function formatNumber(value: number) {
   return getFormatters().number.format(value);
+}
+
+/** Número com 2 casas decimais no idioma atual (ex.: 4.47 / 4,47). */
+export function formatDecimal(value: number) {
+  return getFormatters().decimal.format(value);
 }
 
 /** Nome (em inglês, como vem do backend) → código da seleção com tradução no i18n. */

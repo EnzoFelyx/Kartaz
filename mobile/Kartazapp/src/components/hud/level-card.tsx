@@ -1,8 +1,8 @@
-import { Canvas, LinearGradient, RoundedRect, vec } from '@shopify/react-native-skia';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { BoltIcon } from '@/components/icons/bolt-icon';
+import { GradientBox } from '@/components/ui/gradient-box';
 import { colors } from '@/theme/colors';
 import { formatNumber } from '@/utils/card-labels';
 
@@ -26,17 +26,15 @@ export function LevelCard({ level, xp, style }: LevelCardProps) {
       style={[styles.panel, style]}
       accessible
       accessibilityLabel={t('hud.levelA11y', { level, xp: formatNumber(xp) })}>
+      {/* A sombra fica por fora: o GradientBox recorta o conteúdo (overflow). */}
       <View style={styles.badge}>
-        <Canvas style={StyleSheet.absoluteFill}>
-          <RoundedRect x={0} y={0} width={BADGE_SIZE} height={BADGE_SIZE} r={BADGE_RADIUS}>
-            <LinearGradient
-              start={vec(0, 0)}
-              end={vec(BADGE_SIZE, BADGE_SIZE)}
-              colors={[colors.magenta, colors.violet]}
-            />
-          </RoundedRect>
-        </Canvas>
-        <Text style={styles.level}>{level}</Text>
+        <GradientBox
+          width={BADGE_SIZE}
+          height={BADGE_SIZE}
+          radius={BADGE_RADIUS}
+          colors={[colors.magenta, colors.violet]}>
+          <Text style={styles.level}>{level}</Text>
+        </GradientBox>
       </View>
 
       <View style={styles.info}>
@@ -65,8 +63,6 @@ const styles = StyleSheet.create({
   badge: {
     width: BADGE_SIZE,
     height: BADGE_SIZE,
-    alignItems: 'center',
-    justifyContent: 'center',
     shadowColor: colors.magenta,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.5,

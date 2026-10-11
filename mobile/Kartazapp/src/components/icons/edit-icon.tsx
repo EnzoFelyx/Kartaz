@@ -1,12 +1,12 @@
 import type { ColorValue } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
-type FlameIconProps = {
+type EditIconProps = {
   color: ColorValue;
   size?: number;
 };
 
-export function FlameIcon({ color, size = 14 }: FlameIconProps) {
+export function EditIcon({ color, size = 20 }: EditIconProps) {
   return (
     <Svg
       width={size}
@@ -17,7 +17,8 @@ export function FlameIcon({ color, size = 14 }: FlameIconProps) {
       strokeWidth={2}
       strokeLinecap="round"
       strokeLinejoin="round">
-      <Path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
+      <Path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+      <Path d="M18.38 2.62a2.12 2.12 0 1 1 3 3L12.36 14.64a2 2 0 0 1-.85.51l-2.87.84a.5.5 0 0 1-.62-.62l.84-2.87a2 2 0 0 1 .51-.85z" />
     </Svg>
   );
 }

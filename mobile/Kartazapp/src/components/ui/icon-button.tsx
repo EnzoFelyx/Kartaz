@@ -3,17 +3,19 @@ import { Pressable, StyleSheet } from 'react-native';
 
 import { colors, withAlpha } from '@/theme/colors';
 
-const SIZE = 44;
+const DEFAULT_SIZE = 44;
 
 type IconButtonProps = {
   icon: ReactNode;
   accessibilityLabel: string;
   onPress: () => void;
   selected?: boolean;
+  /** Diâmetro do botão (padrão 44). */
+  size?: number;
 };
 
 /** Botão circular translúcido só com ícone (voltar, favoritar, compartilhar…). */
-export function IconButton({ icon, accessibilityLabel, onPress, selected }: IconButtonProps) {
+export function IconButton({ icon, accessibilityLabel, onPress, selected, size = DEFAULT_SIZE }: IconButtonProps) {
   return (
     <Pressable
       accessibilityRole="button"
@@ -21,7 +23,11 @@ export function IconButton({ icon, accessibilityLabel, onPress, selected }: Icon
       accessibilityState={selected === undefined ? undefined : { selected }}
       onPress={onPress}
       hitSlop={6}
-      style={({ pressed }) => [styles.button, pressed && styles.pressed]}>
+      style={({ pressed }) => [
+        styles.button,
+        { width: size, height: size, borderRadius: size / 2 },
+        pressed && styles.pressed,
+      ]}>
       {icon}
     </Pressable>
   );
@@ -29,9 +35,6 @@ export function IconButton({ icon, accessibilityLabel, onPress, selected }: Icon
 
 const styles = StyleSheet.create({
   button: {
-    width: SIZE,
-    height: SIZE,
-    borderRadius: SIZE / 2,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: withAlpha(colors.background, 0.65),

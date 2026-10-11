@@ -12,6 +12,7 @@ import { UsersIcon } from '@/components/icons/users-icon';
 import { WalkingIcon } from '@/components/icons/walking-icon';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { colors, withAlpha } from '@/theme/colors';
+import { formatDecimal } from '@/utils/card-labels';
 
 import { RadarButton } from './radar-button';
 import { RadarFab } from './radar-fab';
@@ -72,11 +73,11 @@ export function MapDashboard({
   onRadarSearch,
   style,
 }: MapDashboardProps) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
 
   const nearby = nearbyCount === null ? EMPTY : String(nearbyCount);
-  const km = distanceKm.toLocaleString(i18n.language, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const km = formatDecimal(distanceKm);
 
   return (
     <View style={[styles.container, style]} pointerEvents="box-none">

@@ -24,9 +24,7 @@
     "achievementsTitle": "CONQUISTAS",
     "achievementsSubtitle": "PROGRESSO E RECOMPENSAS",
     "tradesTitle": "TROCAS",
-    "tradesSubtitle": "TROQUE CARTAS PELO MUNDO",
-    "profileTitle": "PERFIL",
-    "profileSubtitle": "SUA IDENTIDADE DE OLHEIRO"
+    "tradesSubtitle": "TROQUE CARTAS PELO MUNDO"
   },
   "rarity": {
     "common": "Comum",
@@ -63,8 +61,6 @@
       "medium": "Média",
       "high": "Alta"
     },
-    "discoveredA11y": "{{discovered}} de {{total}} cartas descobertas",
-    "heatA11y": "Calor da zona {{heat}} por cento",
     "xpRewardA11y": "Recompensa de {{xp}} XP",
     "multiplierA11y": "Multiplicador de recompensa {{multiplier}}",
     "nearme": "Perto",
@@ -158,9 +154,6 @@
     "london": "Londres",
     "mexicoCity": "Cidade do México"
   },
-  "zones": {
-    "southAmerica": "América do Sul"
-  },
   "positions": {
     "GK": "GOL",
     "CB": "ZAG",
@@ -212,14 +205,20 @@
   },
   "profile": {
     "title": "Perfil",
-    "subtitle": "Dados do usuário",
-    "session": "Sessão",
-    "progress": "Progresso",
-    "account": "Conta",
-    "yes": "sim",
-    "no": "não",
+    "subtitle": "Veja suas estatísticas e progresso",
+    "settings": "Configurações",
+    "editName": "Editar nome",
+    "share": "Compartilhar perfil",
+    "levelTitle": "Nível {{level}} Explorador",
+    "friends_one": "+{{count}} amigo",
+    "friends_other": "+{{count}} amigos",
+    "stats": {
+      "totalCards": "Total de cartas",
+      "achievements": "Conquistas",
+      "totalXp": "XP total",
+      "locations": "Locais"
+    },
     "endSession": "Encerrar sessão",
-    "guestHint": "Você está como convidado: ao encerrar a sessão, o progresso será perdido.",
     "changePhoto": "Trocar foto de perfil",
     "photoErrorTitle": "Não foi possível trocar a foto",
     "photoErrorMessage": "Verifique sua conexão e tente novamente."
