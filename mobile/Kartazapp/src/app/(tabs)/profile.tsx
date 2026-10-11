@@ -67,7 +67,6 @@ export default function ProfileScreen() {
     if (result.canceled) return;
     uploadAvatar.mutate(result.assets[0], {
       onError: (error) => {
-        console.log('[Profile] falha ao enviar foto', error.message);
         Alert.alert(t('profile.photoErrorTitle'), t('profile.photoErrorMessage'));
       },
     });

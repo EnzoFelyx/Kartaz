@@ -42,7 +42,7 @@ export function useInitialLocation() {
       }
       const current = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
       if (!cancelled) setCoords(toCoords(current));
-    })().catch((error) => console.log('[useInitialLocation] sem localização', error));
+    })().catch(() => {}); // sem localização: o mapa fica na visão inicial
 
     return () => {
       cancelled = true;

@@ -66,7 +66,17 @@
     "discoveredA11y": "{{discovered}} de {{total}} cartas descobertas",
     "heatA11y": "Calor da zona {{heat}} por cento",
     "xpRewardA11y": "Recompensa de {{xp}} XP",
-    "multiplierA11y": "Multiplicador de recompensa {{multiplier}}"
+    "multiplierA11y": "Multiplicador de recompensa {{multiplier}}",
+    "nearme": "Perto",
+    "nearmeA11y": "{{count}} jogadores por perto",
+    "coverage": "Áreas",
+    "coverageA11y": "{{count}} áreas cobertas",
+    "distanceA11y": "{{km}} quilômetros percorridos",
+    "explorer": "Explorador",
+    "explorerA11y": "Modo explorador {{state}}",
+    "on": "On",
+    "off": "Off",
+    "xpProgressA11y": "Progresso de XP"
   },
   "cards": {
     "title": "Cartas",
@@ -217,5 +227,13 @@
   "map": {
     "youAreHere": "Você está aqui",
     "playerHere": "{{name}} está aqui"
+  },
+  "explorer": {
+    "hint": "Aproxime o zoom para ativar o modo explorador",
+    "noEnergy": "Energia esgotada — afaste o zoom para navegar sem gastar energia",
+    "infoA11y": "Saiba mais sobre o modo explorador",
+    "infoTitle": "Modo explorador",
+    "infoBody": "Com o zoom aproximado, o modo explorador fica ligado: você joga na sua área, vê outros jogadores e cartas, e cada quilômetro andado gasta 1% de energia.\n\nCom o zoom afastado, ele desliga: você navega rápido para qualquer lugar sem gastar energia, mas fica fora das salas — não vê jogadores nem cartas, e não conta áreas, quilômetros nem jogadores por perto.",
+    "close": "Fechar"
   }
 }

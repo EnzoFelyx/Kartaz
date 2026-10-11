@@ -18,7 +18,6 @@ export function usePlayersSync(enabled: boolean) {
     queryKey: queryKeys.playersSync,
     queryFn: async () => {
       const result = await syncPlayersDatabase();
-      console.log('[playersSync]', result);
       if (result.imported > 0) {
         await queryClient.invalidateQueries({ queryKey: queryKeys.players.all });
       }

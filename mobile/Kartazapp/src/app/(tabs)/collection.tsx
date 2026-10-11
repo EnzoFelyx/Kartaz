@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
+import { useDeferredValue, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
@@ -69,21 +69,11 @@ export default function CollectionScreen() {
 
   // Jogadores (grade/lista) e seleções (globo) são buscas diferentes: ao cruzar entre
   // esses dois grupos, limpa o campo. Entre grade e lista a busca é mantida.
-  const switchStartedAt = useRef(0);
   const changeViewMode = (mode: ViewMode) => {
     if (mode === viewMode) return;
     if ((mode === 'nations') !== (viewMode === 'nations')) setQuery('');
-    switchStartedAt.current = Date.now();
     setViewMode(mode);
   };
-
-  // Medição em desenvolvimento: quanto tempo a lista nova leva para aparecer após o toque.
-  useEffect(() => {
-    if (__DEV__ && switchStartedAt.current) {
-      console.log(`[perf] troca para "${listMode}": ${Date.now() - switchStartedAt.current} ms`);
-      switchStartedAt.current = 0;
-    }
-  }, [listMode]);
 
   // Seleções da base com o nome no idioma atual, em ordem alfabética desse idioma.
   const sortedNations = useMemo(

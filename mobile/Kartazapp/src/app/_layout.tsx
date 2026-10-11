@@ -9,7 +9,6 @@ import { useCardsProgressSync } from '@/hooks/queries/use-cards-progress-sync';
 import { usePlayersSync } from '@/hooks/queries/use-players-sync';
 import { useSession } from '@/hooks/queries/use-session';
 import '@/i18n';
-import { apiConfig } from '@/lib/api/config';
 import { queryClient, setupQueryFocusManager } from '@/lib/query/query-client';
 import { seedFromBundleIfNeeded } from '@/lib/sync/seedFromBundle';
 import { colors } from '@/theme/colors';
@@ -26,10 +25,6 @@ function BackgroundSync() {
   const session = useSession();
   usePlayersSync(session.isReady);
   useCardsProgressSync(session.isReady);
-
-  useEffect(() => {
-    console.log(`[RootLayout] backend: ${apiConfig.baseUrl}`);
-  }, []);
 
   return null;
 }
@@ -80,9 +75,9 @@ export default function RootLayout() {
   // Primeira abertura: importa a base de jogadores embutida (assets/data) para o SQLite.
   // Nas próximas aberturas a versão local já é > 0 e isso retorna na hora.
   useEffect(() => {
+    // Falha no seed não bloqueia o app: o sync com o backend preenche a base depois.
     seedFromBundleIfNeeded()
-      .then((result) => console.log('[RootLayout] seedFromBundle', result))
-      .catch((err) => console.log('[RootLayout] seedFromBundle error', err))
+      .catch(() => {})
       .finally(() => setInitializing(false));
   }, []);
 

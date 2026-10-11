@@ -14,7 +14,6 @@ export default function LoginScreen() {
   const playAsGuest = () => {
     guest.mutate(undefined, {
       onSuccess: () => router.replace('/map'),
-      onError: (error) => console.log('[Login] falha ao criar convidado', error.message),
     });
   };
 

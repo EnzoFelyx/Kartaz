@@ -66,7 +66,17 @@
     "discoveredA11y": "{{discovered}} of {{total}} cards discovered",
     "heatA11y": "Zone heat {{heat}} percent",
     "xpRewardA11y": "{{xp}} XP reward",
-    "multiplierA11y": "Reward multiplier {{multiplier}}"
+    "multiplierA11y": "Reward multiplier {{multiplier}}",
+    "nearme": "Nearme",
+    "nearmeA11y": "{{count}} players nearby",
+    "coverage": "Areas",
+    "coverageA11y": "{{count}} areas covered",
+    "distanceA11y": "{{km}} kilometers traveled",
+    "explorer": "Explorer",
+    "explorerA11y": "Explorer mode {{state}}",
+    "on": "On",
+    "off": "Off",
+    "xpProgressA11y": "XP progress"
   },
   "cards": {
     "title": "Cards",
@@ -217,5 +227,13 @@
   "map": {
     "youAreHere": "You are here",
     "playerHere": "{{name}} is here"
+  },
+  "explorer": {
+    "hint": "Zoom in to activate explorer mode",
+    "noEnergy": "Out of energy — zoom out to move around without spending energy",
+    "infoA11y": "Learn more about explorer mode",
+    "infoTitle": "Explorer mode",
+    "infoBody": "When zoomed in, explorer mode is on: you play in your area, see other players and cards, and every kilometer you travel costs 1% energy.\n\nWhen zoomed out, it turns off: you can move quickly anywhere without spending energy, but you're outside the rooms — you won't see players or cards, and areas, kilometers and nearby players aren't counted.",
+    "close": "Close"
   }
 }

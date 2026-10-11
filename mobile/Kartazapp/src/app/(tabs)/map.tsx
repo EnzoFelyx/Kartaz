@@ -9,39 +9,40 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FuelGauge } from '@/components/hud/fuel-gauge';
 import { LevelCard } from '@/components/hud/level-card';
 import { MapDashboard } from '@/components/map-dashboard';
+import { ExplorerHint } from '@/components/map/explorer-hint';
+import { MAP_PLAYER_AVATAR_SIZE, MapAvatar } from '@/components/map/map-avatar';
 import { MapGradientOverlay } from '@/components/map/map-gradient-overlay';
 import { MapGridOverlay } from '@/components/map/map-grid-overlay';
-import { MapAvatar } from '@/components/map/map-avatar';
 import { OtherPlayerMarker } from '@/components/map/other-player-marker';
 import { TAB_BAR_BOTTOM_GAP, TAB_BAR_HEIGHT } from '@/components/tab-bar';
 import { useCurrentUser } from '@/hooks/queries/use-current-user';
 import { useSession } from '@/hooks/queries/use-session';
 import { useCellRoom, type CellRoomProfile } from '@/hooks/use-cell-room';
 import { useInitialLocation } from '@/hooks/use-initial-location';
+import { usePlaceName } from '@/hooks/use-place-name';
 import { resolveApiUri } from '@/lib/api/image-uri';
 import { colors } from '@/theme/colors';
 import { initialMapRegion, kartazMapStyle, mapViewConfig } from '@/theme/map-styles';
 
-// Mock até termos a store do jogador (Fase 4 do todo).
-const MOCK_PLAYER = { fuel: 78, maxFuel: 100, level: 12, xp: 2450 };
-// `zoneId` é a chave de tradução do nome da zona (`zones.<id>`).
-const MOCK_ZONE = {
-  zoneId: 'southAmerica' as const,
-  difficulty: 'medium' as const,
-  discovered: 0,
-  totalCards: 5,
-  heat: 78,
-  xpReward: 350,
-  multiplier: 1.5,
-};
+// Ainda fixos até as cartas existirem.
+const MOCK_ZONE = { difficulty: 'medium' as const, xpBonus: 0, multiplier: 1.5 };
 /** Tempo da busca do radar (só visual, até a resposta vir do servidor). */
 const MOCK_RADAR_SEARCH_MS = 1200;
+/** Sem regra de level ainda: a barra do painel mostra o XP dentro do bloco atual de 100. */
+const XP_BAR_STEP = 100;
+const DEFAULT_MAX_ENERGY = 100;
+
+/** Explore Mode liga a partir deste zoom (≈ hexágono res 8 ocupando ~1/4 da tela). */
+const EXPLORE_MIN_ZOOM = 14;
 /** Zoom da câmera ao focar no jogador (nível de bairro/ruas). */
 const USER_FOCUS_ZOOM = 16;
 const USER_FOCUS_MS = 1000;
-/** Margem depois da animação da câmera: o `onRegionChangeComplete` dela não é movimento do jogador. */
+/** Animação de volta quando o movimento é bloqueado (sem energia). */
+const SNAP_BACK_MS = 400;
+/** Margem depois de uma animação da câmera: o `onRegionChangeComplete` dela não é movimento do jogador. */
 const CAMERA_SETTLE_MS = 400;
-const SELF_AVATAR_SIZE = 48;
+/** Movimentos menores que isso (graus) são ruído do mapa, não arrasto. */
+const MOVE_EPSILON_DEG = 1e-6;
 /** Distância entre o painel e a tab bar. */
 const DASHBOARD_GAP = 12;
 
@@ -61,10 +62,14 @@ function hudTopEntering(_values: EntryAnimationsValues) {
   };
 }
 
+/** Zoom do Google Maps a partir da região visível. */
+function zoomFromRegion(region: Region) {
+  return Math.log2(360 / Math.max(region.longitudeDelta, 1e-9));
+}
+
 export default function MapScreen() {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
-  const { zoneId, ...zone } = MOCK_ZONE;
   const [radarSearching, setRadarSearching] = useState(false);
   const mapRef = useRef<MapView>(null);
   const { coords: gpsCoords } = useInitialLocation();
@@ -74,7 +79,10 @@ export default function MapScreen() {
   /** Centro do mapa depois que o jogador arrasta; antes disso vale a posição do GPS. */
   const [draggedPosition, setDraggedPosition] = useState<LatLng | null>(null);
   const playerPosition = draggedPosition ?? gpsCoords;
-  /** Até quando ignorar `onRegionChangeComplete` (carga inicial e animação até o jogador). */
+  /** Zoom atual (`null` até a câmera ir para o jogador). */
+  const [zoom, setZoom] = useState<number | null>(null);
+  const exploreOn = zoom !== null && zoom >= EXPLORE_MIN_ZOOM;
+  /** Até quando ignorar movimentos (carga inicial e animações da câmera); `null` = câmera ainda não focou. */
   const acceptMovesAfterRef = useRef<number | null>(null);
 
   // Dados enviados à sala; o backend usa os do banco para fuel/xp/level quando existem.
@@ -84,36 +92,87 @@ export default function MapScreen() {
       userId: session.userId,
       username: user?.username ?? session.username,
       avatarId: String(user?.avatarId ?? session.avatarId ?? ''),
-      fuel: user?.fuel ?? 100,
+      fuel: user?.fuel ?? DEFAULT_MAX_ENERGY,
       xp: user?.xp ?? 0,
       level: user?.level ?? 1,
     };
   }, [session, user?.username, user?.avatarId, user?.fuel, user?.xp, user?.level]);
-  const { otherUsers, updatePosition } = useCellRoom(profile);
+
+  /** Volta a câmera (e o jogador) para `position` — movimento bloqueado sem energia. */
+  const snapBack = useCallback((position: LatLng) => {
+    acceptMovesAfterRef.current = Date.now() + SNAP_BACK_MS + CAMERA_SETTLE_MS;
+    setDraggedPosition(position);
+    mapRef.current?.animateCamera({ center: position }, { duration: SNAP_BACK_MS });
+  }, []);
+
+  const handleMoveRejected = useCallback(
+    (lat: number, lng: number) => snapBack({ latitude: lat, longitude: lng }),
+    [snapBack],
+  );
+
+  // Explore ON: conectado à sala da célula. OFF: fora de sala (navega livre, sem dados nem gasto).
+  const { otherUsers, self, nearbyCount, setPosition, updatePosition } = useCellRoom(profile, {
+    enabled: exploreOn,
+    onMoveRejected: handleMoveRejected,
+  });
+
+  // Valores autoritativos do servidor: da sala (tempo real) ou do GET /user (fora de sala).
+  const energy = self?.fuel ?? user?.fuel ?? DEFAULT_MAX_ENERGY;
+  const maxEnergy = self?.maxFuel ?? DEFAULT_MAX_ENERGY;
+  const xp = self?.xp ?? user?.xp ?? 0;
+  const level = self?.level ?? user?.level ?? 1;
+  const coverage = self?.coverage ?? user?.coverage ?? 0;
+  const distanceKm = self?.distanceKm ?? user?.distanceKm ?? 0;
+  const outOfEnergy = energy <= 0;
+  const placeName = usePlaceName(playerPosition, exploreOn);
+
+  // Lidos dentro do handler do mapa (sem recriá-lo a cada patch da sala).
+  const gestureStateRef = useRef({ playerPosition, outOfEnergy });
+  useEffect(() => {
+    gestureStateRef.current = { playerPosition, outOfEnergy };
+  }, [playerPosition, outOfEnergy]);
 
   // Primeira posição do GPS: leva a câmera até o jogador. Espera o mapa carregar
   // (antes disso o `animateCamera` é ignorado).
   useEffect(() => {
     if (!mapReady || !gpsCoords || acceptMovesAfterRef.current !== null) return;
     acceptMovesAfterRef.current = Date.now() + USER_FOCUS_MS + CAMERA_SETTLE_MS;
+    setPosition(gpsCoords.latitude, gpsCoords.longitude);
     mapRef.current?.animateCamera({ center: gpsCoords, zoom: USER_FOCUS_ZOOM }, { duration: USER_FOCUS_MS });
-  }, [mapReady, gpsCoords]);
-
-  // Toda nova posição do jogador (GPS inicial ou arrasto) vai para a sala da célula H3.
-  useEffect(() => {
-    if (playerPosition) updatePosition(playerPosition.latitude, playerPosition.longitude);
-  }, [playerPosition, updatePosition]);
+  }, [mapReady, gpsCoords, setPosition]);
 
   // O jogador fica fixo no centro da tela: soltar o dedo depois de arrastar = mover para o centro.
-  const handleRegionChangeComplete = useCallback((region: Region) => {
-    const acceptAfter = acceptMovesAfterRef.current;
-    if (acceptAfter === null || Date.now() < acceptAfter) return;
-    setDraggedPosition((previous) =>
-      previous?.latitude === region.latitude && previous?.longitude === region.longitude
-        ? previous
-        : { latitude: region.latitude, longitude: region.longitude },
-    );
-  }, []);
+  const handleRegionChangeComplete = useCallback(
+    (region: Region) => {
+      const acceptAfter = acceptMovesAfterRef.current;
+      if (acceptAfter === null) return; // câmera ainda não foi até o jogador
+
+      const nextZoom = zoomFromRegion(region);
+      setZoom(nextZoom);
+      if (Date.now() < acceptAfter) return; // fim de uma animação da câmera, não é movimento
+
+      const { playerPosition: current, outOfEnergy: noEnergy } = gestureStateRef.current;
+      const moved =
+        !current ||
+        Math.abs(current.latitude - region.latitude) > MOVE_EPSILON_DEG ||
+        Math.abs(current.longitude - region.longitude) > MOVE_EPSILON_DEG;
+      if (!moved) return;
+
+      const nextExplore = nextZoom >= EXPLORE_MIN_ZOOM;
+      // Explore ON sem energia: não anda (volta para onde estava). Explore OFF navega livre.
+      if (nextExplore && noEnergy && current) {
+        snapBack(current);
+        return;
+      }
+
+      const next = { latitude: region.latitude, longitude: region.longitude };
+      setDraggedPosition(next);
+      if (nextExplore) updatePosition(next.latitude, next.longitude);
+      else setPosition(next.latitude, next.longitude); // navegação "cega": não envia nem gasta
+    },
+    [setPosition, snapBack, updatePosition],
+  );
+
   // Muda a cada vez que a aba ganha foco; usado como `key` do HUD do topo para
   // remontá-lo e reiniciar a animação de entrada.
   const [focusCount, setFocusCount] = useState(0);
@@ -134,6 +193,8 @@ export default function MapScreen() {
     setRadarSearching(true);
     searchTimeout.current = setTimeout(() => setRadarSearching(false), MOCK_RADAR_SEARCH_MS);
   };
+
+  const hint = zoom === null ? null : !exploreOn ? 'zoomIn' : outOfEnergy ? 'noEnergy' : null;
 
   return (
     <View style={styles.container}>
@@ -164,35 +225,39 @@ export default function MapScreen() {
           pointerEvents="none"
           accessible
           accessibilityLabel={t('map.youAreHere')}>
-          <MapAvatar uri={resolveApiUri(user?.avatar)} size={SELF_AVATAR_SIZE} highlighted />
+          <MapAvatar uri={resolveApiUri(user?.avatar)} size={MAP_PLAYER_AVATAR_SIZE} highlighted halo={false} />
         </View>
       )}
 
-      {/* HUD do topo: Fuel à esquerda (ocupa o espaço livre) e Level/XP à direita. */}
+      {/* HUD do topo: Energy à esquerda (ocupa o espaço livre) e Level/XP à direita. */}
       <Animated.View
         key={focusCount}
         entering={hudTopEntering}
         style={[styles.hudTop, { top: insets.top + 8 }]}
         pointerEvents="box-none">
-        <FuelGauge
-          fuel={MOCK_PLAYER.fuel}
-          maxFuel={MOCK_PLAYER.maxFuel}
-          style={styles.fuel}
-        />
-        <LevelCard level={MOCK_PLAYER.level} xp={MOCK_PLAYER.xp} />
+        <FuelGauge fuel={energy} maxFuel={maxEnergy} style={styles.fuel} />
+        <LevelCard level={level} xp={xp} />
       </Animated.View>
 
-      <MapDashboard
-        {...zone}
-        zone={t(`zones.${zoneId}`)}
-        searching={radarSearching}
-        canSearch={MOCK_PLAYER.fuel >= 1}
-        onRadarSearch={handleRadarSearch}
-        style={[
-          styles.dashboard,
-          { bottom: insets.bottom + TAB_BAR_BOTTOM_GAP + TAB_BAR_HEIGHT + DASHBOARD_GAP },
-        ]}
-      />
+      <View
+        style={[styles.bottomHud, { bottom: insets.bottom + TAB_BAR_BOTTOM_GAP + TAB_BAR_HEIGHT + DASHBOARD_GAP }]}
+        pointerEvents="box-none">
+        {hint && <ExplorerHint key={hint} variant={hint} />}
+        <MapDashboard
+          location={placeName}
+          difficulty={MOCK_ZONE.difficulty}
+          nearbyCount={exploreOn ? nearbyCount : null}
+          coverage={coverage}
+          distanceKm={distanceKm}
+          xpBonus={MOCK_ZONE.xpBonus}
+          multiplier={MOCK_ZONE.multiplier}
+          exploreOn={exploreOn}
+          xpProgress={(xp % XP_BAR_STEP) / XP_BAR_STEP}
+          searching={radarSearching}
+          canSearch={exploreOn && !outOfEnergy}
+          onRadarSearch={handleRadarSearch}
+        />
+      </View>
     </View>
   );
 }
@@ -219,9 +284,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
   },
-  dashboard: {
+  bottomHud: {
     position: 'absolute',
     left: 16,
     right: 16,
+    gap: 8,
   },
 });

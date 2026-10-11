@@ -18,7 +18,6 @@ export function useCardsProgressSync(enabled: boolean) {
     queryFn: async () => {
       const updated = await syncCardsProgress();
       if (updated > 0) {
-        console.log('[cardsProgressSync]', { updated });
         await queryClient.invalidateQueries({ queryKey: queryKeys.players.all });
       }
       return updated;

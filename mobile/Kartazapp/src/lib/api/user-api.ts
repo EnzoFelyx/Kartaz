@@ -17,6 +17,8 @@ export type CurrentUserDto = {
   xp: number;
   fuel: number;
   coverage: number;
+  /** Distância total andada com Explore ON (km). */
+  distanceKm: number;
 };
 
 /** GET /user — perfil e progresso do usuário da sessão (convidado ou logado). */

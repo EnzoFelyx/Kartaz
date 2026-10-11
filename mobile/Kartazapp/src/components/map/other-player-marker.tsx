@@ -4,9 +4,7 @@ import { Marker } from 'react-native-maps';
 import { resolveApiUri } from '@/lib/api/image-uri';
 import type { CellUser } from '@/lib/colyseus/types';
 
-import { MapAvatar } from './map-avatar';
-
-const OTHER_PLAYER_AVATAR_SIZE = 40;
+import { MAP_PLAYER_AVATAR_SIZE, MapAvatar } from './map-avatar';
 
 type OtherPlayerMarkerProps = {
   player: CellUser;
@@ -27,7 +25,7 @@ export function OtherPlayerMarker({ player, accessibilityLabel }: OtherPlayerMar
       tracksViewChanges={tracksViewChanges}
       zIndex={2}
       accessibilityLabel={accessibilityLabel}>
-      <MapAvatar uri={uri} size={OTHER_PLAYER_AVATAR_SIZE} onReady={() => setReadyUri(uri)} />
+      <MapAvatar uri={uri} size={MAP_PLAYER_AVATAR_SIZE} halo={false} onReady={() => setReadyUri(uri)} />
     </Marker>
   );
 }
