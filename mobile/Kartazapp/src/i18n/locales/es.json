@@ -193,11 +193,32 @@
     "empty": "Aún no se encontraron copias",
     "notFound": "Jugador no encontrado"
   },
+  "onboarding": {
+    "skip": "Saltar",
+    "next": "Siguiente",
+    "slides": {
+      "explore": {
+        "title": "Explora el Mundo",
+        "description": "Camina por el mapa real de tu ciudad, descubre nuevas áreas y encuentra jugadores legendarios del fútbol en el camino."
+      },
+      "collect": {
+        "title": "Colecciona Cartas",
+        "description": "Usa el radar para escanear áreas del mapa y revelar cartas coleccionables de jugadores, organizadas por selecciones nacionales."
+      },
+      "trade": {
+        "title": "Intercambia con Amigos",
+        "description": "Encuentra exploradores cerca, intercambia tus cartas repetidas y completa tu colección de estrellas del fútbol."
+      },
+      "welcome": {
+        "title": "¡Bienvenido a Kartaz!",
+        "description": "Comienza tu viaje por el mundo del fútbol. Entra con tu cuenta o explora como invitado."
+      }
+    },
+    "continueWithApple": "Continuar con Apple",
+    "continueWithGoogle": "Continuar con Google",
+    "continueAsGuest": "Continuar como invitado"
+  },
   "auth": {
-    "title": "KARTAZ",
-    "subtitle": "EXPLORA EL MUNDO Y COLECCIONA CARTAS",
-    "signIn": "Iniciar sesión",
-    "playAsGuest": "Jugar como invitado",
     "signOut": "Cerrar sesión",
     "cancel": "Cancelar",
     "guestSignOutTitle": "¿Salir de la cuenta de invitado?",

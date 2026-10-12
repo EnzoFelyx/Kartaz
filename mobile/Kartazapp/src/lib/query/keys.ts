@@ -4,6 +4,7 @@
  */
 export const queryKeys = {
   session: ['session'] as const,
+  onboardingSeen: ['onboardingSeen'] as const,
   currentUser: ['currentUser'] as const,
   playersSync: ['playersSync'] as const,
   cardsProgressSync: ['cardsProgressSync'] as const,

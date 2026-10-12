@@ -193,11 +193,32 @@
     "empty": "No copies found yet",
     "notFound": "Player not found"
   },
+  "onboarding": {
+    "skip": "Skip",
+    "next": "Next",
+    "slides": {
+      "explore": {
+        "title": "Explore the World",
+        "description": "Walk the real map of your city, discover new areas and find legendary football players along the way."
+      },
+      "collect": {
+        "title": "Collect Cards",
+        "description": "Use the radar to scan areas on the map and reveal collectible player cards, organized by national teams."
+      },
+      "trade": {
+        "title": "Trade with Friends",
+        "description": "Find explorers nearby, trade your duplicate cards and complete your collection of football stars."
+      },
+      "welcome": {
+        "title": "Welcome to Kartaz!",
+        "description": "Start your journey through the world of football. Sign in with your account or explore as a guest."
+      }
+    },
+    "continueWithApple": "Continue with Apple",
+    "continueWithGoogle": "Continue with Google",
+    "continueAsGuest": "Continue as guest"
+  },
   "auth": {
-    "title": "KARTAZ",
-    "subtitle": "EXPLORE THE WORLD AND COLLECT CARDS",
-    "signIn": "Sign in",
-    "playAsGuest": "Play as guest",
     "signOut": "Sign out",
     "cancel": "Cancel",
     "guestSignOutTitle": "Sign out of guest account?",

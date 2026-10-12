@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 
 import { DatabaseInitSplash } from '@/components/database-init-splash';
 import { useCardsProgressSync } from '@/hooks/queries/use-cards-progress-sync';
+import { useOnboardingSeen } from '@/hooks/queries/use-onboarding';
 import { usePlayersSync } from '@/hooks/queries/use-players-sync';
 import { useSession } from '@/hooks/queries/use-session';
 import '@/i18n';
@@ -30,14 +31,16 @@ function BackgroundSync() {
 }
 
 /**
- * Rotas do jogo só existem com sessão (convidado ou logado); sem sessão, só o login.
+ * Rotas do jogo só existem com sessão (convidado ou logado); o login (onboarding) fica sempre disponível.
  * Enquanto a sessão é lida do aparelho, o splash continua cobrindo a tela.
  */
 function RootNavigator() {
   const session = useSession();
+  const onboardingSeen = useOnboardingSeen();
   const signedIn = session.isReady;
 
-  if (session.isPending) return <DatabaseInitSplash />;
+  // A flag do onboarding decide em qual slide o login abre: espera ela também.
+  if (session.isPending || onboardingSeen.isPending) return <DatabaseInitSplash />;
 
   return (
     <>
@@ -48,6 +51,8 @@ function RootNavigator() {
           contentStyle: { backgroundColor: colors.background },
         }}>
         <Stack.Screen name="index" />
+        {/* Onboarding + entrada: fora dos guards para também abrir com sessão (primeira abertura). */}
+        <Stack.Screen name="login" />
         <Stack.Protected guard={signedIn}>
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="card/[id]" />
@@ -55,9 +60,6 @@ function RootNavigator() {
           <Stack.Screen name="nation/[code]" />
           <Stack.Screen name="found-copies/[id]" />
           <Stack.Screen name="edit-profile" />
-        </Stack.Protected>
-        <Stack.Protected guard={!signedIn}>
-          <Stack.Screen name="login" />
         </Stack.Protected>
       </Stack>
     </>
