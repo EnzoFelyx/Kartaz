@@ -1,0 +1,6 @@
+{
+  // A pasta backend/ é um repositório Git separado (e está no .gitignore deste):
+  // não mostrar ele no painel Source Control junto com o Kartaz.
+  "git.autoRepositoryDetection": "subFolders",
+  "git.repositoryScanIgnoredFolders": ["node_modules", "backend"]
+}
