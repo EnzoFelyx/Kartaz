@@ -14,10 +14,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { scheduleOnRN } from 'react-native-worklets';
 
 import { AuthButton } from '@/components/auth/auth-button';
-import { AppleIcon } from '@/components/icons/apple-icon';
+import { SocialAuthButtons } from '@/components/auth/social-auth-buttons';
 import { ChevronRightIcon } from '@/components/icons/chevron-right-icon';
 import { GlobeIcon } from '@/components/icons/globe-icon';
-import { GoogleIcon } from '@/components/icons/google-icon';
 import { MapIcon } from '@/components/icons/map-icon';
 import { UsersIcon } from '@/components/icons/users-icon';
 import { BackgroundOrbs } from '@/components/onboarding/background-orbs';
@@ -136,21 +135,8 @@ export default function LoginScreen() {
         title={t('onboarding.slides.welcome.title')}
         description={t('onboarding.slides.welcome.description')}>
         <Animated.View entering={listItemEntering(3)} style={styles.authButtons}>
-          {/* TODO: login social (Apple / Google) — por enquanto só visual. */}
-          <AuthButton
-            label={t('onboarding.continueWithApple')}
-            variant="light"
-            icon={<AppleIcon color={colors.background} size={20} />}
-            onPress={() => {}}
-            disabled={guest.isPending}
-          />
-          <AuthButton
-            label={t('onboarding.continueWithGoogle')}
-            variant="light"
-            icon={<GoogleIcon color={colors.background} size={18} />}
-            onPress={() => {}}
-            disabled={guest.isPending}
-          />
+          {/* Apple (só iOS) e Google: vinculam o email; se a conta já existia, entra nela. */}
+          <SocialAuthButtons onLinked={() => router.replace('/map')} disabled={guest.isPending} />
           <AuthButton
             label={t('onboarding.continueAsGuest')}
             variant="secondary"

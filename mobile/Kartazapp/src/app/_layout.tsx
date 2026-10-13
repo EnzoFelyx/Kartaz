@@ -1,7 +1,8 @@
 import { QueryClientProvider } from '@tanstack/react-query';
-import { Stack } from 'expo-router';
+import { DarkTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
+import * as SystemUI from 'expo-system-ui';
 import { useEffect, useState } from 'react';
 
 import { DatabaseInitSplash } from '@/components/database-init-splash';
@@ -15,6 +16,19 @@ import { seedFromBundleIfNeeded } from '@/lib/sync/seedFromBundle';
 import { colors } from '@/theme/colors';
 
 SplashScreen.preventAutoHideAsync();
+
+// Fundo da view raiz (aparece por trás das telas durante as transições): o mesmo escuro do app.
+SystemUI.setBackgroundColorAsync(colors.background);
+
+/** Tema da navegação com o fundo escuro do app (evita o branco padrão entre as telas). */
+const navigationTheme = {
+  ...DarkTheme,
+  colors: {
+    ...DarkTheme.colors,
+    background: colors.background,
+    card: colors.background,
+  },
+};
 
 /**
  * Tarefas de dados em segundo plano, depois da base local pronta e com sessão:
@@ -86,8 +100,10 @@ export default function RootLayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <StatusBar style="light" />
-      {initializing ? <DatabaseInitSplash /> : <RootNavigator />}
+      <ThemeProvider value={navigationTheme}>
+        <StatusBar style="light" />
+        {initializing ? <DatabaseInitSplash /> : <RootNavigator />}
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

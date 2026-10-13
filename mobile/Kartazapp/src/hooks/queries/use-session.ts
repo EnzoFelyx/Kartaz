@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { restoreSession, signInAsGuest, signOut, type Session } from '@/lib/auth/session';
+import { linkAccount, restoreSession, signInAsGuest, signOut, type Session } from '@/lib/auth/session';
+import { signInWithGoogle } from '@/lib/auth/social-providers';
 import { queryKeys } from '@/lib/query/keys';
 import { clearUserQueries } from '@/lib/query/query-client';
 
@@ -25,6 +26,31 @@ export function useSignInAsGuest() {
     onSuccess: (session) => {
       clearUserQueries(queryClient);
       queryClient.setQueryData<Session | null>(queryKeys.session, session);
+    },
+  });
+}
+
+/**
+ * Vincula a conta Google (Apple ainda sem conta paga no Apple Developer): abre o provedor, envia o ID token ao backend e troca a sessão pela
+ * devolvida (conta vinculada). Resolve `null` se o usuário cancelar.
+ */
+export function useLinkAccount() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const idToken = await signInWithGoogle();
+      if (!idToken) return null;
+      return linkAccount('google', idToken);
+    },
+    onSuccess: async (session) => {
+      if (!session) return;
+      queryClient.setQueryData<Session | null>(queryKeys.session, session);
+      // Vinculado no Perfil (telas montadas): recarrega os dados — pode ter virado outro usuário.
+      await Promise.all(
+        [queryKeys.currentUser, queryKeys.userInstances.all, ['playerInstances']].map((queryKey) =>
+          queryClient.resetQueries({ queryKey }),
+        ),
+      );
     },
   });
 }

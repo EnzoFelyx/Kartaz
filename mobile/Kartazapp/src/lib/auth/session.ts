@@ -1,6 +1,12 @@
 import * as SecureStore from 'expo-secure-store';
 
-import { AuthRequestError, createGuest, refreshTokens } from '@/lib/api/auth-api';
+import {
+  AuthRequestError,
+  createGuest,
+  linkSocialAccount,
+  refreshTokens,
+  type SocialProvider,
+} from '@/lib/api/auth-api';
 
 const SESSION_KEY = 'kartaz_session';
 
@@ -93,6 +99,42 @@ export async function signInAsGuest(): Promise<Session> {
     avatarId: data.avatarId,
     expiresIn: data.expires_in,
     isGuest: true,
+  };
+  await saveSession(session);
+  return session;
+}
+
+/**
+ * Vincula uma conta Apple/Google (só o email; a autenticação continua sendo o JWT do backend).
+ * - Com sessão: vincula ao usuário atual (convidado vira conta).
+ * - Sem sessão (fim do onboarding): cria um convidado só em memória e vincula a ele; se falhar,
+ *   nada fica salvo no aparelho.
+ * Se aquela conta já estava vinculada a outro usuário, o backend devolve esse usuário: é o "login".
+ */
+export async function linkAccount(provider: SocialProvider, idToken: string): Promise<Session> {
+  const link = async () => {
+    const accessToken = current?.accessToken ?? (await createGuest()).access_token;
+    return linkSocialAccount(provider, idToken, accessToken);
+  };
+
+  let data;
+  try {
+    data = await link();
+  } catch (error) {
+    // Access token da sessão expirado (dura 30 min): renova uma vez e tenta de novo.
+    if (!(error instanceof AuthRequestError && error.status === 401 && current && (await refreshSession()))) {
+      throw error;
+    }
+    data = await link();
+  }
+  const session: Session = {
+    userId: data.user.id,
+    username: data.user.username ?? '',
+    accessToken: data.access_token,
+    refreshToken: data.refresh_token,
+    avatarId: data.user.avatarId ?? 0,
+    expiresIn: data.expires_in,
+    isGuest: false,
   };
   await saveSession(session);
   return session;

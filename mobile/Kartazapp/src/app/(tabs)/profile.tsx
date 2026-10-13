@@ -1,5 +1,5 @@
-import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { router, useNavigation, type NativeStackNavigationProp } from 'expo-router';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
@@ -10,6 +10,7 @@ import { MapPinIcon } from '@/components/icons/map-pin-icon';
 import { SettingsIcon } from '@/components/icons/settings-icon';
 import { StarIcon } from '@/components/icons/star-icon';
 import { TrophyIcon } from '@/components/icons/trophy-icon';
+import { LinkAccountCard } from '@/components/profile/link-account-card';
 import { ProfileHeaderCard } from '@/components/profile/profile-header-card';
 import { StatCard } from '@/components/profile/stat-card';
 import { TAB_BAR_BOTTOM_GAP, TAB_BAR_HEIGHT } from '@/components/tab-bar';
@@ -60,13 +61,39 @@ export default function ProfileScreen() {
     ]);
   };
 
-  // A aba fica montada: remonta o conteúdo a cada foco para a entrada em cascata rodar de novo.
+  // A aba fica montada: remonta o conteúdo para a entrada em cascata rodar de novo ao reaparecer.
   const [focusKey, setFocusKey] = useState(0);
-  useFocusEffect(
-    useCallback(() => {
-      setFocusKey((key) => key + 1);
-    }, []),
-  );
+  const navigation = useNavigation();
+  const leftToStack = useRef(false);
+
+  useEffect(() => {
+    const stack = navigation.getParent<NativeStackNavigationProp<Record<string, object | undefined>>>();
+    const replay = () => setFocusKey((key) => key + 1);
+
+    // Volta de uma tela da pilha (ex.: Editar Perfil): anima no início da transição, inclusive no
+    // gesto de voltar, em vez de esperar o foco (que só chega depois de soltar o dedo).
+    const unsubscribeTransition = stack?.addListener('transitionStart', (event) => {
+      if (!event.data.closing) replay();
+    });
+    // Saiu por um push (a pilha perdeu o foco) ou por troca de aba (a pilha continua focada).
+    const unsubscribeBlur = navigation.addListener('blur', () => {
+      leftToStack.current = !(stack?.isFocused() ?? true);
+    });
+    // Troca de aba: anima no foco. Vindo da pilha, o transitionStart já animou.
+    const unsubscribeFocus = navigation.addListener('focus', () => {
+      if (leftToStack.current) {
+        leftToStack.current = false;
+        return;
+      }
+      replay();
+    });
+
+    return () => {
+      unsubscribeTransition?.();
+      unsubscribeBlur();
+      unsubscribeFocus();
+    };
+  }, [navigation]);
 
   const stats = [
     {
@@ -110,9 +137,7 @@ export default function ProfileScreen() {
           paddingBottom: insets.bottom + TAB_BAR_BOTTOM_GAP + TAB_BAR_HEIGHT + 24,
         },
       ]}
-      refreshControl={
-        <RefreshControl refreshing={user.isRefetching} onRefresh={refresh} tintColor={colors.primary} />
-      }>
+      refreshControl={<RefreshControl refreshing={user.isRefetching} onRefresh={refresh} tintColor={colors.primary} />}>
       {/* Entrada em cascata (mesma da tela de Cartas): header, card do jogador e cada estatística. */}
       <View key={focusKey} style={styles.sections}>
         <Animated.View entering={listItemEntering(0)} style={styles.header}>
@@ -140,9 +165,16 @@ export default function ProfileScreen() {
           />
         </Animated.View>
 
+        {/* Convidado: oferece vincular Apple/Google; some quando a conta é vinculada. */}
+        {isGuest && (
+          <Animated.View entering={listItemEntering(2)}>
+            <LinkAccountCard />
+          </Animated.View>
+        )}
+
         <View style={styles.grid}>
           {stats.map((stat, index) => (
-            <Animated.View key={stat.label} entering={listItemEntering(index + 2)} style={styles.gridItem}>
+            <Animated.View key={stat.label} entering={listItemEntering(index + 3)} style={styles.gridItem}>
               <StatCard color={stat.color} icon={stat.icon} value={stat.value} label={stat.label} />
             </Animated.View>
           ))}

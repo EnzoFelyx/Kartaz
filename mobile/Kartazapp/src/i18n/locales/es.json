@@ -199,7 +199,7 @@
     "slides": {
       "explore": {
         "title": "Explora el Mundo",
-        "description": "Camina por el mapa real de tu ciudad, descubre nuevas áreas y encuentra jugadores legendarios del fútbol en el camino."
+        "description": "¡El mundo entero es tu cancha! Explora cualquier rincón del planeta y encuentra cracks legendarios por donde pases."
       },
       "collect": {
         "title": "Colecciona Cartas",
@@ -223,6 +223,13 @@
     "cancel": "Cancelar",
     "guestSignOutTitle": "¿Salir de la cuenta de invitado?",
     "guestSignOutMessage": "Tu cuenta de invitado no está vinculada a ningún inicio de sesión. Si sales, perderás todo tu progreso y no podrás recuperarlo."
+  },
+  "linkAccount": {
+    "title": "Protege tu progreso",
+    "description": "Vincula tu perfil a una cuenta para no perder tus cartas al cambiar de dispositivo.",
+    "errorTitle": "No se pudo vincular",
+    "emailInUse": "Este correo ya está vinculado a otra cuenta.",
+    "error": "Algo salió mal. Inténtalo de nuevo en unos instantes."
   },
   "profile": {
     "title": "Perfil",

@@ -199,7 +199,7 @@
     "slides": {
       "explore": {
         "title": "Explore the World",
-        "description": "Walk the real map of your city, discover new areas and find legendary football players along the way."
+        "description": "The whole world is your pitch! Explore any corner of the planet and find legendary stars wherever you go."
       },
       "collect": {
         "title": "Collect Cards",
@@ -223,6 +223,13 @@
     "cancel": "Cancel",
     "guestSignOutTitle": "Sign out of guest account?",
     "guestSignOutMessage": "Your guest account isn't linked to any login. If you sign out, all your progress will be lost and can't be recovered."
+  },
+  "linkAccount": {
+    "title": "Protect your progress",
+    "description": "Link your profile to an account so you don't lose your cards when switching devices.",
+    "errorTitle": "Couldn't link account",
+    "emailInUse": "This email is already linked to another account.",
+    "error": "Something went wrong. Please try again in a moment."
   },
   "profile": {
     "title": "Profile",
