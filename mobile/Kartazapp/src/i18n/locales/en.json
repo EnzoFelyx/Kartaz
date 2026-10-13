@@ -51,7 +51,9 @@
     "energy": "ENERGY",
     "energyA11y": "Energy",
     "xp": "XP",
-    "levelA11y": "Level {{level}}, {{xp}} XP"
+    "levelA11y": "Level {{level}}, {{xp}} XP",
+    "coinsA11y_one": "{{count}} coin",
+    "coinsA11y_other": "{{count}} coins"
   },
   "mapDashboard": {
     "open": "Open zone dashboard",
@@ -252,7 +254,9 @@
   },
   "map": {
     "youAreHere": "You are here",
-    "playerHere": "{{name}} is here"
+    "playerHere": "{{name}} is here",
+    "coinA11y": "Coin",
+    "batteryA11y": "Battery"
   },
   "discoveryFlag": {
     "a11y": "Discovery flag: nobody has been here yet",
@@ -278,5 +282,22 @@
     "bio": "Bio",
     "bioPlaceholder": "Tell a bit about yourself",
     "mockBio": "Level {{level}} Explorer | Card Collector"
+  },
+  "refuel": {
+    "title": "Refuel",
+    "subtitle": "Fill the tank at once, with the room connected in explorer mode.",
+    "currentFuel": "{{percent}}% energy",
+    "fillTank": "Fill tank — {{cost}} coins",
+    "full": "Tank full",
+    "notEnoughCoins": "Not enough coins: you have {{balance}}. Collect coins on the map.",
+    "close": "Close",
+    "openA11y": "Opens the refuel screen",
+    "errors": {
+      "already_full": "The tank is already full.",
+      "insufficient_coins": "Not enough coins to fill the tank.",
+      "not_connected": "Turn on explorer mode to refuel.",
+      "timeout": "The server did not respond. Try again.",
+      "server_error": "Couldn't refuel right now. Try again."
+    }
   }
 }

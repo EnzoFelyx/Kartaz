@@ -51,7 +51,9 @@
     "energy": "ENERGIA",
     "energyA11y": "Energia",
     "xp": "XP",
-    "levelA11y": "Nível {{level}}, {{xp}} XP"
+    "levelA11y": "Nível {{level}}, {{xp}} XP",
+    "coinsA11y_one": "{{count}} moeda",
+    "coinsA11y_other": "{{count}} moedas"
   },
   "mapDashboard": {
     "open": "Abrir painel da zona",
@@ -252,7 +254,9 @@
   },
   "map": {
     "youAreHere": "Você está aqui",
-    "playerHere": "{{name}} está aqui"
+    "playerHere": "{{name}} está aqui",
+    "coinA11y": "Moeda",
+    "batteryA11y": "Bateria"
   },
   "discoveryFlag": {
     "a11y": "Bandeira de descoberta: ninguém esteve aqui ainda",
@@ -278,5 +282,22 @@
     "bio": "Bio",
     "bioPlaceholder": "Conte um pouco sobre você",
     "mockBio": "Nível {{level}} Explorador | Colecionador de cartas"
+  },
+  "refuel": {
+    "title": "Abastecer",
+    "subtitle": "Encha o tanque de uma vez, com a sala conectada no modo explorador.",
+    "currentFuel": "{{percent}}% de energia",
+    "fillTank": "Encher tanque — {{cost}} moedas",
+    "full": "Tanque cheio",
+    "notEnoughCoins": "Moedas insuficientes: você tem {{balance}}. Colete moedas no mapa.",
+    "close": "Fechar",
+    "openA11y": "Abre a tela de abastecer",
+    "errors": {
+      "already_full": "O tanque já está cheio.",
+      "insufficient_coins": "Moedas insuficientes para encher o tanque.",
+      "not_connected": "Ative o modo explorador para abastecer.",
+      "timeout": "O servidor não respondeu. Tente novamente.",
+      "server_error": "Não foi possível abastecer agora. Tente novamente."
+    }
   }
 }

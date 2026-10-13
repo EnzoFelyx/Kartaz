@@ -5,8 +5,17 @@ import { AppState } from 'react-native';
 
 import i18n from '@/i18n';
 import { enterCell } from '@/lib/colyseus/cells';
-import type { CellUser, ChangeRoomMessage, DiscoveryFlag, JoinCellOptions } from '@/lib/colyseus/types';
+import type {
+  CellBattery,
+  CellCoin,
+  CellUser,
+  ChangeRoomMessage,
+  DiscoveryFlag,
+  JoinCellOptions,
+  RoomCoinGranted,
+} from '@/lib/colyseus/types';
 import { getRoomCell, getUserCell } from '@/lib/h3/cells';
+import type { WalletDto } from '@/lib/api/wallet-api';
 import { queryKeys } from '@/lib/query/keys';
 import { toast } from '@/lib/toast/toast-store';
 
@@ -64,6 +73,45 @@ function readUsers(state: unknown, selfUserId: string): CellUser[] {
   return list;
 }
 
+/** Moedas da sala (`state.coins`): a fonte de verdade — uma moeda coletada sai daqui para todos. */
+function readCoins(state: unknown): CellCoin[] {
+  const coins = (state as { coins?: { forEach: (cb: (coin: any, id: string) => void) => void } })?.coins;
+  const list: CellCoin[] = [];
+  coins?.forEach((coin, id) => {
+    if (!coin) return;
+    list.push({
+      id: String(coin.id || id),
+      lat: Number(coin.lat),
+      lng: Number(coin.lng),
+      value: Number(coin.value ?? 1),
+    });
+  });
+  return list;
+}
+
+/** Baterias da sala (`state.batteries`): somem daqui quando alguém pega (a energia vem no `fuel`). */
+function readBatteries(state: unknown): CellBattery[] {
+  const batteries = (state as { batteries?: { forEach: (cb: (battery: any, id: string) => void) => void } })?.batteries;
+  const list: CellBattery[] = [];
+  batteries?.forEach((battery, id) => {
+    if (!battery) return;
+    list.push({ id: String(battery.id || id), lat: Number(battery.lat), lng: Number(battery.lng) });
+  });
+  return list;
+}
+
+/** Motivo de uma compra de energia recusada (do servidor ou do app). */
+export type FuelPurchaseError = 'already_full' | 'insufficient_coins' | 'not_connected' | 'timeout' | 'server_error';
+
+const FUEL_PURCHASE_TIMEOUT_MS = 10_000;
+const KNOWN_PURCHASE_ERRORS: FuelPurchaseError[] = ['already_full', 'insufficient_coins'];
+
+/** Ganho de moedas para o HUD animar o "+N" (`at` distingue duas coletas de mesmo valor). */
+export type CoinGain = {
+  value: number;
+  at: number;
+};
+
 function readSelf(state: unknown, sessionId: string): CellSelf | null {
   const users = (state as { users?: { get: (key: string) => any } })?.users;
   const user = users?.get(sessionId);
@@ -110,6 +158,23 @@ export function useCellRoom(profile: CellRoomProfile | null, { enabled, onMoveRe
   /** Dono da bandeira da sala atual: nome de quem coletou, `null` = sem dono, `undefined` = fora de sala. */
   const [flagOwnerName, setFlagOwnerName] = useState<string | null | undefined>(undefined);
   const flagsSignatureRef = useRef('');
+  /** Moedas da sala atual (paradas nas coordenadas até alguém coletar). */
+  const [coins, setCoins] = useState<CellCoin[]>([]);
+  const coinsSignatureRef = useRef('');
+  /** Baterias da sala atual (mesmas regras das moedas; recarregam energia). */
+  const [batteries, setBatteries] = useState<CellBattery[]>([]);
+  const batteriesSignatureRef = useRef('');
+  /** Preço fixo para encher o tanque (`state.economy`), mostrado no "Abastecer". */
+  const [fillTankPrice, setFillTankPrice] = useState(50);
+  /** Compra de energia em andamento: presa à sala em que foi enviada (resposta vem dela). */
+  const pendingPurchaseRef = useRef<{
+    room: Room;
+    resolve: () => void;
+    reject: (reason: FuelPurchaseError) => void;
+    timer: ReturnType<typeof setTimeout>;
+  } | null>(null);
+  /** Última coleta de moedas do próprio jogador (para o "+N" do HUD). */
+  const [lastCoinGain, setLastCoinGain] = useState<CoinGain | null>(null);
   const selfSignatureRef = useRef('');
   const onMoveRejectedRef = useRef(onMoveRejected);
 
@@ -177,6 +242,10 @@ export function useCellRoom(profile: CellRoomProfile | null, { enabled, onMoveRe
     flagsSignatureRef.current = '';
     setDiscoveryFlags([]);
     setFlagOwnerName(undefined);
+    coinsSignatureRef.current = '';
+    setCoins([]);
+    batteriesSignatureRef.current = '';
+    setBatteries([]);
   }, [setRoomUsers]);
 
   // `attachRoom` e `join` se referenciam (reconexão / troca de sala): ligados por ref.
@@ -202,6 +271,11 @@ export function useCellRoom(profile: CellRoomProfile | null, { enabled, onMoveRe
       // O dono da bandeira não é limpo: o anterior fica na tela até o estado da nova sala chegar.
       flagsSignatureRef.current = '';
       setDiscoveryFlags([]);
+      // Moedas e baterias são da sala: a lista da anterior é trocada de uma vez pela da nova.
+      coinsSignatureRef.current = '';
+      setCoins([]);
+      batteriesSignatureRef.current = '';
+      setBatteries([]);
       setRoomUsers([]);
 
       // Patches de uma sala antiga (durante a troca) não podem sobrescrever a lista da nova.
@@ -214,6 +288,21 @@ export function useCellRoom(profile: CellRoomProfile | null, { enabled, onMoveRe
           selfSignatureRef.current = signature;
           setSelf(nextSelf);
         }
+        // Moedas: só re-renderiza quando o conjunto muda (as coordenadas de uma moeda não mudam).
+        const nextCoins = readCoins(state);
+        const coinsSignature = nextCoins.map((coin) => coin.id).join('|');
+        if (coinsSignature !== coinsSignatureRef.current) {
+          coinsSignatureRef.current = coinsSignature;
+          setCoins(nextCoins);
+        }
+        const nextBatteries = readBatteries(state);
+        const batteriesSignature = nextBatteries.map((battery) => battery.id).join('|');
+        if (batteriesSignature !== batteriesSignatureRef.current) {
+          batteriesSignatureRef.current = batteriesSignature;
+          setBatteries(nextBatteries);
+        }
+        const price = Number((state as { economy?: { fillTankPriceCoins?: number } })?.economy?.fillTankPriceCoins);
+        if (Number.isFinite(price) && price > 0) setFillTankPrice(price);
         // Dono da bandeira da área: vem no estado da sala (chega junto com a entrada). "" = sem dono.
         const owner = (state as { discoveryFlagOwner?: string })?.discoveryFlagOwner;
         if (typeof owner === 'string') setFlagOwnerName(owner || null);
@@ -237,6 +326,45 @@ export function useCellRoom(profile: CellRoomProfile | null, { enabled, onMoveRe
       });
 
       // Coletou uma bandeira (foi o primeiro a chegar ao centro da área): avisa e atualiza o perfil.
+      // Compra de energia: responde a quem comprou nesta sala. A energia nova chega pelo estado
+      // (`fuel`); o saldo novo vai para o cache da carteira.
+      room.onMessage('fuelPurchaseGranted', (message: { balance: number }) => {
+        const pending = pendingPurchaseRef.current;
+        if (!pending || pending.room !== room) return;
+        const balance = Number(message.balance);
+        if (Number.isFinite(balance)) {
+          queryClient.setQueryData<WalletDto>(queryKeys.wallet, (wallet) =>
+            wallet ? { ...wallet, balance } : { userId: profileRef.current?.userId ?? '', balance },
+          );
+        }
+        clearTimeout(pending.timer);
+        pendingPurchaseRef.current = null;
+        pending.resolve();
+      });
+      room.onMessage('fuelPurchaseRejected', (message: { reason?: string }) => {
+        const pending = pendingPurchaseRef.current;
+        if (!pending || pending.room !== room) return;
+        clearTimeout(pending.timer);
+        pendingPurchaseRef.current = null;
+        const reason = KNOWN_PURCHASE_ERRORS.find((known) => known === message.reason) ?? 'server_error';
+        pending.reject(reason);
+        // Saldo pode ter mudado (ex.: moedas insuficientes): confere com o servidor.
+        void queryClient.invalidateQueries({ queryKey: queryKeys.wallet });
+      });
+
+      // Coletou moedas (passou por cima delas): o saldo novo vai para o cache da carteira e o HUD
+      // anima o "+N". A moeda em si some pelo estado da sala (`state.coins`), para todos.
+      room.onMessage('roomCoinGranted', (message: RoomCoinGranted) => {
+        if (roomRef.current !== room) return;
+        const balance = Number(message.balance);
+        if (Number.isFinite(balance)) {
+          queryClient.setQueryData<WalletDto>(queryKeys.wallet, (wallet) =>
+            wallet ? { ...wallet, balance } : { userId: profileRef.current?.userId ?? '', balance },
+          );
+        }
+        setLastCoinGain({ value: Math.max(1, Number(message.value) || 1), at: Date.now() });
+      });
+
       room.onMessage('discoveryFlagCollected', (message: { discoveryFlags: number }) => {
         if (roomRef.current !== room) return;
         toast.reward(
@@ -267,7 +395,9 @@ export function useCellRoom(profile: CellRoomProfile | null, { enabled, onMoveRe
         }
       });
 
-      // Moedas, cartas, captura de células, packs etc. ainda não são usados no app: evita avisos do SDK.
+      // Demais mensagens (coinCollected, collectCoinRejected, batteryCollected — a energia nova já
+      // vem no estado —, cartas, captura de células, packs...) não são
+      // usadas no app: o handler genérico evita avisos do SDK.
       room.onMessage('*', () => {});
 
       room.onLeave((code) => {
@@ -344,6 +474,31 @@ export function useCellRoom(profile: CellRoomProfile | null, { enabled, onMoveRe
   }, []);
 
   /** Nova posição do jogador (centro do mapa): entra na sala se ainda não entrou (só com Explore ON). */
+  /**
+   * Enche o tanque com moedas (só com a sala conectada, Explore ON) pelo preço fixo da sala. O
+   * servidor desconta da carteira e devolve a energia nova no estado. Rejeita com o motivo.
+   */
+  const purchaseFuel = useCallback(
+    () =>
+      new Promise<void>((resolve, reject: (reason: FuelPurchaseError) => void) => {
+        const room = roomRef.current;
+        if (!room || pendingPurchaseRef.current) {
+          reject(room ? 'server_error' : 'not_connected');
+          return;
+        }
+        const timer = setTimeout(() => {
+          if (pendingPurchaseRef.current?.timer !== timer) return;
+          pendingPurchaseRef.current = null;
+          reject('timeout');
+        }, FUEL_PURCHASE_TIMEOUT_MS);
+        pendingPurchaseRef.current = { room, resolve, reject, timer };
+        // Chave única por compra: se a mensagem for repetida, o servidor não cobra duas vezes.
+        const idempotencyKey = `fuel-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+        room.send('purchaseFuel', { idempotencyKey });
+      }),
+    [],
+  );
+
   const updatePosition = useCallback(
     (lat: number, lng: number) => {
       positionRef.current = { lat, lng };
@@ -404,6 +559,11 @@ export function useCellRoom(profile: CellRoomProfile | null, { enabled, onMoveRe
     nearbyCount,
     discoveryFlags,
     flagOwnerName,
+    coins,
+    batteries,
+    lastCoinGain,
+    fillTankPrice,
+    purchaseFuel,
     setPosition,
     updatePosition,
   };

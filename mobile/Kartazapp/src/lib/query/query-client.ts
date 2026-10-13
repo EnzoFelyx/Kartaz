@@ -20,6 +20,7 @@ export const queryClient = new QueryClient({
  */
 export function clearUserQueries(client: QueryClient = queryClient) {
   client.removeQueries({ queryKey: queryKeys.currentUser });
+  client.removeQueries({ queryKey: queryKeys.wallet });
   client.removeQueries({ queryKey: queryKeys.userInstances.all });
   client.removeQueries({ queryKey: ['playerInstances'] });
 }

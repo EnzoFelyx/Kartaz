@@ -47,3 +47,26 @@ export type DiscoveryFlag = {
   lat: number;
   lng: number;
 };
+
+/** Moeda da sala (`room.state.coins`): fica parada na coordenada até alguém coletar. */
+export type CellCoin = {
+  id: string;
+  lat: number;
+  lng: number;
+  value: number;
+};
+
+/** Bateria da sala (`room.state.batteries`): recarrega energia de quem passar por cima dela. */
+export type CellBattery = {
+  id: string;
+  lat: number;
+  lng: number;
+};
+
+/** Servidor → quem coletou uma moeda (coleta automática ao passar por cima dela). */
+export type RoomCoinGranted = {
+  coinId: string;
+  value: number;
+  /** Saldo da carteira depois da coleta. */
+  balance: number;
+};

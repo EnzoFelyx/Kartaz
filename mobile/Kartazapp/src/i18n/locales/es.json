@@ -51,7 +51,9 @@
     "energy": "ENERGÍA",
     "energyA11y": "Energía",
     "xp": "XP",
-    "levelA11y": "Nivel {{level}}, {{xp}} XP"
+    "levelA11y": "Nivel {{level}}, {{xp}} XP",
+    "coinsA11y_one": "{{count}} moneda",
+    "coinsA11y_other": "{{count}} monedas"
   },
   "mapDashboard": {
     "open": "Abrir panel de la zona",
@@ -252,7 +254,9 @@
   },
   "map": {
     "youAreHere": "Estás aquí",
-    "playerHere": "{{name}} está aquí"
+    "playerHere": "{{name}} está aquí",
+    "coinA11y": "Moneda",
+    "batteryA11y": "Batería"
   },
   "discoveryFlag": {
     "a11y": "Bandera de descubrimiento: nadie ha estado aquí todavía",
@@ -278,5 +282,22 @@
     "bio": "Bio",
     "bioPlaceholder": "Cuenta un poco sobre ti",
     "mockBio": "Nivel {{level}} Explorador | Coleccionista de cartas"
+  },
+  "refuel": {
+    "title": "Repostar",
+    "subtitle": "Llena el tanque de una vez, con la sala conectada en modo explorador.",
+    "currentFuel": "{{percent}}% de energía",
+    "fillTank": "Llenar tanque — {{cost}} monedas",
+    "full": "Tanque lleno",
+    "notEnoughCoins": "Monedas insuficientes: tienes {{balance}}. Recoge monedas en el mapa.",
+    "close": "Cerrar",
+    "openA11y": "Abre la pantalla de repostar",
+    "errors": {
+      "already_full": "El tanque ya está lleno.",
+      "insufficient_coins": "Monedas insuficientes para llenar el tanque.",
+      "not_connected": "Activa el modo explorador para repostar.",
+      "timeout": "El servidor no respondió. Inténtalo de nuevo.",
+      "server_error": "No se pudo repostar ahora. Inténtalo de nuevo."
+    }
   }
 }

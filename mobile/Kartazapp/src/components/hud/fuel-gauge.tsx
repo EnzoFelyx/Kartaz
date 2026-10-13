@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { BoltIcon } from '@/components/icons/bolt-icon';
 import { ProgressBar } from '@/components/ui/progress-bar';
@@ -10,6 +10,8 @@ type FuelGaugeProps = {
   maxFuel: number;
   /** Abaixo desta fração o painel entra em estado de alerta (laranja). */
   lowThreshold?: number;
+  /** Toque no painel (abre o "Abastecer"). */
+  onPress?: () => void;
   style?: StyleProp<ViewStyle>;
 };
 
@@ -17,7 +19,7 @@ type FuelGaugeProps = {
  * Painel de Rocket Fuel do HUD do mapa: ícone + "FUEL", porcentagem e barra.
  * Os valores vêm de fora (store/servidor); o componente só exibe.
  */
-export function FuelGauge({ fuel, maxFuel, lowThreshold = 0.3, style }: FuelGaugeProps) {
+export function FuelGauge({ fuel, maxFuel, lowThreshold = 0.3, onPress, style }: FuelGaugeProps) {
   const { t } = useTranslation();
   const ratio = maxFuel > 0 ? fuel / maxFuel : 0;
   const percent = Math.round(Math.min(Math.max(ratio, 0), 1) * 100);
@@ -26,11 +28,14 @@ export function FuelGauge({ fuel, maxFuel, lowThreshold = 0.3, style }: FuelGaug
   const tint = isLow ? colors.accent : colors.gold;
 
   return (
-    <View
-      style={[styles.panel, style]}
+    <Pressable
+      onPress={onPress}
+      disabled={!onPress}
+      style={({ pressed }) => [styles.panel, style, pressed && styles.pressed]}
       accessible
-      accessibilityRole="progressbar"
+      accessibilityRole={onPress ? 'button' : 'progressbar'}
       accessibilityLabel={t('hud.energyA11y')}
+      accessibilityHint={onPress ? t('refuel.openA11y') : undefined}
       accessibilityValue={{ min: 0, max: 100, now: percent }}>
       <View style={styles.header}>
         <View style={styles.title}>
@@ -46,11 +51,14 @@ export function FuelGauge({ fuel, maxFuel, lowThreshold = 0.3, style }: FuelGaug
         glowColor={tint}
         pulse
       />
-    </View>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
+  pressed: {
+    opacity: 0.85,
+  },
   panel: {
     gap: 10,
     paddingHorizontal: 16,

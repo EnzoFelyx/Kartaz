@@ -7,17 +7,23 @@ import Animated, { Easing, withTiming, type EntryAnimationsValues } from 'react-
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { FuelGauge } from '@/components/hud/fuel-gauge';
+import { CoinBalance } from '@/components/hud/coin-balance';
+import { BatteryIcon } from '@/components/icons/battery-icon';
+import { CoinIcon } from '@/components/icons/coin-icon';
 import { LevelCard } from '@/components/hud/level-card';
+import { RefuelModal } from '@/components/hud/refuel-modal';
 import { MapDashboard } from '@/components/map-dashboard';
 import { ExplorerHint } from '@/components/map/explorer-hint';
 import { DiscoveryFlagMarker } from '@/components/map/discovery-flag-marker';
 import { MAP_PLAYER_AVATAR_SIZE, MapAvatar } from '@/components/map/map-avatar';
 import { MapGradientOverlay } from '@/components/map/map-gradient-overlay';
 import { MapGridOverlay } from '@/components/map/map-grid-overlay';
+import { PickupMarker } from '@/components/map/pickup-marker';
 import { OtherPlayerMarker } from '@/components/map/other-player-marker';
 import { TAB_BAR_BOTTOM_GAP, TAB_BAR_HEIGHT } from '@/components/tab-bar';
 import { useCurrentUser } from '@/hooks/queries/use-current-user';
 import { useSession } from '@/hooks/queries/use-session';
+import { useWallet } from '@/hooks/queries/use-wallet';
 import { useCellRoom, type CellRoomProfile } from '@/hooks/use-cell-room';
 import { useInitialLocation } from '@/hooks/use-initial-location';
 import { usePlaceName } from '@/hooks/use-place-name';
@@ -33,11 +39,11 @@ const MOCK_RADAR_SEARCH_MS = 1200;
 const XP_BAR_STEP = 100;
 const DEFAULT_MAX_ENERGY = 100;
 
-/** Explore Mode liga a partir deste zoom (nível de ruas). */
-const EXPLORE_MIN_ZOOM = 18;
+/** Explore Mode liga a partir deste zoom. TODO: temporário (teste) — voltar para 18 (nível de ruas). */
+const EXPLORE_MIN_ZOOM = 14;
 /** Zoom da câmera ao focar no jogador: já começa com o Explore Mode ligado. */
 const USER_FOCUS_ZOOM = 18;
-/** Folga do arredondamento ao comparar o zoom calculado com o limite (ex.: 17,999 conta como 18). */
+/** Folga do arredondamento ao comparar o zoom calculado com o limite (ex.: 13,999 conta como 14). */
 const ZOOM_EPSILON = 0.05;
 const USER_FOCUS_MS = 1000;
 /** Animação de volta quando o movimento é bloqueado (sem energia). */
@@ -46,6 +52,8 @@ const SNAP_BACK_MS = 400;
 const CAMERA_SETTLE_MS = 400;
 /** Movimentos menores que isso (graus) são ruído do mapa, não arrasto. */
 const MOVE_EPSILON_DEG = 1e-6;
+/** Tamanho dos itens coletáveis no mapa (moedas e baterias). */
+const PICKUP_ICON_SIZE = 22;
 /** Distância entre o painel e a tab bar. */
 const DASHBOARD_GAP = 12;
 
@@ -81,10 +89,12 @@ export default function MapScreen() {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const [radarSearching, setRadarSearching] = useState(false);
+  const [refuelOpen, setRefuelOpen] = useState(false);
   const mapRef = useRef<MapView>(null);
   const { coords: gpsCoords } = useInitialLocation();
   const { data: session } = useSession();
   const { data: user } = useCurrentUser();
+  const { data: wallet } = useWallet();
   const [mapReady, setMapReady] = useState(false);
   /** Centro do mapa depois que o jogador arrasta; antes disso vale a posição do GPS. */
   const [draggedPosition, setDraggedPosition] = useState<LatLng | null>(null);
@@ -121,13 +131,24 @@ export default function MapScreen() {
   );
 
   // Explore ON: conectado à sala da célula. OFF: fora de sala (navega livre, sem dados nem gasto).
-  const { otherUsers, self, nearbyCount, discoveryFlags, flagOwnerName, setPosition, updatePosition } = useCellRoom(
-    profile,
-    {
-      enabled: exploreOn,
-      onMoveRejected: handleMoveRejected,
-    },
-  );
+  const {
+    connected,
+    otherUsers,
+    self,
+    nearbyCount,
+    discoveryFlags,
+    flagOwnerName,
+    coins,
+    batteries,
+    lastCoinGain,
+    fillTankPrice,
+    purchaseFuel,
+    setPosition,
+    updatePosition,
+  } = useCellRoom(profile, {
+    enabled: exploreOn,
+    onMoveRejected: handleMoveRejected,
+  });
 
   // Valores autoritativos do servidor: da sala (tempo real) ou do GET /user (fora de sala).
   const energy = self?.fuel ?? user?.fuel ?? DEFAULT_MAX_ENERGY;
@@ -224,6 +245,27 @@ export default function MapScreen() {
         initialRegion={initialMapRegion}
         {...mapViewConfig}>
         {/* Bandeira da área (sala) atual, se ninguém a coletou — como jogadores e cartas, só da própria sala. */}
+        {/* Moedas e baterias da sala atual: paradas na coordenada, somem quando alguém coleta. */}
+        {coins.map((coin) => (
+          <PickupMarker
+            key={coin.id}
+            latitude={coin.lat}
+            longitude={coin.lng}
+            size={PICKUP_ICON_SIZE}
+            icon={<CoinIcon size={PICKUP_ICON_SIZE} />}
+            accessibilityLabel={t('map.coinA11y')}
+          />
+        ))}
+        {batteries.map((battery) => (
+          <PickupMarker
+            key={battery.id}
+            latitude={battery.lat}
+            longitude={battery.lng}
+            size={PICKUP_ICON_SIZE}
+            icon={<BatteryIcon size={PICKUP_ICON_SIZE} />}
+            accessibilityLabel={t('map.batteryA11y')}
+          />
+        ))}
         {discoveryFlags.map((flag) => (
           <DiscoveryFlagMarker key={flag.h3Index} flag={flag} accessibilityLabel={t('discoveryFlag.a11y')} />
         ))}
@@ -251,8 +293,12 @@ export default function MapScreen() {
         entering={hudTopEntering}
         style={[styles.hudTop, { top: insets.top + 8 }]}
         pointerEvents="box-none">
-        <FuelGauge fuel={energy} maxFuel={maxEnergy} style={styles.fuel} />
-        <LevelCard level={level} xp={xp} />
+        <View style={styles.hudRow}>
+          <FuelGauge fuel={energy} maxFuel={maxEnergy} style={styles.fuel} onPress={() => setRefuelOpen(true)} />
+          <LevelCard level={level} xp={xp} />
+        </View>
+        {/* Saldo de moedas embaixo do nível, à direita (com o "+N" animado a cada coleta). */}
+        <CoinBalance balance={wallet?.balance ?? 0} lastGain={lastCoinGain} />
       </Animated.View>
 
       <View
@@ -272,6 +318,17 @@ export default function MapScreen() {
           onRadarSearch={handleRadarSearch}
         />
       </View>
+
+      <RefuelModal
+        visible={refuelOpen}
+        onClose={() => setRefuelOpen(false)}
+        fuel={energy}
+        maxFuel={maxEnergy}
+        balance={wallet?.balance ?? 0}
+        price={fillTankPrice}
+        connected={exploreOn && connected}
+        onPurchase={purchaseFuel}
+      />
     </View>
   );
 }
@@ -290,6 +347,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 16,
     right: 16,
+    gap: 8,
+  },
+  hudRow: {
     flexDirection: 'row',
     alignItems: 'stretch',
     gap: 10,
