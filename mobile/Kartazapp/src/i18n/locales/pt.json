@@ -11,7 +11,8 @@
     "overallShort": "OVR",
     "updatingDatabase": "Atualizando a base de dados local...",
     "retry": "Tentar novamente",
-    "loadError": "Não foi possível carregar. Verifique sua conexão."
+    "loadError": "Não foi possível carregar. Verifique sua conexão.",
+    "close": "Fechar"
   },
   "tabs": {
     "map": "Mapa",

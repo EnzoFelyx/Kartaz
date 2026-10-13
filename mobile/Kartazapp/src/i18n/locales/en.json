@@ -11,7 +11,8 @@
     "overallShort": "OVR",
     "updatingDatabase": "Updating local database...",
     "retry": "Try again",
-    "loadError": "Could not load. Check your connection."
+    "loadError": "Could not load. Check your connection.",
+    "close": "Close"
   },
   "tabs": {
     "map": "Map",

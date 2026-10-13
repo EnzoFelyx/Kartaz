@@ -4,8 +4,11 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import * as SystemUI from 'expo-system-ui';
 import { useEffect, useState } from 'react';
+import { StyleSheet } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { DatabaseInitSplash } from '@/components/database-init-splash';
+import { ToastHost } from '@/components/toast/toast-host';
 import { useCardsProgressSync } from '@/hooks/queries/use-cards-progress-sync';
 import { useOnboardingSeen } from '@/hooks/queries/use-onboarding';
 import { usePlayersSync } from '@/hooks/queries/use-players-sync';
@@ -102,11 +105,23 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider value={navigationTheme}>
-        <StatusBar style="light" />
-        {initializing ? <DatabaseInitSplash /> : <RootNavigator />}
-      </ThemeProvider>
-    </QueryClientProvider>
+    // Raiz dos gestos (react-native-gesture-handler): necessária para os GestureDetector (ex.: toast).
+    <GestureHandlerRootView style={styles.root}>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider value={navigationTheme}>
+          <StatusBar style="light" />
+          {initializing ? <DatabaseInitSplash /> : <RootNavigator />}
+          {/* Toasts por cima de todas as telas (disparados com `toast.success(...)` etc.). */}
+          <ToastHost />
+        </ThemeProvider>
+      </QueryClientProvider>
+    </GestureHandlerRootView>
   );
 }
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+});
