@@ -62,18 +62,16 @@
       "medium": "Medium",
       "high": "High"
     },
-    "xpRewardA11y": "{{xp}} XP reward",
-    "multiplierA11y": "Reward multiplier {{multiplier}}",
     "nearme": "Nearme",
     "nearmeA11y": "{{count}} players nearby",
-    "coverage": "Areas",
-    "coverageA11y": "{{count}} areas covered",
     "distanceA11y": "{{km}} kilometers traveled",
     "explorer": "Explorer",
     "explorerA11y": "Explorer mode {{state}}",
     "on": "On",
     "off": "Off",
-    "xpProgressA11y": "XP progress"
+    "xpProgressA11y": "XP progress",
+    "flagNoOwner": "No owner",
+    "flagOwnerA11y": "Area flag owner: {{owner}}"
   },
   "cards": {
     "title": "Cards",
@@ -244,7 +242,8 @@
       "totalCards": "Total Cards",
       "achievements": "Achievements",
       "totalXp": "Total XP",
-      "locations": "Locations"
+      "locations": "Locations",
+      "flags": "Flags"
     },
     "endSession": "End session",
     "editProfile": "Edit profile",
@@ -254,6 +253,12 @@
   "map": {
     "youAreHere": "You are here",
     "playerHere": "{{name}} is here"
+  },
+  "discoveryFlag": {
+    "a11y": "Discovery flag: nobody has been here yet",
+    "collectedTitle": "Flag collected!",
+    "collectedMessage_one": "You were the first to get here. You now have {{count}} flag.",
+    "collectedMessage_other": "You were the first to get here. You now have {{count}} flags."
   },
   "explorer": {
     "hint": "Zoom in to activate explorer mode",

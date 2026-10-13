@@ -3,10 +3,12 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 
+import i18n from '@/i18n';
 import { enterCell } from '@/lib/colyseus/cells';
-import type { CellUser, ChangeRoomMessage, JoinCellOptions } from '@/lib/colyseus/types';
+import type { CellUser, ChangeRoomMessage, DiscoveryFlag, JoinCellOptions } from '@/lib/colyseus/types';
 import { getRoomCell, getUserCell } from '@/lib/h3/cells';
 import { queryKeys } from '@/lib/query/keys';
+import { toast } from '@/lib/toast/toast-store';
 
 /** Dados do jogador enviados ao entrar na sala (o backend prioriza os do banco para fuel/xp/level). */
 export type CellRoomProfile = {
@@ -103,6 +105,11 @@ export function useCellRoom(profile: CellRoomProfile | null, { enabled, onMoveRe
   const [self, setSelf] = useState<CellSelf | null>(null);
   /** Outros jogadores por perto (sala + anel k1), contados pelo servidor; `null` fora de sala. */
   const [nearbyCount, setNearbyCount] = useState<number | null>(null);
+  /** Bandeira ainda não coletada da sala atual (área res 8) — nunca das vizinhas. */
+  const [discoveryFlags, setDiscoveryFlags] = useState<DiscoveryFlag[]>([]);
+  /** Dono da bandeira da sala atual: nome de quem coletou, `null` = sem dono, `undefined` = fora de sala. */
+  const [flagOwnerName, setFlagOwnerName] = useState<string | null | undefined>(undefined);
+  const flagsSignatureRef = useRef('');
   const selfSignatureRef = useRef('');
   const onMoveRejectedRef = useRef(onMoveRejected);
 
@@ -167,6 +174,9 @@ export function useCellRoom(profile: CellRoomProfile | null, { enabled, onMoveRe
     setRoomCell(null);
     setRoomUsers([]);
     setNearbyCount(null);
+    flagsSignatureRef.current = '';
+    setDiscoveryFlags([]);
+    setFlagOwnerName(undefined);
   }, [setRoomUsers]);
 
   // `attachRoom` e `join` se referenciam (reconexão / troca de sala): ligados por ref.
@@ -188,6 +198,10 @@ export function useCellRoom(profile: CellRoomProfile | null, { enabled, onMoveRe
       reconnectAttemptRef.current = 0;
       setConnected(true);
       setRoomCell(h3RoomCell);
+      // A bandeira é só da sala atual: a da sala anterior some na hora (a nova chega no join).
+      // O dono da bandeira não é limpo: o anterior fica na tela até o estado da nova sala chegar.
+      flagsSignatureRef.current = '';
+      setDiscoveryFlags([]);
       setRoomUsers([]);
 
       // Patches de uma sala antiga (durante a troca) não podem sobrescrever a lista da nova.
@@ -200,6 +214,9 @@ export function useCellRoom(profile: CellRoomProfile | null, { enabled, onMoveRe
           selfSignatureRef.current = signature;
           setSelf(nextSelf);
         }
+        // Dono da bandeira da área: vem no estado da sala (chega junto com a entrada). "" = sem dono.
+        const owner = (state as { discoveryFlagOwner?: string })?.discoveryFlagOwner;
+        if (typeof owner === 'string') setFlagOwnerName(owner || null);
       });
 
       // "Perto": o servidor já envia só os OUTROS jogadores distintos (nunca o próprio, nem o
@@ -207,6 +224,26 @@ export function useCellRoom(profile: CellRoomProfile | null, { enabled, onMoveRe
       room.onMessage('nearbyPlayers', (message: { count: number }) => {
         if (roomRef.current !== room) return;
         setNearbyCount(Math.max(0, Number(message.count) || 0));
+      });
+
+      // Bandeira de descoberta da sala atual (enviada ao entrar e após cada coleta).
+      room.onMessage('discoveryFlags', (message: { flags: DiscoveryFlag[] }) => {
+        if (roomRef.current !== room) return;
+        const flags = Array.isArray(message.flags) ? message.flags : [];
+        const signature = flags.map((flag) => flag.h3Index).join('|');
+        if (signature === flagsSignatureRef.current) return;
+        flagsSignatureRef.current = signature;
+        setDiscoveryFlags(flags);
+      });
+
+      // Coletou uma bandeira (foi o primeiro a chegar ao centro da área): avisa e atualiza o perfil.
+      room.onMessage('discoveryFlagCollected', (message: { discoveryFlags: number }) => {
+        if (roomRef.current !== room) return;
+        toast.reward(
+          i18n.t('discoveryFlag.collectedTitle'),
+          i18n.t('discoveryFlag.collectedMessage', { count: Number(message.discoveryFlags) || 1 }),
+        );
+        void queryClient.invalidateQueries({ queryKey: queryKeys.currentUser });
       });
 
       // Sem energia: o servidor não moveu o jogador; a posição volta para a dele.
@@ -230,7 +267,7 @@ export function useCellRoom(profile: CellRoomProfile | null, { enabled, onMoveRe
         }
       });
 
-      // Moedas, cartas, bandeiras, packs etc. ainda não são usados no app: evita avisos do SDK.
+      // Moedas, cartas, captura de células, packs etc. ainda não são usados no app: evita avisos do SDK.
       room.onMessage('*', () => {});
 
       room.onLeave((code) => {
@@ -245,7 +282,7 @@ export function useCellRoom(profile: CellRoomProfile | null, { enabled, onMoveRe
         sendPosition(room);
       }
     },
-    [resetRoomState, scheduleReconnect, sendPosition, setRoomUsers],
+    [queryClient, resetRoomState, scheduleReconnect, sendPosition, setRoomUsers],
   );
 
   const join = useCallback(
@@ -359,5 +396,15 @@ export function useCellRoom(profile: CellRoomProfile | null, { enabled, onMoveRe
     return () => subscription.remove();
   }, [shouldConnect, join, leave]);
 
-  return { connected, roomCell, otherUsers, self, nearbyCount, setPosition, updatePosition };
+  return {
+    connected,
+    roomCell,
+    otherUsers,
+    self,
+    nearbyCount,
+    discoveryFlags,
+    flagOwnerName,
+    setPosition,
+    updatePosition,
+  };
 }

@@ -3,11 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, { FadeInDown, FadeOutDown, ZoomIn, ZoomOut } from 'react-native-reanimated';
 
-import { BoltIcon } from '@/components/icons/bolt-icon';
 import { CompassIcon } from '@/components/icons/compass-icon';
-import { MapIcon } from '@/components/icons/map-icon';
+import { FlagIcon } from '@/components/icons/flag-icon';
 import { MapPinIcon } from '@/components/icons/map-pin-icon';
-import { TrendingUpIcon } from '@/components/icons/trending-up-icon';
 import { UsersIcon } from '@/components/icons/users-icon';
 import { WalkingIcon } from '@/components/icons/walking-icon';
 import { ProgressBar } from '@/components/ui/progress-bar';
@@ -35,14 +33,13 @@ type MapDashboardProps = {
   difficulty: ZoneDifficulty;
   /** Jogadores por perto (sala + anel ~1 km); `null` com Explore OFF. */
   nearbyCount: number | null;
-  /** Áreas: células res 8 distintas já visitadas. */
-  coverage: number;
   /** Distância total andada (km). */
   distanceKm: number;
-  /** Bônus de XP da zona (ainda fixo, até as cartas existirem). */
-  xpBonus: number;
-  /** Multiplicador de recompensa (ainda fixo). */
-  multiplier: number;
+  /**
+   * Dono da bandeira da área: nome de quem a coletou, `null` = sem dono (bandeira esperando),
+   * `undefined` = desconhecido (Explore OFF ou a sala ainda não respondeu).
+   */
+  flagOwnerName: string | null | undefined;
   exploreOn: boolean;
   /** Progresso da barra (0 a 1). */
   xpProgress: number;
@@ -54,18 +51,16 @@ type MapDashboardProps = {
 
 /**
  * Painel da zona atual do mapa (fica acima da tab bar).
- * Recolhido: só o botão do radar. Expandido: localização, dificuldade, Perto / Áreas / km,
- * bônus, multiplicador, Explore On/Off, barra de XP e botão de busca.
+ * Recolhido: só o botão do radar. Expandido: localização, dificuldade, Perto / km,
+ * dono da bandeira da área, Explore On/Off, barra de XP e botão de busca.
  * Só exibe dados e emite intenções — quem decide é o servidor.
  */
 export function MapDashboard({
   location,
   difficulty,
   nearbyCount,
-  coverage,
   distanceKm,
-  xpBonus,
-  multiplier,
+  flagOwnerName,
   exploreOn,
   xpProgress,
   searching,
@@ -78,6 +73,7 @@ export function MapDashboard({
 
   const nearby = nearbyCount === null ? EMPTY : String(nearbyCount);
   const km = formatDecimal(distanceKm);
+  const flagOwner = flagOwnerName === undefined ? EMPTY : (flagOwnerName ?? t('mapDashboard.flagNoOwner'));
 
   return (
     <View style={[styles.container, style]} pointerEvents="box-none">
@@ -115,11 +111,6 @@ export function MapDashboard({
                   accessibilityLabel={t('mapDashboard.nearmeA11y', { count: nearbyCount ?? 0 })}
                 />
                 <ZoneStat
-                  icon={<MapIcon color={colors.violet} size={STAT_ICON_SIZE} />}
-                  value={`${t('mapDashboard.coverage')}: ${coverage}`}
-                  accessibilityLabel={t('mapDashboard.coverageA11y', { count: coverage })}
-                />
-                <ZoneStat
                   icon={<WalkingIcon color={colors.magenta} size={STAT_ICON_SIZE} />}
                   value={`${km} km`}
                   accessibilityLabel={t('mapDashboard.distanceA11y', { km })}
@@ -128,14 +119,10 @@ export function MapDashboard({
 
               <View style={styles.stats}>
                 <ZoneStat
-                  icon={<BoltIcon color={colors.gold} size={STAT_ICON_SIZE} />}
-                  value={`+${xpBonus}`}
-                  accessibilityLabel={t('mapDashboard.xpRewardA11y', { xp: xpBonus })}
-                />
-                <ZoneStat
-                  icon={<TrendingUpIcon color={colors.success} size={STAT_ICON_SIZE} />}
-                  value={`x${multiplier}`}
-                  accessibilityLabel={t('mapDashboard.multiplierA11y', { multiplier })}
+                  icon={<FlagIcon color={colors.accent} size={STAT_ICON_SIZE} />}
+                  value={flagOwner}
+                  accessibilityLabel={t('mapDashboard.flagOwnerA11y', { owner: flagOwner })}
+                  shrink
                 />
                 <View
                   style={styles.explorer}

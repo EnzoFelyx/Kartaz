@@ -40,3 +40,10 @@ export type ChangeRoomMessage = {
   xp: number;
   level: number;
 };
+
+/** Bandeira de descoberta: área (res 8) que ninguém coletou ainda, com o centro onde ela fica. */
+export type DiscoveryFlag = {
+  h3Index: string;
+  lat: number;
+  lng: number;
+};

@@ -62,18 +62,16 @@
       "medium": "Media",
       "high": "Alta"
     },
-    "xpRewardA11y": "Recompensa de {{xp}} XP",
-    "multiplierA11y": "Multiplicador de recompensa {{multiplier}}",
     "nearme": "Cerca",
     "nearmeA11y": "{{count}} jugadores cerca",
-    "coverage": "Áreas",
-    "coverageA11y": "{{count}} áreas cubiertas",
     "distanceA11y": "{{km}} kilómetros recorridos",
     "explorer": "Explorador",
     "explorerA11y": "Modo explorador {{state}}",
     "on": "On",
     "off": "Off",
-    "xpProgressA11y": "Progreso de XP"
+    "xpProgressA11y": "Progreso de XP",
+    "flagNoOwner": "Sin dueño",
+    "flagOwnerA11y": "Dueño de la bandera del área: {{owner}}"
   },
   "cards": {
     "title": "Cartas",
@@ -244,7 +242,8 @@
       "totalCards": "Cartas totales",
       "achievements": "Logros",
       "totalXp": "XP total",
-      "locations": "Lugares"
+      "locations": "Lugares",
+      "flags": "Banderas"
     },
     "endSession": "Cerrar sesión",
     "editProfile": "Editar perfil",
@@ -254,6 +253,12 @@
   "map": {
     "youAreHere": "Estás aquí",
     "playerHere": "{{name}} está aquí"
+  },
+  "discoveryFlag": {
+    "a11y": "Bandera de descubrimiento: nadie ha estado aquí todavía",
+    "collectedTitle": "¡Bandera recolectada!",
+    "collectedMessage_one": "Fuiste el primero en llegar aquí. Ahora tienes {{count}} bandera.",
+    "collectedMessage_other": "Fuiste el primero en llegar aquí. Ahora tienes {{count}} banderas."
   },
   "explorer": {
     "hint": "Acerca el zoom para activar el modo explorador",

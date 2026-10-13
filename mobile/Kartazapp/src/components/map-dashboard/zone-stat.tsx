@@ -7,19 +7,26 @@ type ZoneStatProps = {
   icon: ReactNode;
   value: string;
   accessibilityLabel?: string;
+  /** Texto longo (ex.: nome de jogador): encolhe na linha e corta com "…". */
+  shrink?: boolean;
 };
 
 /** Um indicador da zona: ícone colorido + valor. */
-export function ZoneStat({ icon, value, accessibilityLabel }: ZoneStatProps) {
+export function ZoneStat({ icon, value, accessibilityLabel, shrink = false }: ZoneStatProps) {
   return (
-    <View style={styles.stat} accessible accessibilityLabel={accessibilityLabel}>
+    <View style={[styles.stat, shrink && styles.shrink]} accessible accessibilityLabel={accessibilityLabel}>
       {icon}
-      <Text style={styles.value}>{value}</Text>
+      <Text style={[styles.value, shrink && styles.shrink]} numberOfLines={1}>
+        {value}
+      </Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  shrink: {
+    flexShrink: 1,
+  },
   stat: {
     flexDirection: 'row',
     alignItems: 'center',

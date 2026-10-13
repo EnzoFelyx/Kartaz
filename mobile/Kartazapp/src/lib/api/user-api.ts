@@ -19,6 +19,8 @@ export type CurrentUserDto = {
   coverage: number;
   /** Distância total andada com Explore ON (km). */
   distanceKm: number;
+  /** Bandeiras de descoberta coletadas (primeiro a chegar ao centro de uma área). */
+  discoveryFlags: number;
 };
 
 /** GET /user — perfil e progresso do usuário da sessão (convidado ou logado). */

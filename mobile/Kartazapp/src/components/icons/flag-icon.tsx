@@ -1,12 +1,13 @@
 import type { ColorValue } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
-type TrendingUpIconProps = {
+type FlagIconProps = {
   color: ColorValue;
   size?: number;
 };
 
-export function TrendingUpIcon({ color, size = 14 }: TrendingUpIconProps) {
+/** Bandeira (descoberta de uma área). */
+export function FlagIcon({ color, size = 18 }: FlagIconProps) {
   return (
     <Svg
       width={size}
@@ -17,8 +18,8 @@ export function TrendingUpIcon({ color, size = 14 }: TrendingUpIconProps) {
       strokeWidth={2}
       strokeLinecap="round"
       strokeLinejoin="round">
-      <Path d="m22 7-8.5 8.5-5-5L2 17" />
-      <Path d="M16 7h6v6" />
+      <Path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
+      <Path d="M4 22v-7" />
     </Svg>
   );
 }

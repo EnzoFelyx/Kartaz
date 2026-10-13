@@ -6,6 +6,7 @@ import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BoltIcon } from '@/components/icons/bolt-icon';
+import { FlagIcon } from '@/components/icons/flag-icon';
 import { MapPinIcon } from '@/components/icons/map-pin-icon';
 import { SettingsIcon } from '@/components/icons/settings-icon';
 import { StarIcon } from '@/components/icons/star-icon';
@@ -119,6 +120,12 @@ export default function ProfileScreen() {
       icon: <MapPinIcon color={colors.success} size={STAT_ICON_SIZE} />,
       value: formatNumber(profile?.coverage ?? 0),
       label: t('profile.stats.locations'),
+    },
+    {
+      color: colors.accent,
+      icon: <FlagIcon color={colors.accent} size={STAT_ICON_SIZE} />,
+      value: formatNumber(profile?.discoveryFlags ?? 0),
+      label: t('profile.stats.flags'),
     },
   ];
 
