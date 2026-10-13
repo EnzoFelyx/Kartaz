@@ -45,7 +45,7 @@ function BackgroundSync() {
 }
 
 /**
- * Rotas do jogo só existem com sessão (convidado ou logado); o login (onboarding) fica sempre disponível.
+ * Rotas do jogo só existem com sessão (convidado ou logado); sem sessão, o index abre o login (onboarding).
  * Enquanto a sessão é lida do aparelho, o splash continua cobrindo a tela.
  */
 function RootNavigator() {
@@ -65,8 +65,6 @@ function RootNavigator() {
           contentStyle: { backgroundColor: colors.background },
         }}>
         <Stack.Screen name="index" />
-        {/* Onboarding + entrada: fora dos guards para também abrir com sessão (primeira abertura). */}
-        <Stack.Screen name="login" />
         <Stack.Protected guard={signedIn}>
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="card/[id]" />
@@ -74,6 +72,11 @@ function RootNavigator() {
           <Stack.Screen name="nation/[code]" />
           <Stack.Screen name="found-copies/[id]" />
           <Stack.Screen name="edit-profile" />
+        </Stack.Protected>
+        {/* Onboarding + entrada: só sem sessão. Ao entrar (convidado ou Google), o guard remove a tela e o
+            router volta ao index, que leva ao mapa — sem navegação manual disputando com a troca de sessão. */}
+        <Stack.Protected guard={!signedIn}>
+          <Stack.Screen name="login" />
         </Stack.Protected>
       </Stack>
     </>

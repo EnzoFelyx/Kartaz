@@ -1,22 +1,34 @@
 import type { ConfigContext, ExpoConfig } from 'expo/config';
+import { withInfoPlist, type ConfigPlugin } from 'expo/config-plugins';
+
+/**
+ * Registra no Info.plist (só no nativo) o esquema de retorno do login do Google no iOS: o client ID
+ * invertido (`com.googleusercontent.apps.<id>`). Fica fora do `scheme` do Expo de propósito: com mais
+ * de um esquema lá, o expo-linking avisa "multiple possible URI schemes" a cada abertura.
+ */
+const withGoogleAuthScheme: ConfigPlugin<string> = (config, scheme) =>
+  withInfoPlist(config, (mod) => {
+    const urlTypes = mod.modResults.CFBundleURLTypes ?? [];
+    const alreadyRegistered = urlTypes.some((type) => type.CFBundleURLSchemes?.includes(scheme));
+    if (!alreadyRegistered) {
+      mod.modResults.CFBundleURLTypes = [...urlTypes, { CFBundleURLSchemes: [scheme] }];
+    }
+    return mod;
+  });
 
 /**
  * Estende o app.json com configs que dependem de variáveis de ambiente.
  * A chave do Google Maps vem de GOOGLE_MAPS_API_KEY (defina em .env.local, que não vai pro git).
- * O esquema do login do Google no iOS é o client ID invertido (`com.googleusercontent.apps.<id>`),
- * derivado de EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID; sem ele, fica só o esquema do app.json.
+ * O esquema do login do Google vem de EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID; sem ele, nada é registrado.
  */
 export default ({ config }: ConfigContext): ExpoConfig => {
   const googleMapsApiKey = process.env.GOOGLE_MAPS_API_KEY;
-  const googleIosClientId = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID;
-  const googleAuthScheme = googleIosClientId?.split('.').reverse().join('.');
-  const baseSchemes = [config.scheme ?? []].flat();
+  const googleAuthScheme = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID?.split('.').reverse().join('.');
 
-  return {
+  const expoConfig: ExpoConfig = {
     ...config,
     name: config.name ?? 'Kartazapp',
     slug: config.slug ?? 'Kartazapp',
-    scheme: googleAuthScheme ? [...baseSchemes, googleAuthScheme] : baseSchemes,
     plugins: [
       ...(config.plugins ?? []),
       [
@@ -28,4 +40,6 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       ],
     ],
   };
+
+  return googleAuthScheme ? withGoogleAuthScheme(expoConfig, googleAuthScheme) : expoConfig;
 };

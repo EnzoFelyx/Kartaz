@@ -1,4 +1,3 @@
-import { router } from 'expo-router';
 import { useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
@@ -25,7 +24,7 @@ import { OnboardingSlide } from '@/components/onboarding/onboarding-slide';
 import { PageDots } from '@/components/onboarding/page-dots';
 import { TradeIllustration } from '@/components/onboarding/trade-illustration';
 import { useMarkOnboardingSeen, useOnboardingSeen } from '@/hooks/queries/use-onboarding';
-import { useSession, useSignInAsGuest } from '@/hooks/queries/use-session';
+import { useSignInAsGuest } from '@/hooks/queries/use-session';
 import { colors } from '@/theme/colors';
 import { listItemEntering } from '@/utils/list-loading';
 
@@ -58,7 +57,6 @@ const ILLUSTRATIONS: Record<Exclude<SlideId, 'welcome'>, ReactNode> = {
 export default function LoginScreen() {
   const { t } = useTranslation();
   const { width } = useWindowDimensions();
-  const session = useSession();
   const guest = useSignInAsGuest();
   const onboardingSeen = useOnboardingSeen();
   const markSeen = useMarkOnboardingSeen();
@@ -94,16 +92,8 @@ export default function LoginScreen() {
     onPageChange(page);
   };
 
-  const playAsGuest = () => {
-    // Já tem sessão (onboarding aberto na inicialização): segue com ela, sem criar outro convidado.
-    if (session.isReady) {
-      router.replace('/map');
-      return;
-    }
-    guest.mutate(undefined, {
-      onSuccess: () => router.replace('/map'),
-    });
-  };
+  // Ao entrar, a sessão fica pronta e o guard do layout raiz tira esta tela: o app segue para o mapa.
+  const playAsGuest = () => guest.mutate();
 
   // "Pular" e "Próximo" somem ao chegar na boas-vindas, acompanhando o swipe.
   const introControlsStyle = useAnimatedStyle(() => ({
@@ -136,7 +126,7 @@ export default function LoginScreen() {
         description={t('onboarding.slides.welcome.description')}>
         <Animated.View entering={listItemEntering(3)} style={styles.authButtons}>
           {/* Apple (só iOS) e Google: vinculam o email; se a conta já existia, entra nela. */}
-          <SocialAuthButtons onLinked={() => router.replace('/map')} disabled={guest.isPending} />
+          <SocialAuthButtons disabled={guest.isPending} />
           <AuthButton
             label={t('onboarding.continueAsGuest')}
             variant="secondary"
