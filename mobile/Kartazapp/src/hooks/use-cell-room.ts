@@ -6,13 +6,16 @@ import { AppState } from 'react-native';
 import i18n from '@/i18n';
 import { enterCell } from '@/lib/colyseus/cells';
 import type {
+  CardsPack,
   CellBattery,
   CellCoin,
   CellUser,
   ChangeRoomMessage,
   DiscoveryFlag,
   JoinCellOptions,
+  PackCard,
   RoomCoinGranted,
+  SerialClass,
 } from '@/lib/colyseus/types';
 import { getRoomCell, getUserCell } from '@/lib/h3/cells';
 import type { WalletDto } from '@/lib/api/wallet-api';
@@ -37,6 +40,9 @@ export type CellSelf = {
   maxFuel: number;
   xp: number;
   level: number;
+  /** Faixa de XP do nível atual (regra de níveis do servidor), para a barra de progresso. */
+  levelXpStart: number;
+  levelXpEnd: number;
   coverage: number;
   distanceKm: number;
 };
@@ -112,6 +118,29 @@ export type CoinGain = {
   at: number;
 };
 
+const SERIAL_CLASSES: SerialClass[] = ['extreme', 'elite', 'standard'];
+
+/** Valida o `cardsPackGranted` do servidor; `null` se não vier nenhuma carta aproveitável. */
+function readCardsPack(message: unknown): CardsPack | null {
+  const raw = message as { type?: unknown; cards?: unknown };
+  if (!Array.isArray(raw?.cards)) return null;
+  const cards: PackCard[] = [];
+  for (const item of raw.cards as Record<string, unknown>[]) {
+    const cardId = Number(item?.cardId);
+    if (!item?.id || !Number.isFinite(cardId)) continue;
+    const serialClass = SERIAL_CLASSES.find((value) => value === item.serialClass) ?? 'standard';
+    cards.push({
+      id: String(item.id),
+      cardId,
+      serialNumber: Number(item.serialNumber) || 0,
+      serialMax: Number(item.serialMax) || 0,
+      serialClass,
+    });
+  }
+  if (cards.length === 0) return null;
+  return { type: raw.type === 'initial' ? 'initial' : 'daily', cards };
+}
+
 function readSelf(state: unknown, sessionId: string): CellSelf | null {
   const users = (state as { users?: { get: (key: string) => any } })?.users;
   const user = users?.get(sessionId);
@@ -121,13 +150,17 @@ function readSelf(state: unknown, sessionId: string): CellSelf | null {
     maxFuel: Number(user.maxFuel ?? 100),
     xp: Number(user.xp ?? 0),
     level: Number(user.level ?? 1),
+    levelXpStart: Number(user.levelXpStart ?? 0),
+    levelXpEnd: Number(user.levelXpEnd ?? 0),
     coverage: Number(user.coverage ?? 0),
     distanceKm: Number(user.distanceKm ?? 0),
   };
 }
 
 function selfSignature(self: CellSelf | null) {
-  return self ? `${self.fuel}:${self.maxFuel}:${self.xp}:${self.level}:${self.coverage}:${self.distanceKm}` : '';
+  return self
+    ? `${self.fuel}:${self.maxFuel}:${self.xp}:${self.level}:${self.levelXpEnd}:${self.coverage}:${self.distanceKm}`
+    : '';
 }
 
 /** Assinatura para evitar re-render quando o patch não mudou nada visível (ex.: moedas). */
@@ -175,6 +208,11 @@ export function useCellRoom(profile: CellRoomProfile | null, { enabled, onMoveRe
   } | null>(null);
   /** Última coleta de moedas do próprio jogador (para o "+N" do HUD). */
   const [lastCoinGain, setLastCoinGain] = useState<CoinGain | null>(null);
+  /**
+   * Packs recebidos (boas-vindas / diário) esperando o jogador abrir, em ordem de chegada.
+   * Não é limpa na troca de sala: o pack já é do jogador, só falta mostrar.
+   */
+  const [cardsPacks, setCardsPacks] = useState<CardsPack[]>([]);
   const selfSignatureRef = useRef('');
   const onMoveRejectedRef = useRef(onMoveRejected);
 
@@ -374,6 +412,15 @@ export function useCellRoom(profile: CellRoomProfile | null, { enabled, onMoveRe
         void queryClient.invalidateQueries({ queryKey: queryKeys.currentUser });
       });
 
+      // Pack de cartas (boas-vindas ou diário): as cópias já são do jogador; entra na fila do modal.
+      room.onMessage('cardsPackGranted', (message: unknown) => {
+        const pack = readCardsPack(message);
+        if (!pack) return;
+        setCardsPacks((queue) => [...queue, pack]);
+        void queryClient.invalidateQueries({ queryKey: queryKeys.userInstances.all });
+        void queryClient.invalidateQueries({ queryKey: queryKeys.players.all });
+      });
+
       // Sem energia: o servidor não moveu o jogador; a posição volta para a dele.
       room.onMessage('moveRejected', (message: { lat: number; lng: number }) => {
         if (roomRef.current !== room) return;
@@ -396,7 +443,7 @@ export function useCellRoom(profile: CellRoomProfile | null, { enabled, onMoveRe
       });
 
       // Demais mensagens (coinCollected, collectCoinRejected, batteryCollected — a energia nova já
-      // vem no estado —, cartas, captura de células, packs...) não são
+      // vem no estado —, cartas do mapa, captura de células...) não são
       // usadas no app: o handler genérico evita avisos do SDK.
       room.onMessage('*', () => {});
 
@@ -551,6 +598,9 @@ export function useCellRoom(profile: CellRoomProfile | null, { enabled, onMoveRe
     return () => subscription.remove();
   }, [shouldConnect, join, leave]);
 
+  /** Fecha o pack da vez; o próximo da fila (se houver) aparece em seguida. */
+  const dismissCardsPack = useCallback(() => setCardsPacks((queue) => queue.slice(1)), []);
+
   return {
     connected,
     roomCell,
@@ -562,6 +612,8 @@ export function useCellRoom(profile: CellRoomProfile | null, { enabled, onMoveRe
     coins,
     batteries,
     lastCoinGain,
+    cardsPack: cardsPacks[0] ?? null,
+    dismissCardsPack,
     fillTankPrice,
     purchaseFuel,
     setPosition,

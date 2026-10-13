@@ -96,7 +96,7 @@ export default function RootLayout() {
   useEffect(() => setupQueryFocusManager(), []);
 
   // Primeira abertura: importa a base de jogadores embutida (assets/data) para o SQLite.
-  // Nas próximas aberturas a versão local já é > 0 e isso retorna na hora.
+  // Nas próximas aberturas a base local já está em dia e isso retorna na hora (troca se o bundle for mais novo).
   useEffect(() => {
     // Falha no seed não bloqueia o app: o sync com o backend preenche a base depois.
     seedFromBundleIfNeeded()

@@ -3,7 +3,7 @@ import { StyleSheet, View, type StyleProp, type ViewProps, type ViewStyle } from
 
 import { colors } from '@/theme/colors';
 
-import { PlayerPhoto } from './player-photo';
+import { PlayerPhoto, type PhotoDepth } from './player-photo';
 
 const CARD_BACKGROUND = require('../../../assets/images/bg-card.png');
 
@@ -13,6 +13,8 @@ type CardArtworkProps = {
   style?: StyleProp<ViewStyle>;
   /** Use "none" dentro de um Pressable para o toque passar ao pai. */
   pointerEvents?: ViewProps['pointerEvents'];
+  /** Sombra da foto (padrão `card`). */
+  depth?: PhotoDepth;
 };
 
 /**
@@ -24,7 +26,7 @@ type CardArtworkProps = {
  * Sem animação própria de entrada: a cascata da lista e a transição da foto já cuidam disso,
  * e uma animação a mais por card pesava na troca de visualização.
  */
-export function CardArtwork({ uri, style, pointerEvents = 'auto' }: CardArtworkProps) {
+export function CardArtwork({ uri, style, pointerEvents = 'auto', depth }: CardArtworkProps) {
   return (
     <View pointerEvents={pointerEvents} style={[styles.container, style]}>
       <Image
@@ -34,7 +36,7 @@ export function CardArtwork({ uri, style, pointerEvents = 'auto' }: CardArtworkP
         cachePolicy="memory-disk"
         transition={0}
       />
-      <PlayerPhoto key={uri} uri={uri} />
+      <PlayerPhoto key={uri} uri={uri} depth={depth} />
     </View>
   );
 }

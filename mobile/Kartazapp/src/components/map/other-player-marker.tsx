@@ -15,8 +15,9 @@ type OtherPlayerMarkerProps = {
 export function OtherPlayerMarker({ player, accessibilityLabel }: OtherPlayerMarkerProps) {
   const uri = resolveApiUri(player.avatar);
   // O mapa desenha o marcador como imagem: redesenha até a foto carregar e depois congela.
+  // Sem foto (inicial no gradiente SVG) fica sempre redesenhando: congelar cedo pegava o SVG pela metade.
   const [readyUri, setReadyUri] = useState<string | undefined>(undefined);
-  const tracksViewChanges = !!uri && readyUri !== uri;
+  const tracksViewChanges = !uri || readyUri !== uri;
 
   return (
     <Marker
@@ -25,7 +26,13 @@ export function OtherPlayerMarker({ player, accessibilityLabel }: OtherPlayerMar
       tracksViewChanges={tracksViewChanges}
       zIndex={2}
       accessibilityLabel={accessibilityLabel}>
-      <MapAvatar uri={uri} size={MAP_PLAYER_AVATAR_SIZE} halo={false} onReady={() => setReadyUri(uri)} />
+      <MapAvatar
+        uri={uri}
+        name={player.username}
+        size={MAP_PLAYER_AVATAR_SIZE}
+        halo={false}
+        onReady={() => setReadyUri(uri)}
+      />
     </Marker>
   );
 }

@@ -70,3 +70,25 @@ export type RoomCoinGranted = {
   /** Saldo da carteira depois da coleta. */
   balance: number;
 };
+
+/** Classe da série de uma cópia (servidor): nº 1 ou o último = `extreme`; nºs baixos = `elite`. */
+export type SerialClass = 'extreme' | 'elite' | 'standard';
+
+/** Cópia que chegou num pack (`cardsPackGranted`): o jogador vem do `cardId` (SQLite local). */
+export type PackCard = {
+  /** Id da cópia (instância). */
+  id: string;
+  cardId: number;
+  serialNumber: number;
+  serialMax: number;
+  serialClass: SerialClass;
+};
+
+/** `initial` = pacote de boas-vindas (5 cartas), `daily` = pack diário (2 cartas). */
+export type CardsPackType = 'initial' | 'daily';
+
+/** Servidor → jogador depois de andar ~10 m na sala (não logo ao entrar), quando ele tem direito a um pack. */
+export type CardsPack = {
+  type: CardsPackType;
+  cards: PackCard[];
+};

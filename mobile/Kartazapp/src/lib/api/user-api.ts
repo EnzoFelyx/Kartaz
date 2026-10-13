@@ -15,6 +15,9 @@ export type CurrentUserDto = {
   providerId: string | null;
   level: number;
   xp: number;
+  /** Faixa de XP do nível atual: XP total ao chegar no nível e para o próximo (barra de progresso). */
+  levelXpStart: number;
+  levelXpEnd: number;
   fuel: number;
   coverage: number;
   /** Distância total andada com Explore ON (km). */

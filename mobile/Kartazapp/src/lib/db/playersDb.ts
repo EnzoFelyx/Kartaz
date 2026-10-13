@@ -198,6 +198,16 @@ const PLAYERS_UPDATE_ON_CONFLICT = PLAYERS_COLUMNS.split(',')
   .join(',');
 
 /**
+ * Apaga todos os jogadores da base local (e zera o cursor do progresso das cartas, que é
+ * por jogador). Exceção à regra de nunca remover: só para trocar a base embutida inteira.
+ */
+export function clearPlayers(): void {
+  const database = getDb();
+  database.execSync('DELETE FROM players');
+  setCardsProgressVersion(0);
+}
+
+/**
  * Insere ou atualiza jogadores em lote (transação).
  * Regra: nunca removemos jogadores — apenas insert ou update por id.
  * @param options.preserveFoundCount - quando true (ex.: importação do zip), não sobrescreve found_count nos registros existentes

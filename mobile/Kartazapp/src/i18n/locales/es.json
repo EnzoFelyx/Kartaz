@@ -299,5 +299,27 @@
       "timeout": "El servidor no respondió. Inténtalo de nuevo.",
       "server_error": "No se pudo repostar ahora. Inténtalo de nuevo."
     }
+  },
+  "cardReveal": {
+    "tapToReveal": "Toca para revelar",
+    "serial": "{{serial}} / {{max}}",
+    "revealedA11y": "{{name}}, serie {{serial}} de {{max}}, {{serialClass}}",
+    "serialClass": {
+      "extreme": "Extrema",
+      "elite": "Élite",
+      "standard": "Estándar"
+    }
+  },
+  "cardsPack": {
+    "titleInitial": "Paquete de bienvenida",
+    "titleDaily": "Pack diario",
+    "progress": "Carta {{current}} de {{total}}",
+    "reveal": "Revelar carta",
+    "nextCard": "Siguiente carta",
+    "done": "Listo",
+    "close": "Cerrar",
+    "helperTap": "Toca la carta o el botón para ver al jugador.",
+    "helperNext": "Avanza a la siguiente cuando quieras.",
+    "helperDone": "Todas las cartas ya están en tu colección."
   }
 }

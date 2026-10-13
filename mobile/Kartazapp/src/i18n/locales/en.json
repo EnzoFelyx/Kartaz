@@ -299,5 +299,27 @@
       "timeout": "The server did not respond. Try again.",
       "server_error": "Couldn't refuel right now. Try again."
     }
+  },
+  "cardReveal": {
+    "tapToReveal": "Tap to reveal",
+    "serial": "{{serial}} / {{max}}",
+    "revealedA11y": "{{name}}, serial {{serial}} of {{max}}, {{serialClass}}",
+    "serialClass": {
+      "extreme": "Extreme",
+      "elite": "Elite",
+      "standard": "Standard"
+    }
+  },
+  "cardsPack": {
+    "titleInitial": "Welcome pack",
+    "titleDaily": "Daily pack",
+    "progress": "Card {{current}} of {{total}}",
+    "reveal": "Reveal card",
+    "nextCard": "Next card",
+    "done": "Done",
+    "close": "Close",
+    "helperTap": "Tap the card or the button to see the player.",
+    "helperNext": "Move on to the next one whenever you like.",
+    "helperDone": "All cards are already in your collection."
   }
 }

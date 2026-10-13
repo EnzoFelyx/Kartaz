@@ -299,5 +299,27 @@
       "timeout": "O servidor não respondeu. Tente novamente.",
       "server_error": "Não foi possível abastecer agora. Tente novamente."
     }
+  },
+  "cardReveal": {
+    "tapToReveal": "Toque para revelar",
+    "serial": "{{serial}} / {{max}}",
+    "revealedA11y": "{{name}}, série {{serial}} de {{max}}, {{serialClass}}",
+    "serialClass": {
+      "extreme": "Extrema",
+      "elite": "Elite",
+      "standard": "Padrão"
+    }
+  },
+  "cardsPack": {
+    "titleInitial": "Pacote de boas-vindas",
+    "titleDaily": "Pack diário",
+    "progress": "Carta {{current}} de {{total}}",
+    "reveal": "Revelar carta",
+    "nextCard": "Próxima carta",
+    "done": "Concluir",
+    "close": "Fechar",
+    "helperTap": "Toque na carta ou no botão para ver o jogador.",
+    "helperNext": "Avance quando quiser para a próxima.",
+    "helperDone": "Todas as cartas já estão na sua coleção."
   }
 }

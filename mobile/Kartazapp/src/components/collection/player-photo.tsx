@@ -22,8 +22,11 @@ const SHIMMER_STEP_MS = 700;
  */
 const SHIMMER_DELAY_MS = 150;
 
-/** Intensidade da sombra: `card` para as cartas das listas, `hero` para a foto grande dos detalhes. */
-type PhotoDepth = 'card' | 'hero';
+/**
+ * Intensidade da sombra: `card` para as cartas das listas, `hero` para a foto grande dos detalhes,
+ * `flat` sem sombra (cartas animadas em 3D / com opacidade, onde o bitmap da sombra pode sumir no iOS).
+ */
+export type PhotoDepth = 'card' | 'hero' | 'flat';
 
 type PlayerPhotoProps = {
   uri?: string;
@@ -58,7 +61,9 @@ export function PlayerPhoto({ uri, contentFit = 'cover', depth = 'card' }: Playe
          * bitmap; o brilho de loading fica fora desta view para não invalidar esse cache.
          * (No Android a sombra não segue o contorno; lá a foto fica sem sombra.)
          */
-        <View style={[StyleSheet.absoluteFill, depth === 'hero' ? styles.heroShadow : styles.cardShadow]} shouldRasterizeIOS>
+        <View
+          style={[StyleSheet.absoluteFill, depth !== 'flat' && SHADOW[depth]]}
+          shouldRasterizeIOS={depth !== 'flat'}>
           <Image
             source={{ uri }}
             style={StyleSheet.absoluteFill}
@@ -156,3 +161,5 @@ const styles = StyleSheet.create({
     height: SHIMMER_HEIGHT,
   },
 });
+
+const SHADOW = { card: styles.cardShadow, hero: styles.heroShadow };

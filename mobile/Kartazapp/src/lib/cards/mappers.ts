@@ -97,3 +97,27 @@ export function playerInstanceToFoundCopy(dto: PlayerInstanceDto): FoundCopy {
     tradeOffers: 0,
   };
 }
+
+/**
+ * Jogador de uma carta que chegou só com o `cardId` (pack): ficha do SQLite; se o catálogo local
+ * ainda não tiver o jogador, um placeholder com o número da carta.
+ */
+export function playerForCardId(cardId: number): Player {
+  const row = getPlayerById(cardId);
+  if (row) return playerRowToPlayer(row);
+  return {
+    id: cardId,
+    name: `#${cardId}`,
+    nation: '',
+    flagEmoji: null,
+    team: '',
+    position: '',
+    rank: null,
+    rating: 0,
+    rarity: 'common',
+    imageUri: playerPhotoUri(cardId, null),
+    copiesFound: 0,
+    totalCopies: DEFAULT_MAX_SUPPLY,
+    stats: { speed: 0, shooting: 0, passing: 0, dribbling: 0, defense: 0, physical: 0 },
+  };
+}

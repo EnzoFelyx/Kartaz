@@ -2,6 +2,7 @@ import { Asset } from 'expo-asset';
 import * as FileSystem from 'expo-file-system';
 import { inflate } from 'pako';
 import {
+  clearPlayers,
   initPlayersDb,
   getLocalPlayersVersion,
   setLocalPlayersVersion,
@@ -11,13 +12,17 @@ import type { PlayerRow } from '@/types/player';
 
 const BATCH_SIZE = 500;
 
-/** Versão atribuída após importar o bundle (depois o sync do servidor pode atualizar). */
-export const BUNDLED_VERSION = 1;
+/**
+ * Versão atribuída após importar o bundle (depois o sync do servidor pode atualizar).
+ * 2 = só jogadores com foto (a 1 tinha a base inteira, com milhares sem foto).
+ */
+export const BUNDLED_VERSION = 2;
 
 /**
  * Carrega o arquivo NDJSON gzip embutido no app (assets/data/players-initial.json.gz),
  * descompacta, importa no SQLite e define a versão local como BUNDLED_VERSION.
- * Só faz algo se a versão local for 0.
+ * Só faz algo se a base local for mais antiga que o bundle (0 = vazia). Vinda de um bundle
+ * antigo, a base é apagada antes: jogadores que saíram do jogo (sem foto) não podem sobrar.
  * Retorna true se importou, false se já tinha dados ou se falhou.
  */
 export async function seedFromBundleIfNeeded(): Promise<{
@@ -26,7 +31,8 @@ export async function seedFromBundleIfNeeded(): Promise<{
   error?: string;
 }> {
   initPlayersDb();
-  if (getLocalPlayersVersion() !== 0) {
+  const localVersion = getLocalPlayersVersion();
+  if (localVersion >= BUNDLED_VERSION) {
     return { seeded: false, imported: 0 };
   }
 
@@ -63,6 +69,7 @@ export async function seedFromBundleIfNeeded(): Promise<{
       }
     }
 
+    if (localVersion > 0) clearPlayers();
     for (let i = 0; i < rows.length; i += BATCH_SIZE) {
       const batch = rows.slice(i, i + BATCH_SIZE);
       upsertPlayers(batch);

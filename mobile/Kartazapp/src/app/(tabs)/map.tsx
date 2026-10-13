@@ -6,6 +6,7 @@ import MapView, { PROVIDER_GOOGLE, type LatLng, type Region } from 'react-native
 import Animated, { Easing, withTiming, type EntryAnimationsValues } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { CardsPackModal } from '@/components/cards/cards-pack-modal';
 import { FuelGauge } from '@/components/hud/fuel-gauge';
 import { CoinBalance } from '@/components/hud/coin-balance';
 import { BatteryIcon } from '@/components/icons/battery-icon';
@@ -35,15 +36,13 @@ import { initialMapRegion, kartazMapStyle, mapViewConfig } from '@/theme/map-sty
 const MOCK_ZONE = { difficulty: 'medium' as const };
 /** Tempo da busca do radar (só visual, até a resposta vir do servidor). */
 const MOCK_RADAR_SEARCH_MS = 1200;
-/** Sem regra de level ainda: a barra do painel mostra o XP dentro do bloco atual de 100. */
-const XP_BAR_STEP = 100;
 const DEFAULT_MAX_ENERGY = 100;
 
-/** Explore Mode liga a partir deste zoom. TODO: temporário (teste) — voltar para 18 (nível de ruas). */
-const EXPLORE_MIN_ZOOM = 14;
+/** Explore Mode liga a partir deste zoom (nível de ruas). */
+const EXPLORE_MIN_ZOOM = 18;
 /** Zoom da câmera ao focar no jogador: já começa com o Explore Mode ligado. */
 const USER_FOCUS_ZOOM = 18;
-/** Folga do arredondamento ao comparar o zoom calculado com o limite (ex.: 13,999 conta como 14). */
+/** Folga do arredondamento ao comparar o zoom calculado com o limite (ex.: 17,999 conta como 18). */
 const ZOOM_EPSILON = 0.05;
 const USER_FOCUS_MS = 1000;
 /** Animação de volta quando o movimento é bloqueado (sem energia). */
@@ -141,6 +140,8 @@ export default function MapScreen() {
     coins,
     batteries,
     lastCoinGain,
+    cardsPack,
+    dismissCardsPack,
     fillTankPrice,
     purchaseFuel,
     setPosition,
@@ -155,6 +156,10 @@ export default function MapScreen() {
   const maxEnergy = self?.maxFuel ?? DEFAULT_MAX_ENERGY;
   const xp = self?.xp ?? user?.xp ?? 0;
   const level = self?.level ?? user?.level ?? 1;
+  // Barra de XP: quanto do nível atual já foi feito (faixa calculada pelo servidor).
+  const levelXpStart = self?.levelXpStart ?? user?.levelXpStart ?? 0;
+  const levelXpEnd = self?.levelXpEnd ?? user?.levelXpEnd ?? 0;
+  const xpProgress = levelXpEnd > levelXpStart ? (xp - levelXpStart) / (levelXpEnd - levelXpStart) : 1;
   const distanceKm = self?.distanceKm ?? user?.distanceKm ?? 0;
   const outOfEnergy = energy <= 0;
   const placeName = usePlaceName(playerPosition, exploreOn);
@@ -283,7 +288,13 @@ export default function MapScreen() {
       {/* Jogador fixo no centro da tela (o mapa se move por baixo dele). */}
       {playerPosition && (
         <View style={styles.selfAvatar} pointerEvents="none" accessible accessibilityLabel={t('map.youAreHere')}>
-          <MapAvatar uri={resolveApiUri(user?.avatar)} size={MAP_PLAYER_AVATAR_SIZE} highlighted halo={false} />
+          <MapAvatar
+            uri={resolveApiUri(user?.avatar)}
+            name={user?.username ?? session?.username}
+            size={MAP_PLAYER_AVATAR_SIZE}
+            highlighted
+            halo={false}
+          />
         </View>
       )}
 
@@ -312,7 +323,7 @@ export default function MapScreen() {
           distanceKm={distanceKm}
           flagOwnerName={exploreOn ? flagOwnerName : undefined}
           exploreOn={exploreOn}
-          xpProgress={(xp % XP_BAR_STEP) / XP_BAR_STEP}
+          xpProgress={xpProgress}
           searching={radarSearching}
           canSearch={exploreOn && !outOfEnergy}
           onRadarSearch={handleRadarSearch}
@@ -329,6 +340,9 @@ export default function MapScreen() {
         connected={exploreOn && connected}
         onPurchase={purchaseFuel}
       />
+
+      {/* Pack de boas-vindas / diário: chega depois de andar ~10 m na sala (um por vez, na ordem de chegada). */}
+      <CardsPackModal pack={refuelOpen ? null : cardsPack} onClose={dismissCardsPack} />
     </View>
   );
 }
