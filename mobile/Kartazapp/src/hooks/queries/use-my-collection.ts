@@ -2,6 +2,11 @@ import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-qu
 import { useMemo } from 'react';
 
 import { getUserInstances } from '@/lib/api/user-instances-api';
+import {
+  buildCollectionParams,
+  DEFAULT_COLLECTION_FILTERS,
+  type CollectionFilters,
+} from '@/lib/collection/collection-filters';
 import { userInstanceToPlayerCard } from '@/lib/cards/mappers';
 import { queryKeys } from '@/lib/query/keys';
 import { prefetchPhotos } from '@/utils/list-loading';
@@ -12,18 +17,22 @@ export const COLLECTION_PAGE_SIZE = 20;
 
 /**
  * Cartas do usuário (`GET /user/instances`), paginadas por limit/offset.
- * A busca (nome do jogador) é feita no servidor.
+ * A busca (nome do jogador) e os filtros (overall, seleção, posição, origem) são feitos no servidor.
  */
-export function useMyCollection(search: string) {
+export function useMyCollection(search: string, filters: CollectionFilters = DEFAULT_COLLECTION_FILTERS) {
   const { isReady } = useSession();
   const term = search.trim();
 
   const result = useInfiniteQuery({
-    queryKey: queryKeys.userInstances.list(term),
+    queryKey: queryKeys.userInstances.list(term, filters),
     // Converte a página uma vez só, ao chegar (inclui leitura no SQLite por card),
     // em vez de refazer a cada render da lista.
     queryFn: async ({ pageParam }) => {
-      const page = await getUserInstances({ limit: COLLECTION_PAGE_SIZE, offset: pageParam, search: term || undefined });
+      const page = await getUserInstances({
+        ...buildCollectionParams(term, filters),
+        limit: COLLECTION_PAGE_SIZE,
+        offset: pageParam,
+      });
       const cards = page.instances.map(userInstanceToPlayerCard);
       prefetchPhotos(cards.map((card) => card.imageUri));
       return { total: page.total, offset: page.offset, cards };
@@ -34,7 +43,7 @@ export function useMyCollection(search: string) {
       return lastPage.cards.length > 0 && next < lastPage.total ? next : undefined;
     },
     enabled: isReady,
-    // Ao mudar a busca, mantém a lista anterior até a resposta nova chegar.
+    // Ao mudar a busca ou os filtros, mantém a lista anterior até a resposta nova chegar.
     placeholderData: keepPreviousData,
   });
 

@@ -73,7 +73,9 @@
     "off": "Off",
     "xpProgressA11y": "Progreso de XP",
     "flagNoOwner": "Sin dueño",
-    "flagOwnerA11y": "Dueño de la bandera del área: {{owner}}"
+    "flagOwnerA11y": "Dueño de la bandera del área: {{owner}}",
+    "cardsA11y_one": "{{count}} carta en el área",
+    "cardsA11y_other": "{{count}} cartas en el área"
   },
   "cards": {
     "title": "Cartas",
@@ -94,11 +96,26 @@
   },
   "myCollection": {
     "title": "Mi Colección",
-    "search": "Buscar por jugador o selección...",
+    "search": "Buscar por nombre del jugador...",
     "empty": "No se encontraron cartas",
-    "viewOffers": "Ver ofertas",
-    "viewOffersA11y": "Ver {{count}} ofertas de intercambio",
-    "cardA11y": "{{name}}, {{rarity}}, copia {{serial}} de {{total}}, media {{rating}}"
+    "cardA11y": "{{name}}, {{rarity}}, copia {{serial}} de {{total}}, media {{rating}}",
+    "emptyFiltered": "Ninguna carta con estos filtros",
+    "offersA11y": "{{count}} propuestas de intercambio",
+    "filters": {
+      "open": "Filtros",
+      "title": "Filtros",
+      "ovr": "OVERALL (OVR)",
+      "ovrRange": "{{min}} – {{max}}",
+      "nation": "NACIONALIDAD",
+      "nationPlaceholder": "Ej.: BRA o Brasil (varias: separar por coma)",
+      "position": "POSICIÓN",
+      "positionPlaceholder": "Ej.: ST, CM",
+      "spawnSource": "ORIGEN DE LA INSTANCIA",
+      "spawnSourcePlaceholder": "Ej.: user_pack, world_pool",
+      "clear": "Limpiar",
+      "apply": "Aplicar",
+      "close": "Cerrar"
+    }
   },
   "cardDetails": {
     "notFound": "Carta no encontrada",
@@ -256,7 +273,8 @@
     "youAreHere": "Estás aquí",
     "playerHere": "{{name}} está aquí",
     "coinA11y": "Moneda",
-    "batteryA11y": "Batería"
+    "batteryA11y": "Batería",
+    "cardA11y": "Carta misteriosa"
   },
   "discoveryFlag": {
     "a11y": "Bandera de descubrimiento: nadie ha estado aquí todavía",
@@ -320,6 +338,7 @@
     "close": "Cerrar",
     "helperTap": "Toca la carta o el botón para ver al jugador.",
     "helperNext": "Avanza a la siguiente cuando quieras.",
-    "helperDone": "Todas las cartas ya están en tu colección."
+    "helperDone": "Todas las cartas ya están en tu colección.",
+    "titleFound": "¡Jugador encontrado!"
   }
 }

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, { FadeInDown, FadeOutDown, ZoomIn, ZoomOut } from 'react-native-reanimated';
 
+import { CardsIcon } from '@/components/icons/cards-icon';
 import { CompassIcon } from '@/components/icons/compass-icon';
 import { FlagIcon } from '@/components/icons/flag-icon';
 import { MapPinIcon } from '@/components/icons/map-pin-icon';
@@ -33,6 +34,8 @@ type MapDashboardProps = {
   difficulty: ZoneDifficulty;
   /** Jogadores por perto (sala + anel ~1 km); `null` com Explore OFF. */
   nearbyCount: number | null;
+  /** Cartas no mapa da sala (área res 8), visíveis ou não; `null` com Explore OFF. */
+  cardsCount: number | null;
   /** Distância total andada (km). */
   distanceKm: number;
   /**
@@ -59,6 +62,7 @@ export function MapDashboard({
   location,
   difficulty,
   nearbyCount,
+  cardsCount,
   distanceKm,
   flagOwnerName,
   exploreOn,
@@ -72,6 +76,7 @@ export function MapDashboard({
   const [expanded, setExpanded] = useState(false);
 
   const nearby = nearbyCount === null ? EMPTY : String(nearbyCount);
+  const cardsInRoom = cardsCount === null ? EMPTY : String(cardsCount);
   const km = formatDecimal(distanceKm);
   const flagOwner = flagOwnerName === undefined ? EMPTY : (flagOwnerName ?? t('mapDashboard.flagNoOwner'));
 
@@ -109,6 +114,11 @@ export function MapDashboard({
                   icon={<UsersIcon color={colors.primary} size={STAT_ICON_SIZE} />}
                   value={`${t('mapDashboard.nearme')}: ${nearby}`}
                   accessibilityLabel={t('mapDashboard.nearmeA11y', { count: nearbyCount ?? 0 })}
+                />
+                <ZoneStat
+                  icon={<CardsIcon color={colors.primarySoft} size={STAT_ICON_SIZE} />}
+                  value={cardsInRoom}
+                  accessibilityLabel={t('mapDashboard.cardsA11y', { count: cardsCount ?? 0 })}
                 />
                 <ZoneStat
                   icon={<WalkingIcon color={colors.magenta} size={STAT_ICON_SIZE} />}

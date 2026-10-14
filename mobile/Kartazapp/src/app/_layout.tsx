@@ -6,6 +6,7 @@ import * as SystemUI from 'expo-system-ui';
 import { useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated';
 
 import { DatabaseInitSplash } from '@/components/database-init-splash';
 import { ToastHost } from '@/components/toast/toast-host';
@@ -19,6 +20,11 @@ import { seedFromBundleIfNeeded } from '@/lib/sync/seedFromBundle';
 import { colors } from '@/theme/colors';
 
 SplashScreen.preventAutoHideAsync();
+
+// Modo estrito do Reanimated desligado: o Skia lê o `.value` dos valores animados que recebe como
+// prop sempre que redesenha (brilho do grid do mapa, borda da tab bar, barra de XP), e cada redesenho
+// gerava o aviso "Reading from `value` during component render". Os demais avisos continuam.
+configureReanimatedLogger({ level: ReanimatedLogLevel.warn, strict: false });
 
 // Fundo da view raiz (aparece por trás das telas durante as transições): o mesmo escuro do app.
 SystemUI.setBackgroundColorAsync(colors.background);

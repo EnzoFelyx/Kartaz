@@ -8,6 +8,7 @@ import { enterCell } from '@/lib/colyseus/cells';
 import type {
   CardsPack,
   CellBattery,
+  CellCard,
   CellCoin,
   CellUser,
   ChangeRoomMessage,
@@ -96,6 +97,20 @@ function readCoins(state: unknown): CellCoin[] {
 }
 
 /** Baterias da sala (`state.batteries`): somem daqui quando alguém pega (a energia vem no `fuel`). */
+/** Cartas no mapa da sala: só id e posição (o jogador da carta não é exposto à interface). */
+function readCards(state: unknown): CellCard[] {
+  const cards = (state as { cards?: { forEach: (cb: (card: any, id: string) => void) => void } })?.cards;
+  const list: CellCard[] = [];
+  cards?.forEach((card, id) => {
+    if (!card) return;
+    const lat = Number(card.lat);
+    const lng = Number(card.lng);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+    list.push({ id: String(card.id || id), lat, lng });
+  });
+  return list;
+}
+
 function readBatteries(state: unknown): CellBattery[] {
   const batteries = (state as { batteries?: { forEach: (cb: (battery: any, id: string) => void) => void } })?.batteries;
   const list: CellBattery[] = [];
@@ -120,7 +135,10 @@ export type CoinGain = {
 
 const SERIAL_CLASSES: SerialClass[] = ['extreme', 'elite', 'standard'];
 
-/** Valida o `cardsPackGranted` do servidor; `null` se não vier nenhuma carta aproveitável. */
+/**
+ * Valida as cartas que chegaram do servidor (`cardsPackGranted`, ou a carta do `roomCardGranted`
+ * com `type: 'found'`); `null` se não vier nenhuma carta aproveitável.
+ */
 function readCardsPack(message: unknown): CardsPack | null {
   const raw = message as { type?: unknown; cards?: unknown };
   if (!Array.isArray(raw?.cards)) return null;
@@ -138,7 +156,8 @@ function readCardsPack(message: unknown): CardsPack | null {
     });
   }
   if (cards.length === 0) return null;
-  return { type: raw.type === 'initial' ? 'initial' : 'daily', cards };
+  const type: CardsPack['type'] = raw.type === 'initial' || raw.type === 'found' ? raw.type : 'daily';
+  return { type, cards };
 }
 
 function readSelf(state: unknown, sessionId: string): CellSelf | null {
@@ -197,6 +216,8 @@ export function useCellRoom(profile: CellRoomProfile | null, { enabled, onMoveRe
   /** Baterias da sala atual (mesmas regras das moedas; recarregam energia). */
   const [batteries, setBatteries] = useState<CellBattery[]>([]);
   const batteriesSignatureRef = useRef('');
+  const [cards, setCards] = useState<CellCard[]>([]);
+  const cardsSignatureRef = useRef('');
   /** Preço fixo para encher o tanque (`state.economy`), mostrado no "Abastecer". */
   const [fillTankPrice, setFillTankPrice] = useState(50);
   /** Compra de energia em andamento: presa à sala em que foi enviada (resposta vem dela). */
@@ -284,6 +305,8 @@ export function useCellRoom(profile: CellRoomProfile | null, { enabled, onMoveRe
     setCoins([]);
     batteriesSignatureRef.current = '';
     setBatteries([]);
+    cardsSignatureRef.current = '';
+    setCards([]);
   }, [setRoomUsers]);
 
   // `attachRoom` e `join` se referenciam (reconexão / troca de sala): ligados por ref.
@@ -314,6 +337,8 @@ export function useCellRoom(profile: CellRoomProfile | null, { enabled, onMoveRe
       setCoins([]);
       batteriesSignatureRef.current = '';
       setBatteries([]);
+      cardsSignatureRef.current = '';
+      setCards([]);
       setRoomUsers([]);
 
       // Patches de uma sala antiga (durante a troca) não podem sobrescrever a lista da nova.
@@ -338,6 +363,12 @@ export function useCellRoom(profile: CellRoomProfile | null, { enabled, onMoveRe
         if (batteriesSignature !== batteriesSignatureRef.current) {
           batteriesSignatureRef.current = batteriesSignature;
           setBatteries(nextBatteries);
+        }
+        const nextCards = readCards(state);
+        const cardsSignature = nextCards.map((card) => `${card.id}:${card.lat}:${card.lng}`).join('|');
+        if (cardsSignature !== cardsSignatureRef.current) {
+          cardsSignatureRef.current = cardsSignature;
+          setCards(nextCards);
         }
         const price = Number((state as { economy?: { fillTankPriceCoins?: number } })?.economy?.fillTankPriceCoins);
         if (Number.isFinite(price) && price > 0) setFillTankPrice(price);
@@ -410,6 +441,16 @@ export function useCellRoom(profile: CellRoomProfile | null, { enabled, onMoveRe
           i18n.t('discoveryFlag.collectedMessage', { count: Number(message.discoveryFlags) || 1 }),
         );
         void queryClient.invalidateQueries({ queryKey: queryKeys.currentUser });
+      });
+
+      // Carta do mapa coletada (passou por cima dela): já é do jogador; abre o mesmo modal do pack,
+      // com uma carta só. A carta sai do mapa pelo estado da sala (`state.cards`).
+      room.onMessage('roomCardGranted', (message: { card?: unknown }) => {
+        const pack = readCardsPack({ type: 'found', cards: [message?.card] });
+        if (!pack) return;
+        setCardsPacks((queue) => [...queue, pack]);
+        void queryClient.invalidateQueries({ queryKey: queryKeys.userInstances.all });
+        void queryClient.invalidateQueries({ queryKey: queryKeys.players.all });
       });
 
       // Pack de cartas (boas-vindas ou diário): as cópias já são do jogador; entra na fila do modal.
@@ -611,6 +652,7 @@ export function useCellRoom(profile: CellRoomProfile | null, { enabled, onMoveRe
     flagOwnerName,
     coins,
     batteries,
+    cards,
     lastCoinGain,
     cardsPack: cardsPacks[0] ?? null,
     dismissCardsPack,

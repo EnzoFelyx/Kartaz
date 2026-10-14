@@ -22,7 +22,7 @@ export const queryKeys = {
 
   userInstances: {
     all: ['userInstances'] as const,
-    list: (search: string) => ['userInstances', 'list', search] as const,
+    list: (search: string, filters: object) => ['userInstances', 'list', search, filters] as const,
     count: ['userInstances', 'count'] as const,
     byCard: (cardId: number) => ['userInstances', 'byCard', cardId] as const,
   },

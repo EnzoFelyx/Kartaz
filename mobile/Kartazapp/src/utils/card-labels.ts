@@ -1,5 +1,7 @@
 import i18n, { getLocaleTag } from '@/i18n';
 import en from '@/i18n/locales/en.json';
+import es from '@/i18n/locales/es.json';
+import pt from '@/i18n/locales/pt.json';
 import type { FoundLocation, KnownPosition, NationCode } from '@/types/player-card';
 
 export type Role = 'goalkeeper' | 'defender' | 'midfielder' | 'forward';
@@ -101,10 +103,47 @@ export function getNationShortCode(nation: string) {
   return NATION_CODE_BY_NAME.get(value.toLowerCase()) ?? value.slice(0, 3).toUpperCase();
 }
 
-/** Local de coleta (ex.: "Munique, Baviera"). Sem cidade/estado conhecidos, devolve "—". */
+/**
+ * Local de coleta (ex.: "Munique, Baviera"). Sem cidade/estado, as coordenadas (ex.: "-19.9139, -43.9273");
+ * sem nada conhecido, devolve "—".
+ */
 export function formatLocation(location: FoundLocation) {
   const parts = [location.city, location.state].filter((part): part is string => !!part?.trim());
-  return parts.length > 0 ? parts.join(', ') : '—';
+  if (parts.length > 0) return parts.join(', ');
+  const { lat, lng } = location;
+  if (Number.isFinite(lat) && Number.isFinite(lng)) return `${lat!.toFixed(4)}, ${lng!.toFixed(4)}`;
+  return '—';
+}
+
+/** Nomes da seleção em qualquer idioma do app (e o código) → código. Para filtros digitados pelo usuário. */
+const NATION_CODE_BY_ANY_NAME = new Map<string, NationCode>([
+  ...NATION_CODE_BY_NAME,
+  ...[pt.nations, es.nations].flatMap((names) =>
+    (Object.entries(names) as [NationCode, string][]).map(([code, name]) => [name.toLowerCase(), code] as const),
+  ),
+  ...(Object.keys(en.nations) as NationCode[]).map((code) => [code.toLowerCase(), code] as const),
+]);
+
+/** Nomes da base de jogadores que diferem do i18n (o filtro manda os dois). */
+const BACKEND_NATION_ALIASES: Partial<Record<NationCode, string[]>> = {
+  NED: ['Holland'],
+  KOR: ['Korea Republic'],
+};
+
+/**
+ * Filtro de seleção digitado ("BRA, Argentina, Espanha") → nomes como estão no backend, em inglês
+ * ("Brazil,Argentina,Spain"). O que não for reconhecido vai como foi digitado.
+ */
+export function toBackendNationFilter(input: string) {
+  const names = input
+    .split(',')
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .flatMap((part) => {
+      const code = NATION_CODE_BY_ANY_NAME.get(part.toLowerCase());
+      return code ? [en.nations[code], ...(BACKEND_NATION_ALIASES[code] ?? [])] : [part];
+    });
+  return [...new Set(names)].join(',');
 }
 
 /** Comparação alfabética no idioma atual. */

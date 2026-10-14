@@ -3,11 +3,11 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { STAT_CONFIG } from '@/components/card-details/stat-config';
 import { CalendarIcon } from '@/components/icons/calendar-icon';
-import { ChevronRightIcon } from '@/components/icons/chevron-right-icon';
 import { MapPinIcon } from '@/components/icons/map-pin-icon';
 import { MessageCircleIcon } from '@/components/icons/message-circle-icon';
+import { ShieldIcon } from '@/components/icons/shield-icon';
 import type { PlayerCard } from '@/types/player-card';
-import { formatLocation, formatShortDate } from '@/utils/card-labels';
+import { formatLocation, formatShortDate, getNationName } from '@/utils/card-labels';
 import { colors, rarityColors, withAlpha } from '@/theme/colors';
 
 import { CardArt } from './card-art';
@@ -19,16 +19,14 @@ const META_ICON_SIZE = 15;
 type OwnedCardItemProps = {
   card: PlayerCard;
   onPress?: () => void;
-  /** Ação de ver propostas de troca desta cópia (demonstrativa por enquanto). */
-  onViewOffers?: () => void;
 };
 
 /**
- * Cópia de carta da coleção do jogador: identidade + raridade no topo,
- * arte com o serial da cópia (ex.: 384 / 1000), dados da coleta, propostas
- * de troca e os atributos resumidos.
+ * Cópia de carta da coleção do jogador: identidade + raridade no topo, arte com o serial da cópia
+ * (ex.: 384 / 1000), data e local da coleta (coordenadas nas cartas do mapa), time, propostas de
+ * troca, seleção (bandeira + nome) e os atributos resumidos.
  */
-export function OwnedCardItem({ card, onPress, onViewOffers }: OwnedCardItemProps) {
+export function OwnedCardItem({ card, onPress }: OwnedCardItemProps) {
   const { t } = useTranslation();
   const tint = rarityColors[card.rarity];
   const rarity = t(`rarity.${card.rarity}`);
@@ -85,17 +83,23 @@ export function OwnedCardItem({ card, onPress, onViewOffers }: OwnedCardItemProp
             </Text>
           </View>
           <View style={styles.metaRow}>
+            <ShieldIcon color={colors.secondaryForeground} size={META_ICON_SIZE} />
+            <Text style={styles.metaText} numberOfLines={1}>
+              {card.team || '—'}
+            </Text>
+          </View>
+          <View
+            style={styles.metaRow}
+            accessible
+            accessibilityLabel={t('myCollection.offersA11y', { count: card.tradeOffers })}>
             <MessageCircleIcon color={colors.secondaryForeground} size={META_ICON_SIZE} />
             <Text style={styles.metaText}>{card.tradeOffers}</Text>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('myCollection.viewOffersA11y', { count: card.tradeOffers })}
-              onPress={onViewOffers}
-              hitSlop={8}
-              style={styles.offersLink}>
-              <Text style={styles.offersText}>{t('myCollection.viewOffers')}</Text>
-              <ChevronRightIcon color={colors.primary} size={14} />
-            </Pressable>
+          </View>
+          <View style={styles.metaRow}>
+            {card.flagEmoji && <Text style={styles.flag}>{card.flagEmoji}</Text>}
+            <Text style={styles.metaText} numberOfLines={1}>
+              {card.nation ? getNationName(card.nation) : '—'}
+            </Text>
           </View>
         </View>
       </View>
@@ -181,7 +185,7 @@ const styles = StyleSheet.create({
   meta: {
     flex: 1,
     justifyContent: 'center',
-    gap: 10,
+    gap: 7,
   },
   metaRow: {
     flexDirection: 'row',
@@ -194,16 +198,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
-  offersLink: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 2,
-    marginLeft: 'auto',
-  },
-  offersText: {
-    color: colors.primary,
-    fontSize: 13,
-    fontWeight: '700',
+  flag: {
+    fontSize: 15,
   },
   stats: {
     flexDirection: 'row',

@@ -23,6 +23,12 @@ const MODAL_CHROME_HEIGHT = 320;
 /** Espera o fade de entrada do modal antes de vibrar. */
 const HAPTIC_DELAY_MS = 250;
 
+const PACK_TITLE = {
+  initial: 'cardsPack.titleInitial',
+  daily: 'cardsPack.titleDaily',
+  found: 'cardsPack.titleFound',
+} as const satisfies Record<CardsPack['type'], string>;
+
 type CardsPackModalProps = {
   /** Pack da vez (`null` fecha o modal). */
   pack: CardsPack | null;
@@ -102,7 +108,7 @@ function PackContent({ pack, onClose }: { pack: CardsPack; onClose: () => void }
       <View style={styles.header}>
         <View style={styles.titles}>
           <Text style={styles.title} accessibilityRole="header">
-            {t(pack.type === 'initial' ? 'cardsPack.titleInitial' : 'cardsPack.titleDaily')}
+            {t(PACK_TITLE[pack.type])}
           </Text>
           <Text style={styles.subtitle}>{t('cardsPack.progress', { current: index + 1, total })}</Text>
         </View>

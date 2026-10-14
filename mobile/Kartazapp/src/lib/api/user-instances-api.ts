@@ -53,7 +53,10 @@ export type GetUserInstancesParams = {
   nation?: string;
   ovrMin?: number;
   ovrMax?: number;
+  /** Uma ou mais posições separadas por vírgula. */
   position?: string;
+  /** Origem da cópia (`user_pack`, `world_pool`), separadas por vírgula. */
+  spawnSource?: string;
 };
 
 /** GET /user/instances — cartas do usuário logado, ordenadas por overall (maior primeiro). */

@@ -73,7 +73,9 @@
     "off": "Off",
     "xpProgressA11y": "Progresso de XP",
     "flagNoOwner": "Sem dono",
-    "flagOwnerA11y": "Dono da bandeira da área: {{owner}}"
+    "flagOwnerA11y": "Dono da bandeira da área: {{owner}}",
+    "cardsA11y_one": "{{count}} carta na área",
+    "cardsA11y_other": "{{count}} cartas na área"
   },
   "cards": {
     "title": "Cartas",
@@ -94,11 +96,26 @@
   },
   "myCollection": {
     "title": "Minha Coleção",
-    "search": "Buscar por jogador ou seleção...",
+    "search": "Buscar por nome do jogador...",
     "empty": "Nenhuma carta encontrada",
-    "viewOffers": "Ver propostas",
-    "viewOffersA11y": "Ver {{count}} propostas de troca",
-    "cardA11y": "{{name}}, {{rarity}}, cópia {{serial}} de {{total}}, overall {{rating}}"
+    "cardA11y": "{{name}}, {{rarity}}, cópia {{serial}} de {{total}}, overall {{rating}}",
+    "emptyFiltered": "Nenhuma carta com esses filtros",
+    "offersA11y": "{{count}} propostas de troca",
+    "filters": {
+      "open": "Filtros",
+      "title": "Filtros",
+      "ovr": "OVERALL (OVR)",
+      "ovrRange": "{{min}} – {{max}}",
+      "nation": "NACIONALIDADE",
+      "nationPlaceholder": "Ex.: BRA ou Brasil (várias: separar por vírgula)",
+      "position": "POSIÇÃO",
+      "positionPlaceholder": "Ex.: ST, CM",
+      "spawnSource": "ORIGEM DA INSTÂNCIA",
+      "spawnSourcePlaceholder": "Ex.: user_pack, world_pool",
+      "clear": "Limpar",
+      "apply": "Aplicar",
+      "close": "Fechar"
+    }
   },
   "cardDetails": {
     "notFound": "Carta não encontrada",
@@ -256,7 +273,8 @@
     "youAreHere": "Você está aqui",
     "playerHere": "{{name}} está aqui",
     "coinA11y": "Moeda",
-    "batteryA11y": "Bateria"
+    "batteryA11y": "Bateria",
+    "cardA11y": "Carta misteriosa"
   },
   "discoveryFlag": {
     "a11y": "Bandeira de descoberta: ninguém esteve aqui ainda",
@@ -320,6 +338,7 @@
     "close": "Fechar",
     "helperTap": "Toque na carta ou no botão para ver o jogador.",
     "helperNext": "Avance quando quiser para a próxima.",
-    "helperDone": "Todas as cartas já estão na sua coleção."
+    "helperDone": "Todas as cartas já estão na sua coleção.",
+    "titleFound": "Jogador encontrado!"
   }
 }

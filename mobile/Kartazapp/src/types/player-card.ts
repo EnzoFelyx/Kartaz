@@ -48,6 +48,9 @@ export type Player = {
 export type FoundLocation = {
   city: string | null;
   state: string | null;
+  /** Coordenadas da coleta: mostradas quando não há cidade/estado (cartas do mapa). */
+  lat?: number | null;
+  lng?: number | null;
 };
 
 /** Cópia única de uma carta do usuário (jogador + número serial), vinda de `GET /user/instances`. */

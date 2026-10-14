@@ -56,6 +56,16 @@ export type CellCoin = {
   value: number;
 };
 
+/**
+ * Carta no mapa da sala (`room.state.cards`), virada para baixo: o app só usa a posição — quem é
+ * o jogador fica escondido até a coleta.
+ */
+export type CellCard = {
+  id: string;
+  lat: number;
+  lng: number;
+};
+
 /** Bateria da sala (`room.state.batteries`): recarrega energia de quem passar por cima dela. */
 export type CellBattery = {
   id: string;
@@ -84,8 +94,11 @@ export type PackCard = {
   serialClass: SerialClass;
 };
 
-/** `initial` = pacote de boas-vindas (5 cartas), `daily` = pack diário (2 cartas). */
-export type CardsPackType = 'initial' | 'daily';
+/**
+ * `initial` = pacote de boas-vindas (5 cartas), `daily` = pack diário (2 cartas),
+ * `found` = carta coletada no mapa (1 carta, mesmo modal com o título "Jogador encontrado!").
+ */
+export type CardsPackType = 'initial' | 'daily' | 'found';
 
 /** Servidor → jogador depois de andar ~10 m na sala (não logo ao entrar), quando ele tem direito a um pack. */
 export type CardsPack = {

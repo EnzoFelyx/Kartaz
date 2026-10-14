@@ -80,7 +80,12 @@ export function userInstanceToPlayerCard(dto: UserInstanceDto): PlayerCard {
     serial: dto.serialNumber,
     maxSerial: dto.serialMax,
     collectedAt: dto.foundWhen ?? dto.spawnedAt,
-    collectedLocation: { city: dto.foundWhere?.city ?? null, state: dto.foundWhere?.state ?? null },
+    collectedLocation: {
+      city: dto.foundWhere?.city ?? null,
+      state: dto.foundWhere?.state ?? null,
+      lat: dto.foundWhere?.lat ?? null,
+      lng: dto.foundWhere?.lng ?? null,
+    },
     tradeOffers: 0,
   };
 }

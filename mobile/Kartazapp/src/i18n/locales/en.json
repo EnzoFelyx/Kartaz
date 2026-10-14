@@ -73,7 +73,9 @@
     "off": "Off",
     "xpProgressA11y": "XP progress",
     "flagNoOwner": "No owner",
-    "flagOwnerA11y": "Area flag owner: {{owner}}"
+    "flagOwnerA11y": "Area flag owner: {{owner}}",
+    "cardsA11y_one": "{{count}} card in this area",
+    "cardsA11y_other": "{{count}} cards in this area"
   },
   "cards": {
     "title": "Cards",
@@ -94,11 +96,26 @@
   },
   "myCollection": {
     "title": "My Collection",
-    "search": "Search by player or team...",
+    "search": "Search by player name...",
     "empty": "No cards found",
-    "viewOffers": "View offers",
-    "viewOffersA11y": "View {{count}} trade offers",
-    "cardA11y": "{{name}}, {{rarity}}, copy {{serial}} of {{total}}, rating {{rating}}"
+    "cardA11y": "{{name}}, {{rarity}}, copy {{serial}} of {{total}}, rating {{rating}}",
+    "emptyFiltered": "No cards match these filters",
+    "offersA11y": "{{count}} trade offers",
+    "filters": {
+      "open": "Filters",
+      "title": "Filters",
+      "ovr": "OVERALL (OVR)",
+      "ovrRange": "{{min}} – {{max}}",
+      "nation": "NATIONALITY",
+      "nationPlaceholder": "E.g.: BRA or Brazil (several: separate with commas)",
+      "position": "POSITION",
+      "positionPlaceholder": "E.g.: ST, CM",
+      "spawnSource": "INSTANCE ORIGIN",
+      "spawnSourcePlaceholder": "E.g.: user_pack, world_pool",
+      "clear": "Clear",
+      "apply": "Apply",
+      "close": "Close"
+    }
   },
   "cardDetails": {
     "notFound": "Card not found",
@@ -256,7 +273,8 @@
     "youAreHere": "You are here",
     "playerHere": "{{name}} is here",
     "coinA11y": "Coin",
-    "batteryA11y": "Battery"
+    "batteryA11y": "Battery",
+    "cardA11y": "Mystery card"
   },
   "discoveryFlag": {
     "a11y": "Discovery flag: nobody has been here yet",
@@ -320,6 +338,7 @@
     "close": "Close",
     "helperTap": "Tap the card or the button to see the player.",
     "helperNext": "Move on to the next one whenever you like.",
-    "helperDone": "All cards are already in your collection."
+    "helperDone": "All cards are already in your collection.",
+    "titleFound": "Player found!"
   }
 }

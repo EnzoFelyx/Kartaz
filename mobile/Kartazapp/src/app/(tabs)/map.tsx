@@ -1,3 +1,4 @@
+import * as Haptics from 'expo-haptics';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -19,6 +20,7 @@ import { DiscoveryFlagMarker } from '@/components/map/discovery-flag-marker';
 import { MAP_PLAYER_AVATAR_SIZE, MapAvatar } from '@/components/map/map-avatar';
 import { MapGradientOverlay } from '@/components/map/map-gradient-overlay';
 import { MapGridOverlay } from '@/components/map/map-grid-overlay';
+import { MapCardMarker } from '@/components/map/map-card-marker';
 import { PickupMarker } from '@/components/map/pickup-marker';
 import { OtherPlayerMarker } from '@/components/map/other-player-marker';
 import { TAB_BAR_BOTTOM_GAP, TAB_BAR_HEIGHT } from '@/components/tab-bar';
@@ -29,6 +31,7 @@ import { useCellRoom, type CellRoomProfile } from '@/hooks/use-cell-room';
 import { useInitialLocation } from '@/hooks/use-initial-location';
 import { usePlaceName } from '@/hooks/use-place-name';
 import { resolveApiUri } from '@/lib/api/image-uri';
+import { getUserCell } from '@/lib/h3/cells';
 import { colors } from '@/theme/colors';
 import { initialMapRegion, kartazMapStyle, mapViewConfig } from '@/theme/map-styles';
 
@@ -53,6 +56,8 @@ const CAMERA_SETTLE_MS = 400;
 const MOVE_EPSILON_DEG = 1e-6;
 /** Tamanho dos itens coletáveis no mapa (moedas e baterias). */
 const PICKUP_ICON_SIZE = 22;
+/** Altura da carta virada no mapa (a largura sai da proporção da carta). */
+const MAP_CARD_HEIGHT = 34;
 /** Distância entre o painel e a tab bar. */
 const DASHBOARD_GAP = 12;
 
@@ -139,6 +144,7 @@ export default function MapScreen() {
     flagOwnerName,
     coins,
     batteries,
+    cards,
     lastCoinGain,
     cardsPack,
     dismissCardsPack,
@@ -150,6 +156,23 @@ export default function MapScreen() {
     enabled: exploreOn,
     onMoveRejected: handleMoveRejected,
   });
+
+  // Cartas da sala (área res 8) só aparecem quando o jogador entra na mesma célula res 9 da carta.
+  const playerCell = playerPosition ? getUserCell(playerPosition.latitude, playerPosition.longitude) : null;
+  const visibleCards = useMemo(
+    () => (playerCell ? cards.filter((card) => getUserCell(card.lat, card.lng) === playerCell) : []),
+    [cards, playerCell],
+  );
+
+  // Carta que acabou de aparecer (entrou na célula dela ou nasceu na sua): vibração leve, uma vez
+  // por atualização, por mais cartas que apareçam juntas. A animação dispara ao montar o marcador.
+  const seenCardIdsRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    const ids = new Set(visibleCards.map((card) => card.id));
+    const hasNew = visibleCards.some((card) => !seenCardIdsRef.current.has(card.id));
+    seenCardIdsRef.current = ids;
+    if (hasNew) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+  }, [visibleCards]);
 
   // Valores autoritativos do servidor: da sala (tempo real) ou do GET /user (fora de sala).
   const energy = self?.fuel ?? user?.fuel ?? DEFAULT_MAX_ENERGY;
@@ -271,6 +294,9 @@ export default function MapScreen() {
             accessibilityLabel={t('map.batteryA11y')}
           />
         ))}
+        {visibleCards.map((card) => (
+          <MapCardMarker key={card.id} card={card} height={MAP_CARD_HEIGHT} accessibilityLabel={t('map.cardA11y')} />
+        ))}
         {discoveryFlags.map((flag) => (
           <DiscoveryFlagMarker key={flag.h3Index} flag={flag} accessibilityLabel={t('discoveryFlag.a11y')} />
         ))}
@@ -320,6 +346,7 @@ export default function MapScreen() {
           location={placeName}
           difficulty={MOCK_ZONE.difficulty}
           nearbyCount={exploreOn ? nearbyCount : null}
+          cardsCount={exploreOn && connected ? cards.length : null}
           distanceKm={distanceKm}
           flagOwnerName={exploreOn ? flagOwnerName : undefined}
           exploreOn={exploreOn}
