@@ -460,6 +460,8 @@ export function useCellRoom(profile: CellRoomProfile | null, { enabled, onMoveRe
         setCardsPacks((queue) => [...queue, pack]);
         void queryClient.invalidateQueries({ queryKey: queryKeys.userInstances.all });
         void queryClient.invalidateQueries({ queryKey: queryKeys.players.all });
+        // O pacote de boas-vindas cria o time do jogador.
+        if (pack.type === 'initial') void queryClient.invalidateQueries({ queryKey: queryKeys.userTeam });
       });
 
       // Sem energia: o servidor não moveu o jogador; a posição volta para a dele.

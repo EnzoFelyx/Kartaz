@@ -7,6 +7,7 @@ export const queryKeys = {
   onboardingSeen: ['onboardingSeen'] as const,
   currentUser: ['currentUser'] as const,
   wallet: ['wallet'] as const,
+  userTeam: ['userTeam'] as const,
   playersSync: ['playersSync'] as const,
   cardsProgressSync: ['cardsProgressSync'] as const,
 
@@ -24,6 +25,9 @@ export const queryKeys = {
     all: ['userInstances'] as const,
     list: (search: string, filters: object) => ['userInstances', 'list', search, filters] as const,
     count: ['userInstances', 'count'] as const,
+    mapFindsCount: ['userInstances', 'mapFindsCount'] as const,
+    /** Todas as cartas (várias páginas), ex.: para escolher titulares. */
+    everything: ['userInstances', 'everything'] as const,
     byCard: (cardId: number) => ['userInstances', 'byCard', cardId] as const,
   },
 

@@ -340,5 +340,82 @@
     "helperNext": "Avanza a la siguiente cuando quieras.",
     "helperDone": "Todas las cartas ya están en tu colección.",
     "titleFound": "¡Jugador encontrado!"
+  },
+  "achievements": {
+    "title": "Logros",
+    "subtitle": "Sigue tu equipo y tu progreso",
+    "myTeam": "Mi equipo",
+    "myTeamA11y": "Mi equipo: {{name}}, overall {{overall}}, {{record}}",
+    "record": "{{wins}}V {{losses}}D",
+    "recordShort": "{{wins}}V · {{losses}}D",
+    "editTeam": "Editar nombre y titulares",
+    "noTeam": "Sin equipo todavía",
+    "noTeamHint": "Abre el paquete de bienvenida para armar el tuyo",
+    "wins": "Victorias",
+    "teamAchievementsShort": "Logros del equipo",
+    "individualShort": "Individuales",
+    "teamSection": "Logros del equipo",
+    "individualSection": "Logros individuales",
+    "soon": "Próximamente",
+    "done": "Completado",
+    "progress": "{{current}} / {{target}}",
+    "items": {
+      "firstTeamWin": {
+        "title": "Primera victoria en equipo",
+        "description": "Disponible cuando los partidos en equipo estén activos."
+      },
+      "winStreak": {
+        "title": "Racha de victorias",
+        "description": "Ven a jugar con tu equipo cuando el modo esté disponible."
+      },
+      "firstDiscovery": {
+        "title": "Primer descubrimiento",
+        "description": "Encuentra tu primera carta en el mapa."
+      },
+      "collector": {
+        "title": "Coleccionista",
+        "description": "Ten 10 cartas en tu colección."
+      },
+      "flagHunter": {
+        "title": "Pionero",
+        "description": "Recoge 3 banderas de descubrimiento."
+      },
+      "walker": {
+        "title": "Caminante",
+        "description": "Camina 5 km explorando el mapa."
+      }
+    }
+  },
+  "team": {
+    "title": "Editar equipo",
+    "save": "Guardar",
+    "nameLabel": "Nombre del equipo",
+    "namePlaceholder": "Mi Equipo",
+    "overall": "Overall {{overall}}",
+    "baseBonus": "Base {{base}} · Bono +{{bonus}}%",
+    "maxGroup": "Grupo más grande: {{count}} jugador(es) de la misma selección",
+    "starters": "Titulares ({{count}})",
+    "slot": "Posición {{index}}",
+    "ovr": "OVR {{ovr}}",
+    "swapA11y": "Cambiar a {{name}}",
+    "pickerTitle": "Elegir jugador",
+    "pickerSubtitle": "Para la posición {{index}}",
+    "pickerEmpty": "No hay otras cartas disponibles. ¡Encuentra más cartas en el mapa!",
+    "rulesTitle": "Puntuación del equipo",
+    "rulesBase": "El overall del equipo es la suma del overall de los 5 titulares.",
+    "rulesBonus": "Cada selección con 2 o más titulares da un bono, y los bonos se suman:",
+    "rulesTier": "{{count}} de la misma selección",
+    "rulesExample": "Ej.: 2 brasileños y 3 argentinos = +5% + 10% = +15%.",
+    "noTeam": "Todavía no tienes equipo",
+    "noTeamHint": "Se crea con las 5 cartas del paquete de bienvenida.",
+    "savedTitle": "Equipo guardado",
+    "savedMessage": "Tu equipo fue actualizado.",
+    "saveErrorTitle": "No se pudo guardar",
+    "saveErrorMessage": "Revisa tu conexión e inténtalo de nuevo.",
+    "nameEmpty": "Ponle un nombre al equipo.",
+    "unsavedTitle": "¿Salir sin guardar?",
+    "unsavedMessage": "Se perderán los cambios del equipo.",
+    "stay": "Seguir editando",
+    "leave": "Salir sin guardar"
   }
 }

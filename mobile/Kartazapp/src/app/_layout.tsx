@@ -81,6 +81,7 @@ function RootNavigator() {
           <Stack.Screen name="nation/[code]" />
           <Stack.Screen name="found-copies/[id]" />
           <Stack.Screen name="edit-profile" />
+          <Stack.Screen name="edit-team" />
         </Stack.Protected>
         {/* Onboarding + entrada: só sem sessão. Ao entrar (convidado ou Google), o guard remove a tela e o
             router volta ao index, que leva ao mapa — sem navegação manual disputando com a troca de sessão. */}

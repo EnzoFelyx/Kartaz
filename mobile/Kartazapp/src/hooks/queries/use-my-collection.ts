@@ -63,6 +63,16 @@ export function useCollectionCount() {
   });
 }
 
+/** Quantas cartas o usuário achou no mapa (origem `world_pool`), para as conquistas. */
+export function useMapFindsCount() {
+  const { isReady } = useSession();
+  return useQuery({
+    queryKey: queryKeys.userInstances.mapFindsCount,
+    queryFn: async () => (await getUserInstances({ spawnSource: 'world_pool', limit: 1 })).total,
+    enabled: isReady,
+  });
+}
+
 /** A cópia do usuário deste jogador, se ele tiver (serial, data e local nos detalhes da carta). */
 export function useOwnedCopy(cardId: number) {
   const { isReady } = useSession();

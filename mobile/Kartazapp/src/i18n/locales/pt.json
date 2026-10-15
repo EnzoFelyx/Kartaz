@@ -340,5 +340,82 @@
     "helperNext": "Avance quando quiser para a próxima.",
     "helperDone": "Todas as cartas já estão na sua coleção.",
     "titleFound": "Jogador encontrado!"
+  },
+  "achievements": {
+    "title": "Conquistas",
+    "subtitle": "Acompanhe o seu time e o seu progresso",
+    "myTeam": "Meu time",
+    "myTeamA11y": "Meu time: {{name}}, overall {{overall}}, {{record}}",
+    "record": "{{wins}}V {{losses}}D",
+    "recordShort": "{{wins}}V · {{losses}}D",
+    "editTeam": "Editar nome e titulares",
+    "noTeam": "Sem time ainda",
+    "noTeamHint": "Abra o pacote de boas-vindas para montar o seu",
+    "wins": "Vitórias",
+    "teamAchievementsShort": "Conquistas do time",
+    "individualShort": "Individuais",
+    "teamSection": "Conquistas do time",
+    "individualSection": "Conquistas individuais",
+    "soon": "Em breve",
+    "done": "Concluída",
+    "progress": "{{current}} / {{target}}",
+    "items": {
+      "firstTeamWin": {
+        "title": "Primeira vitória em equipe",
+        "description": "Disponível quando as partidas em time estiverem ativas."
+      },
+      "winStreak": {
+        "title": "Sequência de vitórias",
+        "description": "Venha jogar com o seu time quando o modo estiver liberado."
+      },
+      "firstDiscovery": {
+        "title": "Primeira descoberta",
+        "description": "Encontre a sua primeira carta no mapa."
+      },
+      "collector": {
+        "title": "Colecionador",
+        "description": "Tenha 10 cartas na sua coleção."
+      },
+      "flagHunter": {
+        "title": "Desbravador",
+        "description": "Colete 3 bandeiras de descoberta."
+      },
+      "walker": {
+        "title": "Andarilho",
+        "description": "Ande 5 km explorando o mapa."
+      }
+    }
+  },
+  "team": {
+    "title": "Editar time",
+    "save": "Salvar",
+    "nameLabel": "Nome do time",
+    "namePlaceholder": "Meu Time",
+    "overall": "Overall {{overall}}",
+    "baseBonus": "Base {{base}} · Bônus +{{bonus}}%",
+    "maxGroup": "Maior grupo: {{count}} jogador(es) da mesma nação",
+    "starters": "Titulares ({{count}})",
+    "slot": "Posição {{index}}",
+    "ovr": "OVR {{ovr}}",
+    "swapA11y": "Trocar {{name}}",
+    "pickerTitle": "Escolher jogador",
+    "pickerSubtitle": "Para a posição {{index}}",
+    "pickerEmpty": "Nenhuma outra carta disponível. Encontre mais cartas no mapa!",
+    "rulesTitle": "Pontuação do time",
+    "rulesBase": "O overall do time é a soma do overall dos 5 titulares.",
+    "rulesBonus": "Cada seleção com 2 ou mais titulares dá um bônus, e os bônus se somam:",
+    "rulesTier": "{{count}} da mesma seleção",
+    "rulesExample": "Ex.: 2 brasileiros e 3 argentinos = +5% + 10% = +15%.",
+    "noTeam": "Você ainda não tem um time",
+    "noTeamHint": "Ele é criado com as 5 cartas do pacote de boas-vindas.",
+    "savedTitle": "Time salvo",
+    "savedMessage": "O seu time foi atualizado.",
+    "saveErrorTitle": "Não foi possível salvar",
+    "saveErrorMessage": "Confira a conexão e tente de novo.",
+    "nameEmpty": "Dê um nome ao time.",
+    "unsavedTitle": "Sair sem salvar?",
+    "unsavedMessage": "As alterações do time serão perdidas.",
+    "stay": "Continuar editando",
+    "leave": "Sair sem salvar"
   }
 }

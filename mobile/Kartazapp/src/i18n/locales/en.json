@@ -340,5 +340,82 @@
     "helperNext": "Move on to the next one whenever you like.",
     "helperDone": "All cards are already in your collection.",
     "titleFound": "Player found!"
+  },
+  "achievements": {
+    "title": "Achievements",
+    "subtitle": "Follow your team and your progress",
+    "myTeam": "My team",
+    "myTeamA11y": "My team: {{name}}, overall {{overall}}, {{record}}",
+    "record": "{{wins}}W {{losses}}L",
+    "recordShort": "{{wins}}W · {{losses}}L",
+    "editTeam": "Edit name and starters",
+    "noTeam": "No team yet",
+    "noTeamHint": "Open the welcome pack to build yours",
+    "wins": "Wins",
+    "teamAchievementsShort": "Team achievements",
+    "individualShort": "Individual",
+    "teamSection": "Team achievements",
+    "individualSection": "Individual achievements",
+    "soon": "Coming soon",
+    "done": "Completed",
+    "progress": "{{current}} / {{target}}",
+    "items": {
+      "firstTeamWin": {
+        "title": "First team win",
+        "description": "Available once team matches are live."
+      },
+      "winStreak": {
+        "title": "Win streak",
+        "description": "Come play with your team when the mode is unlocked."
+      },
+      "firstDiscovery": {
+        "title": "First discovery",
+        "description": "Find your first card on the map."
+      },
+      "collector": {
+        "title": "Collector",
+        "description": "Have 10 cards in your collection."
+      },
+      "flagHunter": {
+        "title": "Trailblazer",
+        "description": "Collect 3 discovery flags."
+      },
+      "walker": {
+        "title": "Wanderer",
+        "description": "Walk 5 km exploring the map."
+      }
+    }
+  },
+  "team": {
+    "title": "Edit team",
+    "save": "Save",
+    "nameLabel": "Team name",
+    "namePlaceholder": "My Team",
+    "overall": "Overall {{overall}}",
+    "baseBonus": "Base {{base}} · Bonus +{{bonus}}%",
+    "maxGroup": "Largest group: {{count}} player(s) from the same nation",
+    "starters": "Starters ({{count}})",
+    "slot": "Position {{index}}",
+    "ovr": "OVR {{ovr}}",
+    "swapA11y": "Swap {{name}}",
+    "pickerTitle": "Choose player",
+    "pickerSubtitle": "For position {{index}}",
+    "pickerEmpty": "No other cards available. Find more cards on the map!",
+    "rulesTitle": "Team score",
+    "rulesBase": "The team overall is the sum of the 5 starters' overall.",
+    "rulesBonus": "Each nation with 2 or more starters gives a bonus, and bonuses add up:",
+    "rulesTier": "{{count}} from the same nation",
+    "rulesExample": "E.g.: 2 Brazilians and 3 Argentinians = +5% + 10% = +15%.",
+    "noTeam": "You don't have a team yet",
+    "noTeamHint": "It is created with the 5 cards of the welcome pack.",
+    "savedTitle": "Team saved",
+    "savedMessage": "Your team was updated.",
+    "saveErrorTitle": "Could not save",
+    "saveErrorMessage": "Check your connection and try again.",
+    "nameEmpty": "Give your team a name.",
+    "unsavedTitle": "Leave without saving?",
+    "unsavedMessage": "Your team changes will be lost.",
+    "stay": "Keep editing",
+    "leave": "Leave without saving"
   }
 }

@@ -65,3 +65,19 @@ export function getUserInstances(params: GetUserInstancesParams = {}) {
     auth: 'user',
   });
 }
+
+/** Página máxima que o backend aceita em `GET /user/instances`. */
+const MAX_PAGE_SIZE = 100;
+
+/** Todas as cartas do usuário (várias páginas de 100), ex.: para escolher titulares do time. */
+export async function fetchAllUserInstances() {
+  const all: UserInstanceDto[] = [];
+  let total = Infinity;
+  while (all.length < total) {
+    const page = await getUserInstances({ limit: MAX_PAGE_SIZE, offset: all.length });
+    total = page.total;
+    all.push(...page.instances);
+    if (page.instances.length === 0) break;
+  }
+  return all;
+}
