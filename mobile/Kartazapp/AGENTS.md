@@ -39,3 +39,12 @@ Docs: https://docs.expo.dev/eas/index.md
 - If `ios/` and `android/` directories do not exist, they are generated (Continuous Native Generation). Never create or edit them by hand — configure native behavior in `app.json` and config plugins.
 - Expo Go only includes its bundled native modules. After adding a library with native code, the app needs a development build: `npx expo run:ios|android` locally, or `eas build --profile development`.
 - Prefer recommended Expo modules over third-party libraries, and check your available skills before adding dependencies. Docs: https://docs.expo.dev/versions/latest/index.md
+
+## Arquitetura MVVM (telas e componentes com lógica)
+
+- Rotas em `src/app/` são só uma linha: `export { default } from '@/screens/<tela>';` (Expo Router trata todo arquivo de `src/app/` como rota).
+- Cada tela fica em `src/screens/<tela>/`:
+  - `use-view-model.ts`: estado, queries/mutations, regras, navegação e handlers. Exporta `use<Tela>ViewModel()` e `type <Tela>ViewModel = ReturnType<...>`. Nada de JSX.
+  - `view.tsx`: só UI (JSX, estilos, animações visuais). Recebe tudo por props (`<Tela>ViewModel`); pode usar `useTranslation` e `useSafeAreaInsets`, mas não queries, API, `router` ou `toast`.
+  - `index.tsx`: `const viewModel = use<Tela>ViewModel(); return <<Tela>View {...viewModel} />;`.
+- Componentes com lógica própria seguem o mesmo trio na pasta do componente; componentes só visuais continuam em um arquivo.

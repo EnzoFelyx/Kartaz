@@ -24,9 +24,7 @@ export default function TabsLayout() {
         name="map"
         options={{
           title: t('tabs.map'),
-          tabBarIcon: (props) => (
-            <TabIcon ios="map" android="map" {...props} />
-          ),
+          tabBarIcon: (props) => <TabIcon ios="map" android="map" {...props} />,
         }}
       />
       <Tabs.Screen
@@ -41,35 +39,21 @@ export default function TabsLayout() {
         name="achievements"
         options={{
           title: t('tabs.achievements'),
-          tabBarIcon: (props) => (
-            <TabIcon
-              ios="trophy"
-              android="emoji_events"
-              {...props}
-            />
-          ),
+          tabBarIcon: (props) => <TabIcon ios="trophy" android="emoji_events" {...props} />,
         }}
       />
       <Tabs.Screen
         name="trades"
         options={{
           title: t('tabs.trades'),
-          tabBarIcon: (props) => (
-            <TabIcon ios="arrow.left.arrow.right" android="swap_horiz" {...props} />
-          ),
+          tabBarIcon: (props) => <TabIcon ios="arrow.left.arrow.right" android="swap_horiz" {...props} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: t('tabs.profile'),
-          tabBarIcon: (props) => (
-            <TabIcon
-              ios="person.crop.circle"
-              android="account_circle"
-              {...props}
-            />
-          ),
+          tabBarIcon: (props) => <TabIcon ios="person.crop.circle" android="account_circle" {...props} />,
         }}
       />
     </Tabs>
