@@ -11,11 +11,12 @@ import Animated, {
   withDelay,
   withTiming,
 } from 'react-native-reanimated';
-import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
 import { CardArtwork } from '@/components/collection/card-artwork';
+import { OvrBadge } from '@/components/collection/ovr-badge';
 import { LayersIcon } from '@/components/icons/layers-icon';
 import { SoccerBallIcon } from '@/components/icons/soccer-ball-icon';
+import { SvgGradientRect } from '@/components/ui/svg-gradient-rect';
 import type { SerialClass } from '@/lib/colyseus/types';
 import type { Player } from '@/types/player-card';
 import { colors, withAlpha } from '@/theme/colors';
@@ -162,13 +163,18 @@ export function CardReveal({
 
           {/* Frente */}
           <Animated.View style={[styles.face, frontStyle]} pointerEvents="none">
-            <BorderGradient id="front" colors={serial.gradient} width={width} height={height} />
+            <SvgGradientRect
+              id="front"
+              colors={serial.gradient}
+              radius={OUTER_RADIUS}
+              width={width}
+              height={height}
+              style={styles.border}
+            />
             <View style={styles.inner}>
               <View style={{ height: (height - BORDER_WIDTH * 2) * ART_RATIO }}>
                 <CardArtwork uri={player.imageUri} style={styles.art} pointerEvents="none" depth="flat" />
-                <View style={styles.ratingBadge}>
-                  <Text style={styles.ratingText}>{player.rating > 0 ? player.rating : '—'}</Text>
-                </View>
+                <OvrBadge ovr={player.rating} style={styles.ratingBadge} />
                 {player.flagEmoji && <Text style={styles.flag}>{player.flagEmoji}</Text>}
               </View>
 
@@ -195,23 +201,6 @@ export function CardReveal({
         </View>
       </Animated.View>
     </Pressable>
-  );
-}
-
-/** Borda em gradiente diagonal: fundo da face no tamanho exato da carta, com o miolo por cima. */
-type BorderGradientProps = { id: string; colors: [string, string]; width: number; height: number };
-
-function BorderGradient({ id, colors: [start, end], width, height }: BorderGradientProps) {
-  return (
-    <Svg style={styles.border} width={width} height={height}>
-      <Defs>
-        <LinearGradient id={id} x1="0" y1="0" x2="1" y2="1">
-          <Stop offset="0" stopColor={start} />
-          <Stop offset="1" stopColor={end} />
-        </LinearGradient>
-      </Defs>
-      <Rect x={0} y={0} width={width} height={height} rx={OUTER_RADIUS} fill={`url(#${id})`} />
-    </Svg>
   );
 }
 
@@ -293,19 +282,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 10,
     top: 10,
-    width: 40,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 20,
-    borderWidth: 2,
-    borderColor: colors.primary,
-    backgroundColor: colors.glass,
-  },
-  ratingText: {
-    color: colors.foreground,
-    fontSize: 15,
-    fontWeight: '800',
   },
   flag: {
     position: 'absolute',

@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react';
 import { StyleSheet, View, type LayoutChangeEvent } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
-import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import { scheduleOnRN } from 'react-native-worklets';
 
 import { colors } from '@/theme/colors';
 
+import { SvgGradientRect } from './svg-gradient-rect';
+
 const THUMB_SIZE = 26;
+const RANGE_FILL_COLORS = [colors.primary, colors.progressEnd];
 const TRACK_HEIGHT = 8;
 
 type RangeSliderProps = {
@@ -108,15 +110,7 @@ export function RangeSlider({ min, max, low, high, onChange, onSlide, accessibil
         accessibilityValue={{ text: `${low} – ${high}` }}>
         <View style={styles.track} />
         <Animated.View style={[styles.fill, fillStyle]}>
-          <Svg width="100%" height="100%" preserveAspectRatio="none">
-            <Defs>
-              <LinearGradient id="rangeFill" x1="0" y1="0" x2="1" y2="0">
-                <Stop offset="0" stopColor={colors.primary} />
-                <Stop offset="1" stopColor={colors.progressEnd} />
-              </LinearGradient>
-            </Defs>
-            <Rect x="0" y="0" width="100%" height="100%" fill="url(#rangeFill)" />
-          </Svg>
+          <SvgGradientRect id="rangeFill" colors={RANGE_FILL_COLORS} direction="horizontal" style={null} />
         </Animated.View>
         <Animated.View style={[styles.thumb, lowThumbStyle]} />
         <Animated.View style={[styles.thumb, highThumbStyle]} />

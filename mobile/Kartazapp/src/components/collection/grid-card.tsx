@@ -1,13 +1,14 @@
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
 import { StarIcon } from '@/components/icons/star-icon';
+import { SvgGradientRect } from '@/components/ui/svg-gradient-rect';
 import type { Player, Rarity } from '@/types/player-card';
 import { colors } from '@/theme/colors';
 import { formatNumber, getNationName } from '@/utils/card-labels';
 
 import { CardArtwork } from './card-artwork';
+import { OvrBadge } from './ovr-badge';
 
 const BORDER_WIDTH = 1;
 const CARD_RADIUS = 16;
@@ -49,15 +50,7 @@ export function GridCard({ card, onPress }: GridCardProps) {
       style={({ pressed }) => [styles.pressable, pressed && styles.pressed]}>
       <View style={styles.outer}>
         {/* Borda em gradiente diagonal: SVG em % (sem medir o card), mais leve que um Canvas Skia por card. */}
-        <Svg style={StyleSheet.absoluteFill} width="100%" height="100%">
-          <Defs>
-            <LinearGradient id="border" x1="0" y1="0" x2="1" y2="1">
-              <Stop offset="0" stopColor={start} />
-              <Stop offset="1" stopColor={end} />
-            </LinearGradient>
-          </Defs>
-          <Rect x="0" y="0" width="100%" height="100%" rx={OUTER_RADIUS} fill="url(#border)" />
-        </Svg>
+        <SvgGradientRect id="border" colors={[start, end]} radius={OUTER_RADIUS} />
 
         <View style={styles.inner}>
           <View style={styles.imageWrap}>
@@ -72,9 +65,7 @@ export function GridCard({ card, onPress }: GridCardProps) {
                 <Text style={styles.rankText}>#{card.rank}</Text>
               </View>
             )}
-            <View style={styles.ratingBadge}>
-              <Text style={styles.ratingText}>{card.rating}</Text>
-            </View>
+            <OvrBadge ovr={card.rating} style={styles.ratingBadge} />
             <View style={[styles.rarityBadge, { backgroundColor: start }]}>
               <StarIcon color={colors.white} size={10} />
             </View>
@@ -161,19 +152,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 8,
     top: 8,
-    width: 40,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 20,
-    borderWidth: 2,
-    borderColor: colors.primary,
-    backgroundColor: colors.glass,
-  },
-  ratingText: {
-    color: colors.foreground,
-    fontSize: 14,
-    fontWeight: '700',
   },
   rarityBadge: {
     position: 'absolute',

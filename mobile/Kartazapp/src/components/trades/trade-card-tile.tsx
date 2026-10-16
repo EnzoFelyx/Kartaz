@@ -1,12 +1,12 @@
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { CardArtwork } from '@/components/collection/card-artwork';
+import { NationLabel } from '@/components/collection/nation-label';
+import { OvrBadge } from '@/components/collection/ovr-badge';
+import { PlayerThumb } from '@/components/collection/player-thumb';
 import { playerPhotoUri } from '@/lib/api/image-uri';
 import type { UserInstanceDto } from '@/lib/api/user-instances-api';
 import { colors, withAlpha } from '@/theme/colors';
-import { getNationName } from '@/utils/card-labels';
-import { getFlagEmojiForCountry } from '@/utils/flags';
 
 const THUMB_SIZE = 52;
 /** Largura de cada carta quando a proposta tem mais de uma (lista horizontal). */
@@ -22,17 +22,13 @@ type TradeCardTileProps = {
 export function TradeCardTile({ instance, fullWidth = false }: TradeCardTileProps) {
   const { t } = useTranslation();
   const { card } = instance;
-  const nation = card.nation?.trim() ?? '';
-  const flag = nation ? getFlagEmojiForCountry(nation) : null;
 
   return (
     <View
       style={[styles.tile, fullWidth ? styles.full : { width: TRADE_TILE_WIDTH }]}
       accessible
       accessibilityLabel={`${card.name}, ${t('trades.serial', { serial: instance.serialNumber, max: instance.serialMax })}, OVR ${card.ovr ?? '—'}`}>
-      <View style={styles.thumb}>
-        <CardArtwork uri={playerPhotoUri(card.id, card.url)} style={styles.photo} pointerEvents="none" />
-      </View>
+      <PlayerThumb uri={playerPhotoUri(card.id, card.url)} size={THUMB_SIZE} radius={12} />
       <View style={styles.texts}>
         <Text style={styles.name} numberOfLines={1}>
           {card.name}
@@ -40,16 +36,9 @@ export function TradeCardTile({ instance, fullWidth = false }: TradeCardTileProp
         <Text style={styles.serial}>
           {t('trades.serial', { serial: instance.serialNumber, max: instance.serialMax })}
         </Text>
-        {!!nation && (
-          <Text style={styles.nation} numberOfLines={1}>
-            {flag ? `${flag} ` : ''}
-            {getNationName(nation)}
-          </Text>
-        )}
+        <NationLabel nation={card.nation} />
       </View>
-      <View style={styles.ovrBadge}>
-        <Text style={styles.ovrText}>{card.ovr ?? '—'}</Text>
-      </View>
+      <OvrBadge ovr={card.ovr} variant="outline" />
     </View>
   );
 }
@@ -68,17 +57,6 @@ const styles = StyleSheet.create({
   full: {
     alignSelf: 'stretch',
   },
-  thumb: {
-    width: THUMB_SIZE,
-    height: THUMB_SIZE,
-    overflow: 'hidden',
-    borderRadius: 12,
-    backgroundColor: colors.secondary,
-  },
-  photo: {
-    width: '100%',
-    height: '100%',
-  },
   texts: {
     flex: 1,
     gap: 2,
@@ -91,23 +69,5 @@ const styles = StyleSheet.create({
   serial: {
     color: colors.secondaryForeground,
     fontSize: 12,
-  },
-  nation: {
-    color: colors.violet,
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  ovrBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
-    backgroundColor: withAlpha(colors.primary, 0.15),
-    borderWidth: 1,
-    borderColor: withAlpha(colors.primary, 0.5),
-  },
-  ovrText: {
-    color: colors.primary,
-    fontSize: 13,
-    fontWeight: '900',
   },
 });

@@ -1,13 +1,12 @@
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { CardArtwork } from '@/components/collection/card-artwork';
+import { NationLabel } from '@/components/collection/nation-label';
+import { PlayerThumb } from '@/components/collection/player-thumb';
 import { SwapIcon } from '@/components/icons/swap-icon';
 import { playerPhotoUri } from '@/lib/api/image-uri';
 import type { UserInstanceDto } from '@/lib/api/user-instances-api';
 import { colors } from '@/theme/colors';
-import { getFlagEmojiForCountry } from '@/utils/flags';
-import { getNationName } from '@/utils/card-labels';
 
 const THUMB_SIZE = 56;
 
@@ -29,26 +28,17 @@ type LineupSlotProps = {
 export function LineupSlot({ index, instance, onSwap, onSelect }: LineupSlotProps) {
   const { t } = useTranslation();
   const { card } = instance;
-  const nation = card.nation?.trim() ?? '';
-  const flag = nation ? getFlagEmojiForCountry(nation) : null;
 
   const content = (
     <>
-      <View style={styles.thumb}>
-        <CardArtwork uri={playerPhotoUri(card.id, card.url)} style={styles.photo} pointerEvents="none" />
-      </View>
+      <PlayerThumb uri={playerPhotoUri(card.id, card.url)} size={THUMB_SIZE} />
       <View style={styles.texts}>
         {!onSelect && <Text style={styles.position}>{t('team.slot', { index }).toUpperCase()}</Text>}
         <Text style={styles.name} numberOfLines={1}>
           {card.name}
         </Text>
         <Text style={styles.ovr}>{t('team.ovr', { ovr: card.ovr ?? '—' })}</Text>
-        {!!nation && (
-          <Text style={styles.nation} numberOfLines={1}>
-            {flag ? `${flag} ` : ''}
-            {getNationName(nation)}
-          </Text>
-        )}
+        <NationLabel nation={card.nation} />
       </View>
       {onSwap && (
         <Pressable
@@ -98,17 +88,6 @@ const styles = StyleSheet.create({
   pressed: {
     opacity: 0.7,
   },
-  thumb: {
-    width: THUMB_SIZE,
-    height: THUMB_SIZE,
-    overflow: 'hidden',
-    borderRadius: 14,
-    backgroundColor: colors.secondary,
-  },
-  photo: {
-    width: '100%',
-    height: '100%',
-  },
   texts: {
     flex: 1,
     gap: 2,
@@ -127,11 +106,6 @@ const styles = StyleSheet.create({
   ovr: {
     color: colors.primary,
     fontSize: 13,
-    fontWeight: '700',
-  },
-  nation: {
-    color: colors.violet,
-    fontSize: 12,
     fontWeight: '700',
   },
   swap: {

@@ -114,8 +114,7 @@
       "spawnSource": "ORIGEM DA INSTÂNCIA",
       "spawnSourcePlaceholder": "Ex.: user_pack, world_pool",
       "clear": "Limpar",
-      "apply": "Aplicar",
-      "close": "Fechar"
+      "apply": "Aplicar"
     }
   },
   "cardDetails": {
@@ -309,7 +308,6 @@
     "fillTank": "Encher tanque — {{cost}} moedas",
     "full": "Tanque cheio",
     "notEnoughCoins": "Moedas insuficientes: você tem {{balance}}. Colete moedas no mapa.",
-    "close": "Fechar",
     "openA11y": "Abre a tela de abastecer",
     "errors": {
       "already_full": "O tanque já está cheio.",

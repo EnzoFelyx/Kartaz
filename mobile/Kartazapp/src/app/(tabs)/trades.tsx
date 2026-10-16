@@ -1,13 +1,14 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { TAB_BAR_BOTTOM_GAP, TAB_BAR_HEIGHT } from '@/components/tab-bar';
 import { TradeProposalCard } from '@/components/trades/trade-proposal-card';
 import { TradeStatusFilter } from '@/components/trades/trade-status-filter';
+import { ListState } from '@/components/ui/list-state';
 import { useSession } from '@/hooks/queries/use-session';
 import { TRADE_TABS, useTradeAction, useTradeCounts, useTrades, type TradeTab } from '@/hooks/queries/use-trades';
 import { useUserTeam } from '@/hooks/queries/use-user-team';
@@ -70,18 +71,12 @@ export default function TradesScreen() {
           </View>
         }
         ListEmptyComponent={
-          trades.isPending || session.isPending ? (
-            <ActivityIndicator color={colors.primary} style={styles.loading} />
-          ) : trades.isError ? (
-            <View style={styles.error}>
-              <Text style={styles.empty}>{t('common.loadError')}</Text>
-              <Pressable accessibilityRole="button" onPress={() => void refetch()} style={styles.retryButton}>
-                <Text style={styles.retryText}>{t('common.retry')}</Text>
-              </Pressable>
-            </View>
-          ) : (
-            <Text style={styles.empty}>{t(`trades.empty.${status}`)}</Text>
-          )
+          <ListState
+            loading={trades.isPending || session.isPending}
+            error={trades.isError}
+            onRetry={() => void refetch()}
+            emptyText={t(`trades.empty.${status}`)}
+          />
         }
         renderItem={({ item, index }) => (
           <Animated.View entering={listItemEntering(index)}>
@@ -128,32 +123,5 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: 14,
-  },
-  loading: {
-    marginTop: 32,
-  },
-  error: {
-    alignItems: 'center',
-    gap: 16,
-    marginTop: 24,
-  },
-  empty: {
-    marginTop: 24,
-    color: colors.mutedForeground,
-    fontSize: 14,
-    textAlign: 'center',
-  },
-  retryButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 14,
-    backgroundColor: colors.secondary,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  retryText: {
-    color: colors.primary,
-    fontSize: 14,
-    fontWeight: '800',
   },
 });

@@ -114,8 +114,7 @@
       "spawnSource": "INSTANCE ORIGIN",
       "spawnSourcePlaceholder": "E.g.: user_pack, world_pool",
       "clear": "Clear",
-      "apply": "Apply",
-      "close": "Close"
+      "apply": "Apply"
     }
   },
   "cardDetails": {
@@ -309,7 +308,6 @@
     "fillTank": "Fill tank — {{cost}} coins",
     "full": "Tank full",
     "notEnoughCoins": "Not enough coins: you have {{balance}}. Collect coins on the map.",
-    "close": "Close",
     "openA11y": "Opens the refuel screen",
     "errors": {
       "already_full": "The tank is already full.",

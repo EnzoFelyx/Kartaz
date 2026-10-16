@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { BoltIcon } from '@/components/icons/bolt-icon';
 import { CoinIcon } from '@/components/icons/coin-icon';
+import { ModalCard } from '@/components/ui/modal-card';
 import type { FuelPurchaseError } from '@/hooks/use-cell-room';
 import { colors, withAlpha } from '@/theme/colors';
 import { formatNumber } from '@/utils/card-labels';
@@ -72,65 +73,40 @@ export function RefuelModal({
       : null;
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
-      <Pressable style={styles.backdrop} onPress={close}>
-        <Pressable style={styles.card} onPress={(event) => event.stopPropagation()}>
-          <Text style={styles.title} accessibilityRole="header">
-            {t('refuel.title')}
-          </Text>
-          <Text style={styles.subtitle}>{t('refuel.subtitle')}</Text>
+    <ModalCard visible={visible} onClose={close} showClose>
+      <Text style={styles.title} accessibilityRole="header">
+        {t('refuel.title')}
+      </Text>
+      <Text style={styles.subtitle}>{t('refuel.subtitle')}</Text>
 
-          <View style={styles.fuelRow}>
-            <BoltIcon color={colors.gold} size={18} />
-            <Text style={styles.fuelText}>{t('refuel.currentFuel', { percent })}</Text>
-          </View>
+      <View style={styles.fuelRow}>
+        <BoltIcon color={colors.gold} size={18} />
+        <Text style={styles.fuelText}>{t('refuel.currentFuel', { percent })}</Text>
+      </View>
 
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={buttonLabel}
-            accessibilityState={{ disabled, busy: buying }}
-            disabled={disabled}
-            onPress={purchase}
-            style={({ pressed }) => [styles.buyButton, disabled && styles.buyDisabled, pressed && styles.pressed]}>
-            {buying ? (
-              <ActivityIndicator color={colors.foreground} />
-            ) : (
-              <>
-                {!full && <CoinIcon size={22} />}
-                <Text style={styles.buyText}>{buttonLabel}</Text>
-              </>
-            )}
-          </Pressable>
-
-          {note && <Text style={[styles.note, error && styles.noteError]}>{note}</Text>}
-
-          <Pressable accessibilityRole="button" onPress={close} hitSlop={8} style={styles.closeButton}>
-            <Text style={styles.closeText}>{t('refuel.close')}</Text>
-          </Pressable>
-        </Pressable>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={buttonLabel}
+        accessibilityState={{ disabled, busy: buying }}
+        disabled={disabled}
+        onPress={purchase}
+        style={({ pressed }) => [styles.buyButton, disabled && styles.buyDisabled, pressed && styles.pressed]}>
+        {buying ? (
+          <ActivityIndicator color={colors.foreground} />
+        ) : (
+          <>
+            {!full && <CoinIcon size={22} />}
+            <Text style={styles.buyText}>{buttonLabel}</Text>
+          </>
+        )}
       </Pressable>
-    </Modal>
+
+      {note && <Text style={[styles.note, error && styles.noteError]}>{note}</Text>}
+    </ModalCard>
   );
 }
 
 const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-    backgroundColor: withAlpha(colors.deep, 0.7),
-  },
-  card: {
-    width: '100%',
-    maxWidth: 360,
-    gap: 16,
-    padding: 22,
-    borderRadius: 22,
-    backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: withAlpha(colors.primary, 0.25),
-  },
   title: {
     color: colors.foreground,
     fontSize: 20,
@@ -187,15 +163,5 @@ const styles = StyleSheet.create({
   },
   noteError: {
     color: colors.danger,
-  },
-  closeButton: {
-    alignSelf: 'center',
-    paddingVertical: 6,
-    paddingHorizontal: 16,
-  },
-  closeText: {
-    color: colors.primary,
-    fontSize: 16,
-    fontWeight: '700',
   },
 });

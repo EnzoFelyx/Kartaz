@@ -2,15 +2,17 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AuthButton } from '@/components/auth/auth-button';
-import { CardArtwork } from '@/components/collection/card-artwork';
-import { ArrowLeftIcon } from '@/components/icons/arrow-left-icon';
+import { NationLabel } from '@/components/collection/nation-label';
+import { OvrBadge } from '@/components/collection/ovr-badge';
+import { PlayerThumb } from '@/components/collection/player-thumb';
 import { OfferCardRow } from '@/components/trades/offer-card-row';
-import { IconButton } from '@/components/ui/icon-button';
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { SearchInput } from '@/components/ui/search-input';
+import { ListState } from '@/components/ui/list-state';
 import { useSession } from '@/hooks/queries/use-session';
 import { useUserTeam } from '@/hooks/queries/use-user-team';
 import { createTrade, getTradeErrorCode } from '@/lib/api/trades-api';
@@ -20,7 +22,6 @@ import { playerForCardId } from '@/lib/cards/mappers';
 import { queryKeys } from '@/lib/query/keys';
 import { toast } from '@/lib/toast/toast-store';
 import { colors, withAlpha } from '@/theme/colors';
-import { getNationName } from '@/utils/card-labels';
 
 const TARGET_THUMB_SIZE = 64;
 
@@ -104,21 +105,10 @@ export default function NewTradeScreen() {
   });
 
   const loading = collection.isPending || team.isPending;
-  const nation = target.nation;
 
   return (
     <View style={styles.container}>
-      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-        <IconButton
-          icon={<ArrowLeftIcon color={colors.foreground} />}
-          accessibilityLabel={t('common.goBack')}
-          onPress={goBack}
-        />
-        <Text style={styles.title} accessibilityRole="header">
-          {t('trades.newTitle')}
-        </Text>
-        <View style={styles.headerSpacer} />
-      </View>
+      <ScreenHeader title={t('trades.newTitle')} align="center" onBack={goBack} />
 
       <FlatList
         data={loading ? [] : myCards}
@@ -132,9 +122,7 @@ export default function NewTradeScreen() {
             <View style={styles.targetCard}>
               <Text style={styles.targetLabel}>{t('trades.youWant')}</Text>
               <View style={styles.targetRow}>
-                <View style={styles.targetThumb}>
-                  <CardArtwork uri={target.imageUri} style={styles.photo} pointerEvents="none" />
-                </View>
+                <PlayerThumb uri={target.imageUri} size={TARGET_THUMB_SIZE} />
                 <View style={styles.targetTexts}>
                   <Text style={styles.targetName} numberOfLines={1}>
                     {target.name}
@@ -146,18 +134,9 @@ export default function NewTradeScreen() {
                       owner: params.counterpartyName,
                     })}
                   </Text>
-                  {!!nation && (
-                    <Text style={styles.targetNation} numberOfLines={1}>
-                      {target.flagEmoji ? `${target.flagEmoji} ` : ''}
-                      {getNationName(nation)}
-                    </Text>
-                  )}
+                  <NationLabel nation={target.nation} />
                 </View>
-                {target.rating > 0 && (
-                  <View style={styles.ovrBadge}>
-                    <Text style={styles.ovrText}>{target.rating}</Text>
-                  </View>
-                )}
+                {target.rating > 0 && <OvrBadge ovr={target.rating} variant="solid" style={styles.ovrBadge} />}
               </View>
             </View>
 
@@ -165,13 +144,12 @@ export default function NewTradeScreen() {
           </View>
         }
         ListEmptyComponent={
-          loading ? (
-            <ActivityIndicator color={colors.primary} style={styles.loading} />
-          ) : collection.isError ? (
-            <Text style={styles.empty}>{t('common.loadError')}</Text>
-          ) : (
-            <Text style={styles.empty}>{query.trim() ? t('trades.noMatch') : t('trades.noCards')}</Text>
-          )
+          <ListState
+            loading={loading}
+            error={collection.isError}
+            onRetry={() => void collection.refetch()}
+            emptyText={query.trim() ? t('trades.noMatch') : t('trades.noCards')}
+          />
         }
         renderItem={({ item }) => (
           <OfferCardRow
@@ -201,25 +179,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingHorizontal: 20,
-    paddingBottom: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  title: {
-    flex: 1,
-    color: colors.foreground,
-    fontSize: 18,
-    fontWeight: '800',
-    textAlign: 'center',
-  },
-  headerSpacer: {
-    width: 44,
-  },
   content: {
     paddingHorizontal: 20,
     paddingTop: 20,
@@ -247,17 +206,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 14,
   },
-  targetThumb: {
-    width: TARGET_THUMB_SIZE,
-    height: TARGET_THUMB_SIZE,
-    overflow: 'hidden',
-    borderRadius: 14,
-    backgroundColor: colors.secondary,
-  },
-  photo: {
-    width: '100%',
-    height: '100%',
-  },
   targetTexts: {
     flex: 1,
     gap: 3,
@@ -272,34 +220,11 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
   },
-  targetNation: {
-    color: colors.violet,
-    fontSize: 12,
-    fontWeight: '700',
-  },
   ovrBadge: {
     alignSelf: 'flex-start',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 10,
-    backgroundColor: colors.primary,
-  },
-  ovrText: {
-    color: colors.primaryForeground,
-    fontSize: 15,
-    fontWeight: '900',
   },
   separator: {
     height: 12,
-  },
-  loading: {
-    marginTop: 24,
-  },
-  empty: {
-    marginTop: 24,
-    color: colors.mutedForeground,
-    fontSize: 14,
-    textAlign: 'center',
   },
   footer: {
     gap: 10,

@@ -6,13 +6,12 @@ import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleShee
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { ArrowLeftIcon } from '@/components/icons/arrow-left-icon';
 import { CameraIcon } from '@/components/icons/camera-icon';
 import { MailIcon } from '@/components/icons/mail-icon';
 import { SaveIcon } from '@/components/icons/save-icon';
 import { UserAvatar } from '@/components/profile/user-avatar';
 import { GradientBox } from '@/components/ui/gradient-box';
-import { IconButton } from '@/components/ui/icon-button';
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { TextField } from '@/components/ui/text-field';
 import { useCurrentUser, useUploadAvatar } from '@/hooks/queries/use-current-user';
 import { useSession } from '@/hooks/queries/use-session';
@@ -66,28 +65,27 @@ export default function EditProfileScreen() {
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       {/* Entrada em cascata (mesma da tela de Cartas): cabeçalho, foto e cada campo. */}
-      <Animated.View entering={listItemEntering(0)} style={[styles.header, { paddingTop: insets.top + 8 }]}>
-        <IconButton
-          icon={<ArrowLeftIcon color={colors.foreground} />}
-          accessibilityLabel={t('common.goBack')}
-          onPress={goBack}
+      <Animated.View entering={listItemEntering(0)}>
+        <ScreenHeader
+          title={t('editProfile.title')}
+          align="center"
+          onBack={goBack}
+          right={
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('editProfile.save')}
+              onPress={save}
+              style={({ pressed }) => [styles.saveButton, pressed && styles.pressed]}>
+              <GradientBox
+                width={SAVE_BUTTON_SIZE}
+                height={SAVE_BUTTON_SIZE}
+                radius={SAVE_BUTTON_SIZE / 2}
+                colors={[colors.primary, colors.info]}>
+                <SaveIcon color={colors.white} size={20} />
+              </GradientBox>
+            </Pressable>
+          }
         />
-        <Text style={styles.title} accessibilityRole="header">
-          {t('editProfile.title')}
-        </Text>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('editProfile.save')}
-          onPress={save}
-          style={({ pressed }) => [styles.saveButton, pressed && styles.pressed]}>
-          <GradientBox
-            width={SAVE_BUTTON_SIZE}
-            height={SAVE_BUTTON_SIZE}
-            radius={SAVE_BUTTON_SIZE / 2}
-            colors={[colors.primary, colors.info]}>
-            <SaveIcon color={colors.white} size={20} />
-          </GradientBox>
-        </Pressable>
       </Animated.View>
 
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}>
@@ -163,20 +161,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: H_PADDING,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  title: {
-    color: colors.foreground,
-    fontSize: 20,
-    fontWeight: '800',
   },
   saveButton: {
     borderRadius: SAVE_BUTTON_SIZE / 2,

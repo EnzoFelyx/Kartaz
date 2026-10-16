@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { AuthButton } from '@/components/auth/auth-button';
+import { ModalCard, ModalCloseButton } from '@/components/ui/modal-card';
 import { RangeSlider } from '@/components/ui/range-slider';
 import { TextField } from '@/components/ui/text-field';
 import {
@@ -12,7 +12,7 @@ import {
   OVR_MIN,
   type CollectionFilters,
 } from '@/lib/collection/collection-filters';
-import { colors, withAlpha } from '@/theme/colors';
+import { colors } from '@/theme/colors';
 
 type CollectionFiltersModalProps = {
   visible: boolean;
@@ -28,13 +28,11 @@ type CollectionFiltersModalProps = {
  */
 export function CollectionFiltersModal({ visible, filters, onApply, onClose }: CollectionFiltersModalProps) {
   return (
-    <Modal visible={visible} transparent animationType="fade" statusBarTranslucent onRequestClose={onClose}>
-      {/* O Modal fica fora da raiz de gestos do app: precisa da própria para o slider funcionar. */}
-      <GestureHandlerRootView style={styles.flex}>
-        {/* Remonta a cada abertura: o rascunho começa nos filtros aplicados. */}
-        {visible && <FiltersContent filters={filters} onApply={onApply} onClose={onClose} />}
-      </GestureHandlerRootView>
-    </Modal>
+    // `gestures`: o slider precisa da raiz de gestos (o Modal fica fora da do app).
+    <ModalCard visible={visible} onClose={onClose} maxWidth={400} cardStyle={styles.card} keyboardAvoiding gestures>
+      {/* Remonta a cada abertura: o rascunho começa nos filtros aplicados. */}
+      {visible && <FiltersContent filters={filters} onApply={onApply} onClose={onClose} />}
+    </ModalCard>
   );
 }
 
@@ -62,90 +60,68 @@ function FiltersContent({ filters, onApply, onClose }: Omit<CollectionFiltersMod
   };
 
   return (
-    <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <Pressable style={styles.backdrop} onPress={onClose}>
-        <Pressable style={styles.card} onPress={(event) => event.stopPropagation()} accessibilityViewIsModal>
-          <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" bounces={false}>
-            <Text style={styles.title} accessibilityRole="header">
-              {t('myCollection.filters.title')}
-            </Text>
+    <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" bounces={false}>
+      <Text style={styles.title} accessibilityRole="header">
+        {t('myCollection.filters.title')}
+      </Text>
 
-            <View style={styles.section}>
-              <Text style={styles.sectionLabel}>{t('myCollection.filters.ovr')}</Text>
-              <Text style={styles.rangeValue}>
-                {t('myCollection.filters.ovrRange', { min: liveRange.low, max: liveRange.high })}
-              </Text>
-              <RangeSlider
-                min={OVR_MIN}
-                max={OVR_MAX}
-                low={draft.ovrMin}
-                high={draft.ovrMax}
-                onSlide={(low, high) => setLiveRange({ low, high })}
-                onChange={changeRange}
-                accessibilityLabel={t('myCollection.filters.ovr')}
-              />
-            </View>
+      <View style={styles.section}>
+        <Text style={styles.sectionLabel}>{t('myCollection.filters.ovr')}</Text>
+        <Text style={styles.rangeValue}>
+          {t('myCollection.filters.ovrRange', { min: liveRange.low, max: liveRange.high })}
+        </Text>
+        <RangeSlider
+          min={OVR_MIN}
+          max={OVR_MAX}
+          low={draft.ovrMin}
+          high={draft.ovrMax}
+          onSlide={(low, high) => setLiveRange({ low, high })}
+          onChange={changeRange}
+          accessibilityLabel={t('myCollection.filters.ovr')}
+        />
+      </View>
 
-            <TextField
-              label={t('myCollection.filters.nation')}
-              value={draft.nation}
-              onChangeText={(nation) => update({ nation })}
-              placeholder={t('myCollection.filters.nationPlaceholder')}
-              autoCapitalize="words"
-            />
-            <TextField
-              label={t('myCollection.filters.position')}
-              value={draft.position}
-              onChangeText={(position) => update({ position })}
-              placeholder={t('myCollection.filters.positionPlaceholder')}
-              autoCapitalize="characters"
-            />
-            <TextField
-              label={t('myCollection.filters.spawnSource')}
-              value={draft.spawnSource}
-              onChangeText={(spawnSource) => update({ spawnSource })}
-              placeholder={t('myCollection.filters.spawnSourcePlaceholder')}
-              autoCapitalize="none"
-            />
+      <TextField
+        label={t('myCollection.filters.nation')}
+        value={draft.nation}
+        onChangeText={(nation) => update({ nation })}
+        placeholder={t('myCollection.filters.nationPlaceholder')}
+        autoCapitalize="words"
+      />
+      <TextField
+        label={t('myCollection.filters.position')}
+        value={draft.position}
+        onChangeText={(position) => update({ position })}
+        placeholder={t('myCollection.filters.positionPlaceholder')}
+        autoCapitalize="characters"
+      />
+      <TextField
+        label={t('myCollection.filters.spawnSource')}
+        value={draft.spawnSource}
+        onChangeText={(spawnSource) => update({ spawnSource })}
+        placeholder={t('myCollection.filters.spawnSourcePlaceholder')}
+        autoCapitalize="none"
+      />
 
-            <View style={styles.actions}>
-              <View style={styles.action}>
-                <AuthButton label={t('myCollection.filters.clear')} variant="secondary" onPress={clear} />
-              </View>
-              <View style={styles.action}>
-                <AuthButton label={t('myCollection.filters.apply')} onPress={apply} />
-              </View>
-            </View>
+      <View style={styles.actions}>
+        <View style={styles.action}>
+          <AuthButton label={t('myCollection.filters.clear')} variant="secondary" onPress={clear} />
+        </View>
+        <View style={styles.action}>
+          <AuthButton label={t('myCollection.filters.apply')} onPress={apply} />
+        </View>
+      </View>
 
-            <Pressable accessibilityRole="button" onPress={onClose} hitSlop={8} style={styles.closeButton}>
-              <Text style={styles.closeText}>{t('myCollection.filters.close')}</Text>
-            </Pressable>
-          </ScrollView>
-        </Pressable>
-      </Pressable>
-    </KeyboardAvoidingView>
+      <ModalCloseButton onPress={onClose} />
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  flex: {
-    flex: 1,
-  },
-  backdrop: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-    backgroundColor: withAlpha(colors.deep, 0.7),
-  },
   card: {
-    width: '100%',
-    maxWidth: 400,
     maxHeight: '90%',
-    borderRadius: 22,
-    backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: withAlpha(colors.primary, 0.25),
+    gap: 0,
+    padding: 0,
   },
   content: {
     gap: 18,
@@ -178,15 +154,5 @@ const styles = StyleSheet.create({
   },
   action: {
     flex: 1,
-  },
-  closeButton: {
-    alignSelf: 'center',
-    paddingVertical: 6,
-    paddingHorizontal: 16,
-  },
-  closeText: {
-    color: colors.primary,
-    fontSize: 16,
-    fontWeight: '700',
   },
 });

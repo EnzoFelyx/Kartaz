@@ -1,11 +1,14 @@
 import type { Rarity } from '@/types/player-card';
 
+import baseColors from './base-colors.json';
+
 /**
  * Paleta principal — tokens do `@theme` de UI_REACT_para_referencia/src/index.css.
  * Fonte única de cores do app (será lida pelo tailwind.config na Fase 1).
  */
 export const colors = {
-  background: '#080b14',
+  /** Também usada no app.config (splash e ícone do Android): por isso fica em `base-colors.json`. */
+  background: baseColors.background,
   foreground: '#e8eaf0',
   card: '#0f1520',
   cardForeground: '#e8eaf0',

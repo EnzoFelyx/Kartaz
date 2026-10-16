@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { router, useNavigation } from 'expo-router';
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -16,13 +16,13 @@ import {
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { ArrowLeftIcon } from '@/components/icons/arrow-left-icon';
 import { HelpCircleIcon } from '@/components/icons/help-circle-icon';
 import { SparklesIcon } from '@/components/icons/sparkles-icon';
 import { LineupSlot } from '@/components/team/lineup-slot';
 import { PlayerPickerModal } from '@/components/team/player-picker-modal';
 import { TeamRulesModal } from '@/components/team/team-rules-modal';
 import { IconButton } from '@/components/ui/icon-button';
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { TextField } from '@/components/ui/text-field';
 import { useSession } from '@/hooks/queries/use-session';
 import { useUserTeam } from '@/hooks/queries/use-user-team';
@@ -39,7 +39,6 @@ const NAME_MAX_LENGTH = 30;
 
 /** Edição do time: nome, os 5 titulares (com troca) e o overall recalculado na hora. */
 export default function EditTeamScreen() {
-  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const team = useUserTeam();
 
@@ -52,7 +51,7 @@ export default function EditTeamScreen() {
         <TeamEditor key={team.data.id} team={team.data} onDone={goBack} />
       ) : (
         <>
-          <Header title={t('team.title')} onBack={goBack} paddingTop={insets.top + 8} />
+          <ScreenHeader title={t('team.title')} align="center" onBack={goBack} />
           <View style={styles.center}>
             {team.isPending ? (
               <ActivityIndicator color={colors.primary} />
@@ -207,11 +206,11 @@ function TeamEditor({ team, onDone }: { team: UserTeamDto; onDone: () => void })
 
   return (
     <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <Header
+      <ScreenHeader
         title={t('team.title')}
+        align="center"
         onBack={onDone}
-        paddingTop={insets.top + 8}
-        action={
+        right={
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={t('team.save')}
@@ -303,31 +302,6 @@ function TeamEditor({ team, onDone }: { team: UserTeamDto; onDone: () => void })
   );
 }
 
-type HeaderProps = {
-  title: string;
-  onBack: () => void;
-  paddingTop: number;
-  action?: ReactNode;
-};
-
-/** Cabeçalho: voltar, título no centro e a ação (Salvar) à direita. */
-function Header({ title, onBack, paddingTop, action }: HeaderProps) {
-  const { t } = useTranslation();
-  return (
-    <View style={[styles.header, { paddingTop }]}>
-      <IconButton
-        icon={<ArrowLeftIcon color={colors.foreground} />}
-        accessibilityLabel={t('common.goBack')}
-        onPress={onBack}
-      />
-      <Text style={styles.title} accessibilityRole="header">
-        {title}
-      </Text>
-      <View style={styles.headerAction}>{action}</View>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -335,26 +309,6 @@ const styles = StyleSheet.create({
   },
   flex: {
     flex: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingHorizontal: 20,
-    paddingBottom: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  title: {
-    flex: 1,
-    color: colors.foreground,
-    fontSize: 18,
-    fontWeight: '800',
-    textAlign: 'center',
-  },
-  headerAction: {
-    minWidth: 76,
-    alignItems: 'flex-end',
   },
   saveButton: {
     minWidth: 76,

@@ -1,16 +1,16 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { Pressable, RefreshControl, StyleSheet, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CollectionFiltersModal } from '@/components/collection/collection-filters-modal';
 import { OwnedCardItem } from '@/components/collection/owned-card-item';
-import { ArrowLeftIcon } from '@/components/icons/arrow-left-icon';
 import { SlidersIcon } from '@/components/icons/sliders-icon';
-import { IconButton } from '@/components/ui/icon-button';
+import { ScreenHeader } from '@/components/ui/screen-header';
 import { SearchInput } from '@/components/ui/search-input';
+import { ListLoadingMore, ListState } from '@/components/ui/list-state';
 import { useMyCollection } from '@/hooks/queries/use-my-collection';
 import { useSession } from '@/hooks/queries/use-session';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
@@ -55,19 +55,11 @@ export default function MyCollectionScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-        <IconButton
-          icon={<ArrowLeftIcon color={colors.foreground} />}
-          accessibilityLabel={t('common.goBack')}
-          onPress={goBack}
-        />
-        <View style={styles.titles}>
-          <Text style={styles.title} accessibilityRole="header">
-            {t('myCollection.title')}
-          </Text>
-          <Text style={styles.subtitle}>{t('common.cardsCount', { count: collection.total })}</Text>
-        </View>
-      </View>
+      <ScreenHeader
+        title={t('myCollection.title')}
+        subtitle={t('common.cardsCount', { count: collection.total })}
+        onBack={goBack}
+      />
 
       <Animated.FlatList
         data={collection.cards}
@@ -92,32 +84,14 @@ export default function MyCollectionScreen() {
           </View>
         }
         ListEmptyComponent={
-          isLoading ? (
-            <ActivityIndicator color={colors.primary} style={styles.loading} />
-          ) : hasError ? (
-            <View style={styles.error}>
-              <Text style={styles.empty}>{t('common.loadError')}</Text>
-              <Pressable
-                accessibilityRole="button"
-                onPress={retry}
-                style={({ pressed }) => [styles.retryButton, pressed && styles.retryPressed]}>
-                <Text style={styles.retryText}>{t('common.retry')}</Text>
-              </Pressable>
-            </View>
-          ) : (
-            <Text style={styles.empty}>
-              {search.trim() || filtersActive ? t('myCollection.emptyFiltered') : t('myCollection.empty')}
-            </Text>
-          )
+          <ListState
+            loading={isLoading}
+            error={hasError}
+            onRetry={retry}
+            emptyText={search.trim() || filtersActive ? t('myCollection.emptyFiltered') : t('myCollection.empty')}
+          />
         }
-        ListFooterComponent={
-          collection.isFetchingNextPage ? (
-            <View style={styles.footer}>
-              <ActivityIndicator color={colors.primary} />
-              <Text style={styles.footerText}>{t('cards.loadingMore')}</Text>
-            </View>
-          ) : null
-        }
+        ListFooterComponent={collection.isFetchingNextPage ? <ListLoadingMore /> : null}
         onEndReached={loadMore}
         onEndReachedThreshold={LIST_END_THRESHOLD}
         {...LIST_RENDER_PROPS}
@@ -155,28 +129,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    paddingHorizontal: H_PADDING,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  titles: {
-    flex: 1,
-    gap: 2,
-  },
-  title: {
-    color: colors.foreground,
-    fontSize: 22,
-    fontWeight: '900',
-  },
-  subtitle: {
-    color: colors.secondaryForeground,
-    fontSize: 14,
-  },
   content: {
     paddingHorizontal: H_PADDING,
     paddingTop: 20,
@@ -209,44 +161,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: colors.accent,
   },
-  empty: {
-    marginTop: 24,
-    textAlign: 'center',
-    color: colors.mutedForeground,
-    fontSize: 14,
-  },
-  loading: {
-    marginTop: 32,
-  },
-  error: {
-    alignItems: 'center',
-    gap: 16,
-  },
-  retryButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 14,
-    backgroundColor: colors.secondary,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
   retryPressed: {
     transform: [{ scale: 0.97 }],
-  },
-  retryText: {
-    color: colors.primary,
-    fontSize: 14,
-    fontWeight: '800',
-  },
-  footer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 16,
-  },
-  footerText: {
-    color: colors.mutedForeground,
-    fontSize: 14,
   },
 });

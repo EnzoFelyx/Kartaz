@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { useDeferredValue, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -12,6 +12,7 @@ import { PlayerCardRow } from '@/components/collection/player-card-row';
 import { ViewModeToggle, type ViewMode } from '@/components/collection/view-mode-toggle';
 import { TAB_BAR_BOTTOM_GAP, TAB_BAR_HEIGHT } from '@/components/tab-bar';
 import { SearchInput } from '@/components/ui/search-input';
+import { ListLoadingMore, ListState } from '@/components/ui/list-state';
 import { useCollectionCount } from '@/hooks/queries/use-my-collection';
 import { useNations } from '@/hooks/queries/use-nations';
 import { usePlayersCatalog } from '@/hooks/queries/use-players-catalog';
@@ -34,8 +35,7 @@ const GRID_COLUMNS = 2;
  * exige remontar o FlatList — o que remontaria o header e cortaria a animação do toggle.
  */
 type CollectionRow =
-  | { type: 'cards'; key: string; cards: Player[] }
-  | { type: 'nation'; key: string; nation: string; name: string };
+  { type: 'cards'; key: string; cards: Player[] } | { type: 'nation'; key: string; nation: string; name: string };
 
 function toCardRows(cards: Player[], perRow: number): CollectionRow[] {
   const rows: CollectionRow[] = [];
@@ -117,10 +117,7 @@ export default function CollectionScreen() {
       </View>
 
       {/* Total de cartas do usuário no backend (0 enquanto a sessão não está pronta). */}
-      <MyCollectionButton
-        count={collectionCount.data ?? 0}
-        onPress={() => router.push('/my-collection')}
-      />
+      <MyCollectionButton count={collectionCount.data ?? 0} onPress={() => router.push('/my-collection')} />
 
       <SearchInput
         value={query}
@@ -137,20 +134,9 @@ export default function CollectionScreen() {
         keyExtractor={(row) => `${listMode}-${row.key}`}
         ListHeaderComponent={header}
         ListEmptyComponent={
-          isLoading ? (
-            <ActivityIndicator color={colors.primary} style={styles.loading} />
-          ) : (
-            <Text style={styles.empty}>{isNations ? t('cards.noTeams') : t('cards.noPlayers')}</Text>
-          )
+          <ListState loading={isLoading} emptyText={isNations ? t('cards.noTeams') : t('cards.noPlayers')} />
         }
-        ListFooterComponent={
-          catalog.isFetchingNextPage && !isNations ? (
-            <View style={styles.footer}>
-              <ActivityIndicator color={colors.primary} />
-              <Text style={styles.footerText}>{t('cards.loadingMore')}</Text>
-            </View>
-          ) : null
-        }
+        ListFooterComponent={catalog.isFetchingNextPage && !isNations ? <ListLoadingMore /> : null}
         onEndReached={loadMore}
         onEndReachedThreshold={LIST_END_THRESHOLD}
         {...LIST_RENDER_PROPS}
@@ -160,9 +146,7 @@ export default function CollectionScreen() {
               <NationRow
                 name={row.name}
                 flagEmoji={getFlagEmojiForCountry(row.nation)}
-                onPress={() =>
-                  router.push({ pathname: '/nation/[code]', params: { code: row.nation } })
-                }
+                onPress={() => router.push({ pathname: '/nation/[code]', params: { code: row.nation } })}
               />
             </Animated.View>
           ) : isGrid ? (
@@ -171,8 +155,7 @@ export default function CollectionScreen() {
                 <Animated.View
                   key={card.id}
                   style={styles.gridCell}
-                  entering={listItemEntering(index * GRID_COLUMNS + column)}
-                 >
+                  entering={listItemEntering(index * GRID_COLUMNS + column)}>
                   <GridCard card={card} onPress={() => openCard(card.id)} />
                 </Animated.View>
               ))}
@@ -237,25 +220,5 @@ const styles = StyleSheet.create({
   },
   gridCell: {
     flex: 1,
-  },
-  empty: {
-    marginTop: 24,
-    textAlign: 'center',
-    color: colors.mutedForeground,
-    fontSize: 14,
-  },
-  loading: {
-    marginTop: 32,
-  },
-  footer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 16,
-  },
-  footerText: {
-    color: colors.mutedForeground,
-    fontSize: 14,
   },
 });

@@ -1,6 +1,9 @@
 import type { ConfigContext, ExpoConfig } from 'expo/config';
 import { withInfoPlist, type ConfigPlugin } from 'expo/config-plugins';
 
+// Cores que o app.config precisa ficam em JSON (o config não carrega os .ts do app); o tema lê o mesmo arquivo.
+import baseColors from './src/theme/base-colors.json';
+
 /**
  * Registra no Info.plist (só no nativo) o esquema de retorno do login do Google no iOS: o client ID
  * invertido (`com.googleusercontent.apps.<id>`). Fica fora do `scheme` do Expo de propósito: com mais
@@ -29,8 +32,21 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     ...config,
     name: config.name ?? 'Kartazapp',
     slug: config.slug ?? 'Kartazapp',
+    // Fundo da splash e do ícone adaptativo do Android: a cor de fundo do app (do tema).
+    android: {
+      ...config.android,
+      adaptiveIcon: { ...config.android?.adaptiveIcon, backgroundColor: baseColors.background },
+    },
     plugins: [
       ...(config.plugins ?? []),
+      [
+        'expo-splash-screen',
+        {
+          backgroundColor: baseColors.background,
+          image: './assets/images/splash-icon.png',
+          imageWidth: 76,
+        },
+      ],
       [
         'react-native-maps',
         {
