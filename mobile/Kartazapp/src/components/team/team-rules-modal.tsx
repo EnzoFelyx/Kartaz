@@ -1,15 +1,16 @@
 import { useTranslation } from 'react-i18next';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { NATION_BONUS_TABLE } from '@/lib/team/team-scoring';
+import { CLUB_BONUS_TABLE, NATION_BONUS_TABLE, type BonusTier } from '@/lib/team/team-scoring';
 import { colors, withAlpha } from '@/theme/colors';
+import { formatNumber } from '@/utils/card-labels';
 
 type TeamRulesModalProps = {
   visible: boolean;
   onClose: () => void;
 };
 
-/** Regras da pontuação do time (aberto pelo "?" ao lado do overall): base + bônus cumulativo por seleção. */
+/** Regras da pontuação do time (aberto pelo "?" ao lado do overall): base + bônus cumulativo por seleção e por clube. */
 export function TeamRulesModal({ visible, onClose }: TeamRulesModalProps) {
   const { t } = useTranslation();
 
@@ -23,15 +24,10 @@ export function TeamRulesModal({ visible, onClose }: TeamRulesModalProps) {
           <Text style={styles.text}>{t('team.rulesBase')}</Text>
           <Text style={styles.text}>{t('team.rulesBonus')}</Text>
 
-          <View style={styles.table}>
-            {NATION_BONUS_TABLE.map((tier) => (
-              <View key={tier.count} style={styles.tier}>
-                <Text style={styles.tierLabel}>{t('team.rulesTier', { count: tier.count })}</Text>
-                <Text style={styles.tierValue}>+{tier.percent}%</Text>
-              </View>
-            ))}
-          </View>
+          <BonusTable title={t('team.rulesNationTitle')} tiers={NATION_BONUS_TABLE} label="team.rulesTier" />
+          <BonusTable title={t('team.rulesClubTitle')} tiers={CLUB_BONUS_TABLE} label="team.rulesClubTier" />
 
+          <Text style={styles.example}>{t('team.rulesCap')}</Text>
           <Text style={styles.example}>{t('team.rulesExample')}</Text>
 
           <Pressable accessibilityRole="button" onPress={onClose} hitSlop={8} style={styles.closeButton}>
@@ -40,6 +36,31 @@ export function TeamRulesModal({ visible, onClose }: TeamRulesModalProps) {
         </Pressable>
       </Pressable>
     </Modal>
+  );
+}
+
+function BonusTable({
+  title,
+  tiers,
+  label,
+}: {
+  title: string;
+  tiers: readonly BonusTier[];
+  label: 'team.rulesTier' | 'team.rulesClubTier';
+}) {
+  const { t } = useTranslation();
+  return (
+    <View style={styles.tableBlock}>
+      <Text style={styles.tableTitle}>{title}</Text>
+      <View style={styles.table}>
+        {tiers.map((tier) => (
+          <View key={tier.count} style={styles.tier}>
+            <Text style={styles.tierLabel}>{t(label, { count: tier.count })}</Text>
+            <Text style={styles.tierValue}>+{formatNumber(tier.percent)}%</Text>
+          </View>
+        ))}
+      </View>
+    </View>
   );
 }
 
@@ -70,6 +91,14 @@ const styles = StyleSheet.create({
     color: colors.secondaryForeground,
     fontSize: 14,
     lineHeight: 20,
+  },
+  tableBlock: {
+    gap: 6,
+  },
+  tableTitle: {
+    color: colors.foreground,
+    fontSize: 14,
+    fontWeight: '800',
   },
   table: {
     overflow: 'hidden',

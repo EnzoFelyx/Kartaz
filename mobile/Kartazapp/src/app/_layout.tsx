@@ -15,6 +15,7 @@ import { useOnboardingSeen } from '@/hooks/queries/use-onboarding';
 import { usePlayersSync } from '@/hooks/queries/use-players-sync';
 import { useSession } from '@/hooks/queries/use-session';
 import '@/i18n';
+import { configureNotifications } from '@/lib/notifications/trade-notifications';
 import { queryClient, setupQueryFocusManager } from '@/lib/query/query-client';
 import { seedFromBundleIfNeeded } from '@/lib/sync/seedFromBundle';
 import { colors } from '@/theme/colors';
@@ -25,6 +26,9 @@ SplashScreen.preventAutoHideAsync();
 // prop sempre que redesenha (brilho do grid do mapa, borda da tab bar, barra de XP), e cada redesenho
 // gerava o aviso "Reading from `value` during component render". Os demais avisos continuam.
 configureReanimatedLogger({ level: ReanimatedLogLevel.warn, strict: false });
+
+// Notificações locais aparecem também com o app aberto.
+configureNotifications();
 
 // Fundo da view raiz (aparece por trás das telas durante as transições): o mesmo escuro do app.
 SystemUI.setBackgroundColorAsync(colors.background);
@@ -82,6 +86,7 @@ function RootNavigator() {
           <Stack.Screen name="found-copies/[id]" />
           <Stack.Screen name="edit-profile" />
           <Stack.Screen name="edit-team" />
+          <Stack.Screen name="trades/new" />
         </Stack.Protected>
         {/* Onboarding + entrada: só sem sessão. Ao entrar (convidado ou Google), o guard remove a tela e o
             router volta ao index, que leva ao mapa — sem navegação manual disputando com a troca de sessão. */}

@@ -15,7 +15,7 @@ const ROW_ICON_SIZE = 16;
 
 type FoundCopyCardProps = {
   copy: FoundCopy;
-  /** Proposta de troca por esta cópia (demonstrativa por enquanto). */
+  /** Proposta de troca por esta cópia; sem ela (cópia do próprio usuário) o botão não aparece. */
   onMakeOffer?: () => void;
 };
 
@@ -70,14 +70,16 @@ export function FoundCopyCard({ copy, onMakeOffer }: FoundCopyCardProps) {
           value={String(copy.tradeOffers)}
         />
 
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('foundCopies.makeOfferA11y', { serial: copy.serial, total: copy.maxSerial })}
-          onPress={onMakeOffer}
-          style={({ pressed }) => [styles.offerButton, pressed && styles.pressed]}>
-          <SwapIcon color={colors.foreground} size={18} />
-          <Text style={styles.offerText}>{t('foundCopies.makeOffer')}</Text>
-        </Pressable>
+        {onMakeOffer && (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('foundCopies.makeOfferA11y', { serial: copy.serial, total: copy.maxSerial })}
+            onPress={onMakeOffer}
+            style={({ pressed }) => [styles.offerButton, pressed && styles.pressed]}>
+            <SwapIcon color={colors.foreground} size={18} />
+            <Text style={styles.offerText}>{t('foundCopies.makeOffer')}</Text>
+          </Pressable>
+        )}
       </View>
     </View>
   );

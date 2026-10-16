@@ -17,6 +17,12 @@ export type UserTeamDto = {
   nationalityBonusPercent: number;
   maxSameNationCount: number;
   nationalitySynergy: NationalitySynergyDto[];
+  /** Bônus (%) dos clubes com 2+ titulares (soma com o de seleção). */
+  clubBonusPercent?: number;
+  maxSameClubCount?: number;
+  clubSynergy?: { club: string; count: number; bonusPercent: number }[];
+  /** Bônus total (%): seleções + clubes. */
+  totalBonusPercent?: number;
   shieldId: number | null;
   shieldUrl: string | null;
   globalRank: number | null;

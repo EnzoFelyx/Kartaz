@@ -70,10 +70,14 @@ export type PlayerCard = Player & {
 export type FoundCopy = {
   /** Id da cópia (`Instance.id`, uuid). */
   id: string;
+  /** Jogador da carta. */
+  cardId: number;
   serial: number;
   maxSerial: number;
   /** Apelido de quem possui a cópia. */
   owner: string;
+  /** Id do dono (para propor troca); `null` se a cópia não tiver dono. */
+  ownerId: string | null;
   /** ISO date de quando a cópia foi encontrada. */
   foundAt: string;
   foundLocation: FoundLocation;

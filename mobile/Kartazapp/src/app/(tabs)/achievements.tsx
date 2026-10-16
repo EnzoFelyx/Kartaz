@@ -1,5 +1,5 @@
-import { router } from 'expo-router';
-import type { ReactNode } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
@@ -50,6 +50,14 @@ export default function AchievementsScreen() {
   const user = useCurrentUser();
   const collectionCount = useCollectionCount();
   const mapFinds = useMapFindsCount();
+
+  // Ao voltar para a aba: o time pode ter nascido agora (pacote de boas-vindas no mapa).
+  const refetchTeam = team.refetch;
+  useFocusEffect(
+    useCallback(() => {
+      void refetchTeam();
+    }, [refetchTeam]),
+  );
 
   const mapFindsCount = mapFinds.data ?? 0;
   const cardsCount = collectionCount.data ?? 0;

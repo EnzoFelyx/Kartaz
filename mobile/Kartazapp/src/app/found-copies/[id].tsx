@@ -10,6 +10,7 @@ import { ArrowLeftIcon } from '@/components/icons/arrow-left-icon';
 import { useFoundCopies } from '@/hooks/queries/use-found-copies';
 import { usePlayer } from '@/hooks/queries/use-player';
 import { useSession } from '@/hooks/queries/use-session';
+import type { FoundCopy } from '@/types/player-card';
 import { colors } from '@/theme/colors';
 import { LIST_END_THRESHOLD, LIST_RENDER_PROPS, listItemEntering } from '@/utils/list-loading';
 
@@ -39,6 +40,21 @@ export default function FoundCopiesScreen() {
   };
 
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/collection'));
+  const myUserId = session.data?.userId;
+
+  // Proposta só para cópias de outra pessoa: abre a "Nova troca" com a cópia pedida.
+  const makeOffer = (copy: FoundCopy) =>
+    router.push({
+      pathname: '/trades/new',
+      params: {
+        instanceId: copy.id,
+        cardId: String(copy.cardId),
+        counterpartyId: copy.ownerId ?? '',
+        counterpartyName: copy.owner,
+        serial: String(copy.serial),
+        maxSerial: String(copy.maxSerial),
+      },
+    });
 
   return (
     <View style={styles.container}>
@@ -116,7 +132,10 @@ export default function FoundCopiesScreen() {
           {...LIST_RENDER_PROPS}
           renderItem={({ item, index }) => (
             <Animated.View entering={listItemEntering(index)} style={styles.item}>
-              <FoundCopyCard copy={item} />
+              <FoundCopyCard
+                copy={item}
+                onMakeOffer={item.ownerId && item.ownerId !== myUserId ? () => makeOffer(item) : undefined}
+              />
             </Animated.View>
           )}
           ItemSeparatorComponent={() => <View style={{ height: GAP }} />}

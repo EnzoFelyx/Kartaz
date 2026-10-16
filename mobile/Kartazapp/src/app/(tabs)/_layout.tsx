@@ -3,11 +3,14 @@ import { useTranslation } from 'react-i18next';
 
 import { CardsIcon } from '@/components/icons/cards-icon';
 import { TabBar, TabIcon } from '@/components/tab-bar';
+import { useTradeNotifications } from '@/hooks/use-trade-notifications';
 import { colors } from '@/theme/colors';
 
 // `title` não aparece na barra (só ícones); é usado como label de acessibilidade.
 // Ícones sempre em outline (vazados), inclusive na aba ativa.
 export default function TabsLayout() {
+  // Avisa (notificação local) quando uma proposta do jogador foi aceita enquanto ele estava fora.
+  useTradeNotifications();
   const { t } = useTranslation();
 
   return (

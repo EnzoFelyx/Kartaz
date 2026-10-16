@@ -21,6 +21,7 @@ import type {
 import { getRoomCell, getUserCell } from '@/lib/h3/cells';
 import type { WalletDto } from '@/lib/api/wallet-api';
 import { queryKeys } from '@/lib/query/keys';
+import { handleTradeAccepted, type TradeAcceptedMessage } from '@/lib/notifications/trade-notifications';
 import { toast } from '@/lib/toast/toast-store';
 
 /** Dados do jogador enviados ao entrar na sala (o backend prioriza os do banco para fuel/xp/level). */
@@ -462,6 +463,11 @@ export function useCellRoom(profile: CellRoomProfile | null, { enabled, onMoveRe
         void queryClient.invalidateQueries({ queryKey: queryKeys.players.all });
         // O pacote de boas-vindas cria o time do jogador.
         if (pack.type === 'initial') void queryClient.invalidateQueries({ queryKey: queryKeys.userTeam });
+      });
+
+      // Alguém aceitou uma proposta minha (enviada pelo servidor a qualquer sala em que eu esteja).
+      room.onMessage('tradeAccepted', (message: TradeAcceptedMessage) => {
+        void handleTradeAccepted(profileRef.current?.userId, message).catch(() => {});
       });
 
       // Sem energia: o servidor não moveu o jogador; a posição volta para a dele.

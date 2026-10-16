@@ -18,6 +18,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ArrowLeftIcon } from '@/components/icons/arrow-left-icon';
 import { HelpCircleIcon } from '@/components/icons/help-circle-icon';
+import { SparklesIcon } from '@/components/icons/sparkles-icon';
 import { LineupSlot } from '@/components/team/lineup-slot';
 import { PlayerPickerModal } from '@/components/team/player-picker-modal';
 import { TeamRulesModal } from '@/components/team/team-rules-modal';
@@ -28,9 +29,10 @@ import { useUserTeam } from '@/hooks/queries/use-user-team';
 import { patchUserTeam, type UserTeamDto } from '@/lib/api/team-api';
 import { fetchAllUserInstances, type UserInstanceDto } from '@/lib/api/user-instances-api';
 import { queryKeys } from '@/lib/query/keys';
-import { computeTeamScore } from '@/lib/team/team-scoring';
+import { computeTeamScore, pickBestLineup } from '@/lib/team/team-scoring';
 import { toast } from '@/lib/toast/toast-store';
 import { colors, withAlpha } from '@/theme/colors';
+import { formatNumber } from '@/utils/card-labels';
 import { listItemEntering } from '@/utils/list-loading';
 
 const NAME_MAX_LENGTH = 30;
@@ -93,7 +95,10 @@ function TeamEditor({ team, onDone }: { team: UserTeamDto; onDone: () => void })
   const dirty = nameChanged || lineupChanged;
 
   const score = useMemo(
-    () => computeTeamScore(lineup.map((instance) => ({ ovr: instance.card.ovr, nation: instance.card.nation }))),
+    () =>
+      computeTeamScore(
+        lineup.map((instance) => ({ ovr: instance.card.ovr, nation: instance.card.nation, club: instance.card.team })),
+      ),
     [lineup],
   );
 
@@ -159,6 +164,45 @@ function TeamEditor({ team, onDone }: { team: UserTeamDto; onDone: () => void })
     setPickingSlot(null);
   };
 
+  // "Auto": monta a melhor escalação com as cartas do jogador (mesma regra de pontuação do servidor).
+  // O cálculo roda no próximo quadro para o carregamento aparecer antes.
+  const [autoBuilding, setAutoBuilding] = useState(false);
+  const autoBuild = () => {
+    const all = collection.data;
+    if (!all || autoBuilding) return;
+    setAutoBuilding(true);
+    setTimeout(() => {
+      const best = pickBestLineup(
+        all.map((instance) => ({
+          id: instance.id,
+          cardId: instance.cardId,
+          ovr: instance.card.ovr,
+          nation: instance.card.nation,
+          club: instance.card.team,
+          instance,
+        })),
+      );
+      setAutoBuilding(false);
+      if (!best) {
+        toast.warning(t('team.autoNotEnoughTitle'), t('team.autoNotEnoughMessage'));
+        return;
+      }
+      const next = best.map((item) => item.instance).sort((a, b) => (b.card.ovr ?? 0) - (a.card.ovr ?? 0));
+      const nextScore = computeTeamScore(
+        next.map((i) => ({ ovr: i.card.ovr, nation: i.card.nation, club: i.card.team })),
+      );
+      if (nextScore.overall <= score.overall) {
+        toast.info(t('team.autoAlreadyBestTitle'), t('team.autoAlreadyBestMessage', { overall: score.overall }));
+        return;
+      }
+      setLineup(next);
+      toast.success(
+        t('team.autoDoneTitle'),
+        t('team.autoDoneMessage', { overall: nextScore.overall, bonus: formatNumber(nextScore.bonusPercent) }),
+      );
+    }, 16);
+  };
+
   const canSave = dirty && !save.isPending;
 
   return (
@@ -207,14 +251,40 @@ function TeamEditor({ team, onDone }: { team: UserTeamDto; onDone: () => void })
             />
           </View>
           <Text style={styles.overallBase}>
-            {t('team.baseBonus', { base: score.baseSum, bonus: score.bonusPercent })}
+            {t('team.baseBonus', { base: score.baseSum, bonus: formatNumber(score.bonusPercent) })}
           </Text>
-          <Text style={styles.overallGroup}>{t('team.maxGroup', { count: score.maxSameNation })}</Text>
+          <Text style={styles.overallSplit}>
+            {t('team.bonusSplit', {
+              nation: formatNumber(score.nationBonusPercent),
+              club: formatNumber(score.clubBonusPercent),
+            })}
+          </Text>
+          <Text style={styles.overallGroup}>
+            {t('team.maxGroups', { nation: score.maxSameNation, club: score.maxSameClub })}
+          </Text>
         </Animated.View>
 
-        <Text style={styles.sectionTitle} accessibilityRole="header">
-          {t('team.starters', { count: lineup.length })}
-        </Text>
+        <View style={styles.sectionRow}>
+          <Text style={styles.sectionTitle} accessibilityRole="header">
+            {t('team.starters', { count: lineup.length })}
+          </Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('team.autoA11y')}
+            accessibilityState={{ disabled: !collection.data || autoBuilding, busy: autoBuilding }}
+            disabled={!collection.data || autoBuilding}
+            onPress={autoBuild}
+            style={({ pressed }) => [styles.autoButton, (pressed || !collection.data) && styles.pressed]}>
+            {autoBuilding ? (
+              <ActivityIndicator color={colors.primary} size="small" />
+            ) : (
+              <>
+                <SparklesIcon color={colors.primary} size={18} />
+                <Text style={styles.autoText}>{t('team.auto')}</Text>
+              </>
+            )}
+          </Pressable>
+        </View>
         {lineup.map((instance, index) => (
           <Animated.View key={`${index}-${instance.id}`} entering={listItemEntering(index + 2)}>
             <LineupSlot index={index + 1} instance={instance} onSwap={() => setPickingSlot(index + 1)} />
@@ -339,14 +409,42 @@ const styles = StyleSheet.create({
     color: colors.secondaryForeground,
     fontSize: 14,
   },
+  overallSplit: {
+    color: colors.violet,
+    fontSize: 13,
+    fontWeight: '700',
+  },
   overallGroup: {
     color: colors.mutedForeground,
     fontSize: 12,
   },
-  sectionTitle: {
+  sectionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginTop: 8,
+  },
+  sectionTitle: {
     color: colors.foreground,
     fontSize: 18,
+    fontWeight: '800',
+  },
+  autoButton: {
+    minWidth: 84,
+    height: 38,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    backgroundColor: withAlpha(colors.primary, 0.14),
+    borderWidth: 1,
+    borderColor: withAlpha(colors.primary, 0.5),
+  },
+  autoText: {
+    color: colors.primary,
+    fontSize: 14,
     fontWeight: '800',
   },
   center: {

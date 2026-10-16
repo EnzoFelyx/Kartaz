@@ -94,11 +94,18 @@ export function userInstanceToPlayerCard(dto: UserInstanceDto): PlayerCard {
 export function playerInstanceToFoundCopy(dto: PlayerInstanceDto): FoundCopy {
   return {
     id: dto.id,
+    cardId: dto.cardId,
     serial: dto.serialNumber,
     maxSerial: dto.serialMax,
     owner: dto.owner?.username ?? '—',
+    ownerId: dto.owner?.id ?? null,
     foundAt: dto.foundWhen ?? dto.spawnedAt,
-    foundLocation: { city: dto.foundWhere?.city ?? null, state: dto.foundWhere?.state ?? null },
+    foundLocation: {
+      city: dto.foundWhere?.city ?? null,
+      state: dto.foundWhere?.state ?? null,
+      lat: dto.foundWhere?.lat ?? null,
+      lng: dto.foundWhere?.lng ?? null,
+    },
     tradeOffers: 0,
   };
 }

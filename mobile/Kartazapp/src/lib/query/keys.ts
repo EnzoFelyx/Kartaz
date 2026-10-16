@@ -8,6 +8,11 @@ export const queryKeys = {
   currentUser: ['currentUser'] as const,
   wallet: ['wallet'] as const,
   userTeam: ['userTeam'] as const,
+  trades: {
+    all: ['trades'] as const,
+    list: (status: string) => ['trades', 'list', status] as const,
+    count: (status: string) => ['trades', 'count', status] as const,
+  },
   playersSync: ['playersSync'] as const,
   cardsProgressSync: ['cardsProgressSync'] as const,
 
