@@ -75,7 +75,8 @@
     "flagNoOwner": "No owner",
     "flagOwnerA11y": "Area flag owner: {{owner}}",
     "cardsA11y_one": "{{count}} card in this area",
-    "cardsA11y_other": "{{count}} cards in this area"
+    "cardsA11y_other": "{{count}} cards in this area",
+    "radarCooldownA11y": "Radar recharging: {{time}}"
   },
   "cards": {
     "title": "Cards",
@@ -488,5 +489,16 @@
     "tradeAcceptedTitle": "Trade accepted! 🎉",
     "tradeAcceptedBody": "{{name}} accepted your offer. The cards are already in your collection.",
     "tradesAcceptedBody": "{{count}} of your offers were accepted. Check your collection!"
+  },
+  "radar": {
+    "errorTitle": "Radar unavailable",
+    "revealingA11y": "Radar revealing the cards in this area",
+    "errors": {
+      "cooldown": "The radar is recharging. Wait for the time on the button.",
+      "no_energy": "You need at least 10% energy to use the radar.",
+      "not_connected": "Turn on explore mode to use the radar.",
+      "timeout": "The server did not respond. Try again.",
+      "server_error": "Could not use the radar right now."
+    }
   }
 }

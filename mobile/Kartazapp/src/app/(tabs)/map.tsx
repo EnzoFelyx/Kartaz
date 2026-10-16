@@ -27,19 +27,30 @@ import { TAB_BAR_BOTTOM_GAP, TAB_BAR_HEIGHT } from '@/components/tab-bar';
 import { useCurrentUser } from '@/hooks/queries/use-current-user';
 import { useSession } from '@/hooks/queries/use-session';
 import { useWallet } from '@/hooks/queries/use-wallet';
-import { useCellRoom, type CellRoomProfile } from '@/hooks/use-cell-room';
+import { useCellRoom, type CellRoomProfile, type RadarFailure } from '@/hooks/use-cell-room';
 import { useInitialLocation } from '@/hooks/use-initial-location';
 import { usePlaceName } from '@/hooks/use-place-name';
 import { resolveApiUri } from '@/lib/api/image-uri';
-import { getUserCell } from '@/lib/h3/cells';
+import type { CellCard } from '@/lib/colyseus/types';
+import { getRoomBoundary, getUserCell } from '@/lib/h3/cells';
+import { toast } from '@/lib/toast/toast-store';
 import { colors } from '@/theme/colors';
 import { initialMapRegion, kartazMapStyle, mapViewConfig } from '@/theme/map-styles';
 
 // Ainda fixos até as cartas existirem.
 const MOCK_ZONE = { difficulty: 'medium' as const };
-/** Tempo da busca do radar (só visual, até a resposta vir do servidor). */
-const MOCK_RADAR_SEARCH_MS = 1200;
 const DEFAULT_MAX_ENERGY = 100;
+
+/** Radar: energia gasta por uso (% da máxima; quem cobra é o servidor) e a sequência da câmera. */
+const RADAR_COST_PERCENT = 10;
+/** Zoom out até enquadrar a sala inteira. */
+const RADAR_ZOOM_OUT_MS = 800;
+/** Tempo com as cartas reveladas (tela travada). */
+const RADAR_REVEAL_MS = 3000;
+/** Volta ao zoom do Explore, no jogador. */
+const RADAR_ZOOM_BACK_MS = 800;
+/** Folga nas bordas ao enquadrar a sala (o painel de baixo ocupa espaço). */
+const RADAR_EDGE_PADDING = { top: 160, right: 48, bottom: 300, left: 48 };
 
 /** Explore Mode liga a partir deste zoom (nível de ruas). */
 const EXPLORE_MIN_ZOOM = 18;
@@ -93,6 +104,12 @@ export default function MapScreen() {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const [radarSearching, setRadarSearching] = useState(false);
+  /** Cartas reveladas pelo radar (todas da sala) enquanto a tela está travada; `null` fora do radar. */
+  const [radarCards, setRadarCards] = useState<CellCard[] | null>(null);
+  /** Até quando o radar fica em espera (ms, relógio do servidor ≈ aparelho). */
+  const [radarCooldownUntil, setRadarCooldownUntil] = useState(0);
+  const [now, setNow] = useState(() => Date.now());
+  const radarLocked = radarCards !== null;
   const [refuelOpen, setRefuelOpen] = useState(false);
   const mapRef = useRef<MapView>(null);
   const { coords: gpsCoords } = useInitialLocation();
@@ -105,7 +122,8 @@ export default function MapScreen() {
   const playerPosition = draggedPosition ?? gpsCoords;
   /** Zoom atual (`null` até a câmera ir para o jogador). */
   const [zoom, setZoom] = useState<number | null>(null);
-  const exploreOn = zoom !== null && isExploreZoom(zoom);
+  // Durante o radar a câmera se afasta, mas o jogador continua na sala (Explore segue ligado).
+  const exploreOn = (zoom !== null && isExploreZoom(zoom)) || radarLocked;
   /** Até quando ignorar movimentos (carga inicial e animações da câmera); `null` = câmera ainda não focou. */
   const acceptMovesAfterRef = useRef<number | null>(null);
 
@@ -150,6 +168,7 @@ export default function MapScreen() {
     dismissCardsPack,
     fillTankPrice,
     purchaseFuel,
+    radarScan,
     setPosition,
     updatePosition,
   } = useCellRoom(profile, {
@@ -244,19 +263,74 @@ export default function MapScreen() {
       setFocusCount((count) => count + 1);
     }, []),
   );
-  const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Sequência do radar (zoom out → cartas reveladas → volta): timers limpos ao sair da tela.
+  const radarTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  useEffect(() => () => radarTimersRef.current.forEach(clearTimeout), []);
 
-  useEffect(
-    () => () => {
-      if (searchTimeout.current) clearTimeout(searchTimeout.current);
-    },
-    [],
-  );
+  // Contagem da espera do radar no botão (atualiza a cada segundo só enquanto há espera).
+  useEffect(() => {
+    if (radarCooldownUntil <= Date.now()) return;
+    const interval = setInterval(() => {
+      const current = Date.now();
+      setNow(current);
+      if (current >= radarCooldownUntil) clearInterval(interval);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [radarCooldownUntil]);
+  const radarCooldownSeconds = Math.max(0, Math.ceil((radarCooldownUntil - now) / 1000));
 
-  // Intenção de busca: no futuro vira uma chamada ao servidor, que decide o resultado.
-  const handleRadarSearch = () => {
+  /**
+   * Revela as cartas da sala: trava a tela, afasta a câmera até a sala (res 8) caber, mostra todas as
+   * cartas por 3 s e volta ao zoom do Explore no jogador. Movimentos da câmera nesse tempo não contam
+   * como andar (`acceptMovesAfterRef`).
+   */
+  const revealRadar = (revealed: CellCard[]) => {
+    const center = gestureStateRef.current.playerPosition;
+    const map = mapRef.current;
+    if (!center || !map) return;
+    acceptMovesAfterRef.current = Number.POSITIVE_INFINITY;
+    setRadarCards(revealed);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+
+    const points = [
+      ...getRoomBoundary(center.latitude, center.longitude),
+      ...revealed.map((card) => ({ latitude: card.lat, longitude: card.lng })),
+      center,
+    ];
+    map.fitToCoordinates(points, { edgePadding: RADAR_EDGE_PADDING, animated: true });
+
+    radarTimersRef.current = [
+      setTimeout(() => {
+        mapRef.current?.animateCamera({ center, zoom: USER_FOCUS_ZOOM }, { duration: RADAR_ZOOM_BACK_MS });
+      }, RADAR_ZOOM_OUT_MS + RADAR_REVEAL_MS),
+      setTimeout(
+        () => {
+          acceptMovesAfterRef.current = Date.now() + CAMERA_SETTLE_MS;
+          setRadarCards(null);
+        },
+        RADAR_ZOOM_OUT_MS + RADAR_REVEAL_MS + RADAR_ZOOM_BACK_MS,
+      ),
+    ];
+  };
+
+  const handleRadarSearch = async () => {
+    if (radarLocked || radarSearching) return;
     setRadarSearching(true);
-    searchTimeout.current = setTimeout(() => setRadarSearching(false), MOCK_RADAR_SEARCH_MS);
+    try {
+      const result = await radarScan();
+      setRadarCooldownUntil(result.cooldownUntil);
+      setNow(Date.now());
+      revealRadar(result.cards);
+    } catch (error) {
+      const failure = error as RadarFailure;
+      if (failure.cooldownUntil) {
+        setRadarCooldownUntil(failure.cooldownUntil);
+        setNow(Date.now());
+      }
+      toast.warning(t('radar.errorTitle'), t(`radar.errors.${failure.reason}`));
+    } finally {
+      setRadarSearching(false);
+    }
   };
 
   const hint = zoom === null ? null : !exploreOn ? 'zoomIn' : outOfEnergy ? 'noEnergy' : null;
@@ -271,7 +345,10 @@ export default function MapScreen() {
         style={StyleSheet.absoluteFill}
         customMapStyle={kartazMapStyle}
         initialRegion={initialMapRegion}
-        {...mapViewConfig}>
+        {...mapViewConfig}
+        // Radar: o mapa não se mexe enquanto as cartas estão reveladas.
+        scrollEnabled={!radarLocked}
+        zoomEnabled={!radarLocked}>
         {/* Bandeira da área (sala) atual, se ninguém a coletou — como jogadores e cartas, só da própria sala. */}
         {/* Moedas e baterias da sala atual: paradas na coordenada, somem quando alguém coleta. */}
         {coins.map((coin) => (
@@ -294,7 +371,7 @@ export default function MapScreen() {
             accessibilityLabel={t('map.batteryA11y')}
           />
         ))}
-        {visibleCards.map((card) => (
+        {(radarCards ?? visibleCards).map((card) => (
           <MapCardMarker key={card.id} card={card} height={MAP_CARD_HEIGHT} accessibilityLabel={t('map.cardA11y')} />
         ))}
         {discoveryFlags.map((flag) => (
@@ -352,10 +429,21 @@ export default function MapScreen() {
           exploreOn={exploreOn}
           xpProgress={xpProgress}
           searching={radarSearching}
-          canSearch={exploreOn && !outOfEnergy}
+          canSearch={exploreOn && connected && !radarLocked && energy >= (maxEnergy * RADAR_COST_PERCENT) / 100}
+          radarCooldownSeconds={radarCooldownSeconds}
           onRadarSearch={handleRadarSearch}
         />
       </View>
+
+      {/* Radar ativo: bloqueia qualquer toque na tela (mapa, HUD e painel) até a câmera voltar. */}
+      {radarLocked && (
+        <View
+          style={StyleSheet.absoluteFill}
+          onStartShouldSetResponder={() => true}
+          accessibilityViewIsModal
+          accessibilityLabel={t('radar.revealingA11y')}
+        />
+      )}
 
       <RefuelModal
         visible={refuelOpen}

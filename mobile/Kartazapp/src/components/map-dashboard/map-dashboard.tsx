@@ -48,6 +48,8 @@ type MapDashboardProps = {
   xpProgress: number;
   searching: boolean;
   canSearch: boolean;
+  /** Segundos de espera do radar (`null` = pronto). */
+  radarCooldownSeconds?: number | null;
   onRadarSearch: () => void;
   style?: StyleProp<ViewStyle>;
 };
@@ -69,6 +71,7 @@ export function MapDashboard({
   xpProgress,
   searching,
   canSearch,
+  radarCooldownSeconds,
   onRadarSearch,
   style,
 }: MapDashboardProps) {
@@ -151,7 +154,12 @@ export function MapDashboard({
               </View>
             </View>
 
-            <RadarButton searching={searching} disabled={!canSearch} onPress={onRadarSearch} />
+            <RadarButton
+              searching={searching}
+              disabled={!canSearch}
+              cooldownSeconds={radarCooldownSeconds}
+              onPress={onRadarSearch}
+            />
           </View>
 
           <View style={styles.progress} accessible accessibilityLabel={t('mapDashboard.xpProgressA11y')}>

@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet } from 'react-native';
+import { Pressable, StyleSheet, Text } from 'react-native';
 
 import { RadarIcon } from '@/components/icons/radar-icon';
 import { colors, withAlpha } from '@/theme/colors';
@@ -9,23 +9,38 @@ const BUTTON_SIZE = 56;
 type RadarButtonProps = {
   searching: boolean;
   disabled?: boolean;
+  /** Segundos de espera até poder usar de novo (`null`/0 = pronto). */
+  cooldownSeconds?: number | null;
   onPress: () => void;
 };
 
-/** Botão de radar do card da zona: dispara a busca na zona atual. */
-export function RadarButton({ searching, disabled = false, onPress }: RadarButtonProps) {
+function formatCooldown(seconds: number) {
+  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+}
+
+/** Botão de radar do card da zona: revela as cartas da área. Em espera, mostra o tempo que falta. */
+export function RadarButton({ searching, disabled = false, cooldownSeconds, onPress }: RadarButtonProps) {
   const { t } = useTranslation();
-  const inactive = disabled || searching;
+  const coolingDown = !!cooldownSeconds && cooldownSeconds > 0;
+  const inactive = disabled || searching || coolingDown;
 
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={t('mapDashboard.searchZone')}
+      accessibilityLabel={
+        coolingDown
+          ? t('mapDashboard.radarCooldownA11y', { time: formatCooldown(cooldownSeconds) })
+          : t('mapDashboard.searchZone')
+      }
       accessibilityState={{ disabled: inactive, busy: searching }}
       disabled={inactive}
       onPress={onPress}
       style={({ pressed }) => [styles.button, inactive && styles.inactive, pressed && styles.pressed]}>
-      <RadarIcon color={colors.primary} size={26} />
+      {coolingDown ? (
+        <Text style={styles.cooldown}>{formatCooldown(cooldownSeconds)}</Text>
+      ) : (
+        <RadarIcon color={colors.primary} size={26} />
+      )}
     </Pressable>
   );
 }
@@ -44,6 +59,12 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.3,
     shadowRadius: 10,
+  },
+  cooldown: {
+    color: colors.primary,
+    fontSize: 13,
+    fontWeight: '800',
+    fontVariant: ['tabular-nums'],
   },
   inactive: {
     opacity: 0.55,

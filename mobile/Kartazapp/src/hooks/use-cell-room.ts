@@ -126,6 +126,17 @@ function readBatteries(state: unknown): CellBattery[] {
 export type FuelPurchaseError = 'already_full' | 'insufficient_coins' | 'not_connected' | 'timeout' | 'server_error';
 
 const FUEL_PURCHASE_TIMEOUT_MS = 10_000;
+
+/** Motivo de um uso do radar recusado. */
+export type RadarError = 'cooldown' | 'no_energy' | 'not_connected' | 'timeout' | 'server_error';
+
+/** Radar recusado: o motivo e, na espera, até quando ela vai. */
+export type RadarFailure = { reason: RadarError; cooldownUntil?: number };
+
+/** Radar aceito: as cartas da sala (área res 8) e até quando o radar fica em espera. */
+export type RadarResult = { cards: CellCard[]; cooldownUntil: number };
+
+const RADAR_TIMEOUT_MS = 10_000;
 const KNOWN_PURCHASE_ERRORS: FuelPurchaseError[] = ['already_full', 'insufficient_coins'];
 
 /** Ganho de moedas para o HUD animar o "+N" (`at` distingue duas coletas de mesmo valor). */
@@ -222,6 +233,13 @@ export function useCellRoom(profile: CellRoomProfile | null, { enabled, onMoveRe
   /** Preço fixo para encher o tanque (`state.economy`), mostrado no "Abastecer". */
   const [fillTankPrice, setFillTankPrice] = useState(50);
   /** Compra de energia em andamento: presa à sala em que foi enviada (resposta vem dela). */
+  /** Uso do radar em andamento: preso à sala em que foi enviado (a resposta vem dela). */
+  const pendingRadarRef = useRef<{
+    room: Room;
+    resolve: (result: RadarResult) => void;
+    reject: (failure: RadarFailure) => void;
+    timer: ReturnType<typeof setTimeout>;
+  } | null>(null);
   const pendingPurchaseRef = useRef<{
     room: Room;
     resolve: () => void;
@@ -398,6 +416,25 @@ export function useCellRoom(profile: CellRoomProfile | null, { enabled, onMoveRe
       // Coletou uma bandeira (foi o primeiro a chegar ao centro da área): avisa e atualiza o perfil.
       // Compra de energia: responde a quem comprou nesta sala. A energia nova chega pelo estado
       // (`fuel`); o saldo novo vai para o cache da carteira.
+      room.onMessage('radarGranted', (message: { cards?: unknown[]; cooldownUntil?: number }) => {
+        const pending = pendingRadarRef.current;
+        if (!pending || pending.room !== room) return;
+        clearTimeout(pending.timer);
+        pendingRadarRef.current = null;
+        const cards = readCards({ cards: message.cards ?? [] });
+        pending.resolve({ cards, cooldownUntil: Number(message.cooldownUntil) || Date.now() });
+      });
+
+      room.onMessage('radarRejected', (message: { reason?: string; cooldownUntil?: number }) => {
+        const pending = pendingRadarRef.current;
+        if (!pending || pending.room !== room) return;
+        clearTimeout(pending.timer);
+        pendingRadarRef.current = null;
+        const reason: RadarError =
+          message.reason === 'cooldown' || message.reason === 'no_energy' ? message.reason : 'server_error';
+        pending.reject({ reason, cooldownUntil: Number(message.cooldownUntil) || undefined });
+      });
+
       room.onMessage('fuelPurchaseGranted', (message: { balance: number }) => {
         const pending = pendingPurchaseRef.current;
         if (!pending || pending.room !== room) return;
@@ -595,6 +632,26 @@ export function useCellRoom(profile: CellRoomProfile | null, { enabled, onMoveRe
     [],
   );
 
+  /** Usa o radar (o servidor cobra a energia e confere a espera) e devolve as cartas da sala. */
+  const radarScan = useCallback(
+    () =>
+      new Promise<RadarResult>((resolve, reject: (failure: RadarFailure) => void) => {
+        const room = roomRef.current;
+        if (!room || pendingRadarRef.current) {
+          reject({ reason: room ? 'server_error' : 'not_connected' });
+          return;
+        }
+        const timer = setTimeout(() => {
+          if (pendingRadarRef.current?.timer !== timer) return;
+          pendingRadarRef.current = null;
+          reject({ reason: 'timeout' });
+        }, RADAR_TIMEOUT_MS);
+        pendingRadarRef.current = { room, resolve, reject, timer };
+        room.send('radarScan', {});
+      }),
+    [],
+  );
+
   const updatePosition = useCallback(
     (lat: number, lng: number) => {
       positionRef.current = { lat, lng };
@@ -666,6 +723,7 @@ export function useCellRoom(profile: CellRoomProfile | null, { enabled, onMoveRe
     dismissCardsPack,
     fillTankPrice,
     purchaseFuel,
+    radarScan,
     setPosition,
     updatePosition,
   };

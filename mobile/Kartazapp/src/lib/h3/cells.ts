@@ -1,7 +1,7 @@
 // Antes do h3-js: ele cria um TextDecoder("utf-16le") ao carregar, que o RN não suporta.
 import '@/shims/text-decoder-utf16';
 
-import { cellToParent, latLngToCell } from 'h3-js';
+import { cellToBoundary, cellToParent, latLngToCell } from 'h3-js';
 
 function parseResolution(raw: string | undefined, fallback: number) {
   const value = Number.parseInt(raw ?? '', 10);
@@ -25,4 +25,10 @@ export function getUserCell(lat: number, lng: number) {
 /** Célula da sala: o pai da célula do usuário na resolução `RES_ROOM_CELL`. */
 export function getRoomCell(userCell: string) {
   return cellToParent(userCell, RES_ROOM_CELL);
+}
+
+/** Vértices do hexágono da sala (res 8) em que está a posição — para enquadrar a sala na câmera. */
+export function getRoomBoundary(lat: number, lng: number) {
+  const roomCell = getRoomCell(getUserCell(lat, lng));
+  return cellToBoundary(roomCell).map(([latitude, longitude]) => ({ latitude, longitude }));
 }

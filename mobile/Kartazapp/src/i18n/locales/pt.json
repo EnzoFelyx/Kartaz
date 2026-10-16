@@ -75,7 +75,8 @@
     "flagNoOwner": "Sem dono",
     "flagOwnerA11y": "Dono da bandeira da área: {{owner}}",
     "cardsA11y_one": "{{count}} carta na área",
-    "cardsA11y_other": "{{count}} cartas na área"
+    "cardsA11y_other": "{{count}} cartas na área",
+    "radarCooldownA11y": "Radar recarregando: {{time}}"
   },
   "cards": {
     "title": "Cartas",
@@ -488,5 +489,16 @@
     "tradeAcceptedTitle": "Troca aceita! 🎉",
     "tradeAcceptedBody": "{{name}} aceitou a sua proposta. As cartas já estão na sua coleção.",
     "tradesAcceptedBody": "{{count}} propostas suas foram aceitas. Confira a sua coleção!"
+  },
+  "radar": {
+    "errorTitle": "Radar indisponível",
+    "revealingA11y": "Radar revelando as cartas da área",
+    "errors": {
+      "cooldown": "O radar está recarregando. Espere o tempo no botão.",
+      "no_energy": "Você precisa de pelo menos 10% de energia para usar o radar.",
+      "not_connected": "Ligue o modo explorador para usar o radar.",
+      "timeout": "O servidor não respondeu. Tente de novo.",
+      "server_error": "Não foi possível usar o radar agora."
+    }
   }
 }
