@@ -1,37 +1,18 @@
 import { QueryClientProvider } from '@tanstack/react-query';
 import { DarkTheme, Stack, ThemeProvider } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import * as SystemUI from 'expo-system-ui';
-import { useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated';
 
 import { DatabaseInitSplash } from '@/components/database-init-splash';
 import { ToastHost } from '@/components/toast/toast-host';
-import { useCardsProgressSync } from '@/hooks/queries/use-cards-progress-sync';
-import { useOnboardingSeen } from '@/hooks/queries/use-onboarding';
-import { usePlayersSync } from '@/hooks/queries/use-players-sync';
-import { useSession } from '@/hooks/queries/use-session';
+import { useAppBootstrap, useBackgroundSync, useRootNavigation } from '@/hooks/use-app-bootstrap';
 import '@/i18n';
-import { configureNotifications } from '@/lib/notifications/trade-notifications';
-import { queryClient, setupQueryFocusManager } from '@/lib/query/query-client';
-import { seedFromBundleIfNeeded } from '@/lib/sync/seedFromBundle';
+import { configureApp } from '@/lib/app/configure-app';
+import { queryClient } from '@/lib/query/query-client';
 import { colors } from '@/theme/colors';
 
-SplashScreen.preventAutoHideAsync();
-
-// Modo estrito do Reanimated desligado: o Skia lê o `.value` dos valores animados que recebe como
-// prop sempre que redesenha (brilho do grid do mapa, borda da tab bar, barra de XP), e cada redesenho
-// gerava o aviso "Reading from `value` during component render". Os demais avisos continuam.
-configureReanimatedLogger({ level: ReanimatedLogLevel.warn, strict: false });
-
-// Notificações locais aparecem também com o app aberto.
-configureNotifications();
-
-// Fundo da view raiz (aparece por trás das telas durante as transições): o mesmo escuro do app.
-SystemUI.setBackgroundColorAsync(colors.background);
+configureApp();
 
 /** Tema da navegação com o fundo escuro do app (evita o branco padrão entre as telas). */
 const navigationTheme = {
@@ -43,17 +24,9 @@ const navigationTheme = {
   },
 };
 
-/**
- * Tarefas de dados em segundo plano, depois da base local pronta e com sessão:
- * sincroniza a base de jogadores (a cada 6h)
- * e o found/total das cartas por delta (a cada 1 min).
- * Não bloqueia a UI: o catálogo funciona offline pelo SQLite.
- */
+/** Sincronizações em segundo plano (só com sessão). */
 function BackgroundSync() {
-  const session = useSession();
-  usePlayersSync(session.isReady);
-  useCardsProgressSync(session.isReady);
-
+  useBackgroundSync();
   return null;
 }
 
@@ -62,12 +35,10 @@ function BackgroundSync() {
  * Enquanto a sessão é lida do aparelho, o splash continua cobrindo a tela.
  */
 function RootNavigator() {
-  const session = useSession();
-  const onboardingSeen = useOnboardingSeen();
-  const signedIn = session.isReady;
+  const { signedIn, loading } = useRootNavigation();
 
   // A flag do onboarding decide em qual slide o login abre: espera ela também.
-  if (session.isPending || onboardingSeen.isPending) return <DatabaseInitSplash />;
+  if (loading) return <DatabaseInitSplash />;
 
   return (
     <>
@@ -99,22 +70,7 @@ function RootNavigator() {
 }
 
 export default function RootLayout() {
-  const [initializing, setInitializing] = useState(true);
-
-  useEffect(() => {
-    SplashScreen.hideAsync();
-  }, []);
-
-  useEffect(() => setupQueryFocusManager(), []);
-
-  // Primeira abertura: importa a base de jogadores embutida (assets/data) para o SQLite.
-  // Nas próximas aberturas a base local já está em dia e isso retorna na hora (troca se o bundle for mais novo).
-  useEffect(() => {
-    // Falha no seed não bloqueia o app: o sync com o backend preenche a base depois.
-    seedFromBundleIfNeeded()
-      .catch(() => {})
-      .finally(() => setInitializing(false));
-  }, []);
+  const { initializing } = useAppBootstrap();
 
   return (
     // Raiz dos gestos (react-native-gesture-handler): necessária para os GestureDetector (ex.: toast).
