@@ -3,40 +3,32 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { AuthButton } from '@/components/auth/auth-button';
 import { SwapIcon } from '@/components/icons/swap-icon';
-import type { TradeProposalDto } from '@/lib/api/trades-api';
 import type { UserInstanceDto } from '@/lib/api/user-instances-api';
-import type { TradeAction } from '@/hooks/queries/use-trades';
 import { colors, withAlpha } from '@/theme/colors';
 import { formatShortDate } from '@/utils/card-labels';
 
-import { TradeCardTile } from './trade-card-tile';
-import { TRADE_STATUS_COLOR } from './trade-status-filter';
-
-type TradeProposalCardProps = {
-  trade: TradeProposalDto;
-  myUserId: string | undefined;
-  /** Cópias titulares do meu time: com uma delas no meu lado, não dá para aceitar. */
-  starterIds: Set<string>;
-  /** Ação em andamento nesta proposta (desabilita os botões). */
-  busy: boolean;
-  onAction: (action: TradeAction) => void;
-};
+import { TradeCardTile } from '../trade-card-tile';
+import { TRADE_STATUS_COLOR } from '../trade-status-filter';
+import type { TradeProposalCardViewModel } from './use-view-model';
 
 /**
- * Uma proposta de troca. Enviada por mim: "Você oferece" ⇄ "Você recebe" e, pendente, "Cancelar
- * proposta". Recebida: "Você recebe" vem primeiro e, pendente, "Recusar" / "Aceitar" (bloqueado se
- * alguma carta pedida de mim for titular do time).
+ * Enviada por mim: "Você oferece" ⇄ "Você recebe" e, pendente, "Cancelar proposta". Recebida:
+ * "Você recebe" vem primeiro e, pendente, "Recusar" / "Aceitar".
  */
-export function TradeProposalCard({ trade, myUserId, starterIds, busy, onAction }: TradeProposalCardProps) {
+export function TradeProposalCardView({
+  status,
+  createdAt,
+  sentByMe,
+  otherName,
+  iGive,
+  iGet,
+  pending,
+  acceptBlocked,
+  busy,
+  onAction,
+}: TradeProposalCardViewModel) {
   const { t } = useTranslation();
-  const sentByMe = trade.initiator.id === myUserId;
-  const other = sentByMe ? trade.counterparty : trade.initiator;
-  // Do meu ponto de vista: o que sai das minhas mãos e o que eu ganho.
-  const iGive = sentByMe ? trade.offerFromInitiator : trade.offerFromCounterparty;
-  const iGet = sentByMe ? trade.offerFromCounterparty : trade.offerFromInitiator;
-  const pending = trade.status === 'PENDING';
-  const statusColor = TRADE_STATUS_COLOR[trade.status];
-  const acceptBlocked = !sentByMe && iGive.some((instance) => starterIds.has(instance.id));
+  const statusColor = TRADE_STATUS_COLOR[status];
 
   const give = <TradeSide label={t('trades.youGive')} cards={iGive} />;
   const get = <TradeSide label={t('trades.youGet')} cards={iGet} />;
@@ -45,13 +37,13 @@ export function TradeProposalCard({ trade, myUserId, starterIds, busy, onAction 
     <View style={[styles.card, { borderColor: withAlpha(statusColor, 0.35) }]}>
       <View style={styles.header}>
         <View style={[styles.statusPill, { backgroundColor: withAlpha(statusColor, 0.15) }]}>
-          <Text style={[styles.statusText, { color: statusColor }]}>{t(`trades.status.${trade.status}`)}</Text>
+          <Text style={[styles.statusText, { color: statusColor }]}>{t(`trades.status.${status}`)}</Text>
         </View>
         <Text style={styles.party} numberOfLines={1}>
-          {t(sentByMe ? 'trades.to' : 'trades.from', { name: other.username ?? '—' })}
+          {t(sentByMe ? 'trades.to' : 'trades.from', { name: otherName })}
         </Text>
       </View>
-      <Text style={styles.date}>{formatShortDate(trade.createdAt)}</Text>
+      <Text style={styles.date}>{formatShortDate(createdAt)}</Text>
 
       {sentByMe ? give : get}
       <View style={styles.swap}>

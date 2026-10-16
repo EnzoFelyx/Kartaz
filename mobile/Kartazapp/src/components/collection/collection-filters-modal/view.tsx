@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
@@ -6,58 +6,43 @@ import { AuthButton } from '@/components/auth/auth-button';
 import { ModalCard, ModalCloseButton } from '@/components/ui/modal-card';
 import { RangeSlider } from '@/components/ui/range-slider';
 import { TextField } from '@/components/ui/text-field';
-import {
-  DEFAULT_COLLECTION_FILTERS,
-  OVR_MAX,
-  OVR_MIN,
-  type CollectionFilters,
-} from '@/lib/collection/collection-filters';
+import { OVR_MAX, OVR_MIN } from '@/lib/collection/collection-filters';
 import { colors } from '@/theme/colors';
 
-type CollectionFiltersModalProps = {
-  visible: boolean;
-  /** Filtros aplicados na lista (o modal começa com eles). */
-  filters: CollectionFilters;
-  onApply: (filters: CollectionFilters) => void;
-  onClose: () => void;
-};
+import type { CollectionFiltersViewModel } from './use-view-model';
 
-/**
- * Filtros da coleção: faixa de overall (slider com dois thumbs), seleção, posição e origem da cópia.
- * Edita um rascunho; só "Aplicar" muda a lista. "Limpar" volta o rascunho ao padrão.
- */
-export function CollectionFiltersModal({ visible, filters, onApply, onClose }: CollectionFiltersModalProps) {
+/** Moldura do modal de filtros (com teclado e a raiz de gestos que o slider precisa). */
+export function CollectionFiltersFrame({
+  visible,
+  onClose,
+  children,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  children: ReactNode;
+}) {
   return (
     // `gestures`: o slider precisa da raiz de gestos (o Modal fica fora da do app).
     <ModalCard visible={visible} onClose={onClose} maxWidth={400} cardStyle={styles.card} keyboardAvoiding gestures>
-      {/* Remonta a cada abertura: o rascunho começa nos filtros aplicados. */}
-      {visible && <FiltersContent filters={filters} onApply={onApply} onClose={onClose} />}
+      {children}
     </ModalCard>
   );
 }
 
-function FiltersContent({ filters, onApply, onClose }: Omit<CollectionFiltersModalProps, 'visible'>) {
+/** Faixa de overall (slider com dois thumbs), seleção, posição, origem e os botões Limpar / Aplicar. */
+export function CollectionFiltersView({
+  draft,
+  liveRange,
+  slideRange,
+  changeRange,
+  setNation,
+  setPosition,
+  setSpawnSource,
+  clear,
+  apply,
+  onClose,
+}: CollectionFiltersViewModel) {
   const { t } = useTranslation();
-  const [draft, setDraft] = useState(filters);
-  /** Faixa mostrada no texto: acompanha o arraste ao vivo (o rascunho só muda ao soltar). */
-  const [liveRange, setLiveRange] = useState({ low: filters.ovrMin, high: filters.ovrMax });
-
-  const update = (patch: Partial<CollectionFilters>) => setDraft((current) => ({ ...current, ...patch }));
-
-  const changeRange = (low: number, high: number) => {
-    setLiveRange({ low, high });
-    update({ ovrMin: low, ovrMax: high });
-  };
-
-  const clear = () => {
-    setDraft(DEFAULT_COLLECTION_FILTERS);
-    setLiveRange({ low: OVR_MIN, high: OVR_MAX });
-  };
-
-  const apply = () => {
-    onApply(draft);
-    onClose();
-  };
 
   return (
     <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" bounces={false}>
@@ -75,7 +60,7 @@ function FiltersContent({ filters, onApply, onClose }: Omit<CollectionFiltersMod
           max={OVR_MAX}
           low={draft.ovrMin}
           high={draft.ovrMax}
-          onSlide={(low, high) => setLiveRange({ low, high })}
+          onSlide={slideRange}
           onChange={changeRange}
           accessibilityLabel={t('myCollection.filters.ovr')}
         />
@@ -84,21 +69,21 @@ function FiltersContent({ filters, onApply, onClose }: Omit<CollectionFiltersMod
       <TextField
         label={t('myCollection.filters.nation')}
         value={draft.nation}
-        onChangeText={(nation) => update({ nation })}
+        onChangeText={setNation}
         placeholder={t('myCollection.filters.nationPlaceholder')}
         autoCapitalize="words"
       />
       <TextField
         label={t('myCollection.filters.position')}
         value={draft.position}
-        onChangeText={(position) => update({ position })}
+        onChangeText={setPosition}
         placeholder={t('myCollection.filters.positionPlaceholder')}
         autoCapitalize="characters"
       />
       <TextField
         label={t('myCollection.filters.spawnSource')}
         value={draft.spawnSource}
-        onChangeText={(spawnSource) => update({ spawnSource })}
+        onChangeText={setSpawnSource}
         placeholder={t('myCollection.filters.spawnSourcePlaceholder')}
         autoCapitalize="none"
       />

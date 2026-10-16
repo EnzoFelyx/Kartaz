@@ -1,69 +1,29 @@
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { BoltIcon } from '@/components/icons/bolt-icon';
 import { CoinIcon } from '@/components/icons/coin-icon';
 import { ModalCard } from '@/components/ui/modal-card';
-import type { FuelPurchaseError } from '@/hooks/use-cell-room';
 import { colors, withAlpha } from '@/theme/colors';
 import { formatNumber } from '@/utils/card-labels';
 
-type RefuelModalProps = {
-  visible: boolean;
-  onClose: () => void;
-  fuel: number;
-  maxFuel: number;
-  /** Saldo de moedas da carteira. */
-  balance: number;
-  /** Preço fixo para encher o tanque (economia da sala). */
-  price: number;
-  /** Sala conectada (Explore ON): a compra só acontece por ela. */
-  connected: boolean;
-  /** Enche o tanque; rejeita com o motivo. */
-  onPurchase: () => Promise<void>;
-};
+import type { RefuelModalViewModel } from './use-view-model';
 
-/**
- * "Abastecer": mostra a energia atual e o botão de encher o tanque com moedas, por um preço fixo
- * (o mesmo da sala, não importa quanto falta); quem cobra é o servidor.
- */
-export function RefuelModal({
+/** Energia atual, botão de encher o tanque (com o preço em moedas) e o aviso de saldo ou erro. */
+export function RefuelModalView({
   visible,
-  onClose,
-  fuel,
-  maxFuel,
+  close,
+  percent,
+  full,
+  notEnoughCoins,
   balance,
   price,
-  connected,
-  onPurchase,
-}: RefuelModalProps) {
+  buying,
+  disabled,
+  error,
+  purchase,
+}: RefuelModalViewModel) {
   const { t } = useTranslation();
-  const [buying, setBuying] = useState(false);
-  const [error, setError] = useState<FuelPurchaseError | null>(null);
-
-  const percent = maxFuel > 0 ? Math.round(Math.min(Math.max(fuel / maxFuel, 0), 1) * 100) : 0;
-  const full = maxFuel > 0 && fuel >= maxFuel;
-  const notEnoughCoins = !full && balance < price;
-  const disabled = buying || full || !connected || notEnoughCoins;
-
-  const close = () => {
-    setError(null);
-    onClose();
-  };
-
-  const purchase = async () => {
-    setError(null);
-    setBuying(true);
-    try {
-      await onPurchase();
-      close();
-    } catch (reason) {
-      setError(reason as FuelPurchaseError);
-    } finally {
-      setBuying(false);
-    }
-  };
 
   const buttonLabel = full ? t('refuel.full') : t('refuel.fillTank', { cost: formatNumber(price) });
   const note = notEnoughCoins

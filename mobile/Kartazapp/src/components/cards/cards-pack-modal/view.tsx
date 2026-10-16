@@ -1,5 +1,5 @@
-import * as Haptics from 'expo-haptics';
-import { useEffect, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeIn, useSharedValue, withTiming } from 'react-native-reanimated';
@@ -10,9 +10,10 @@ import { CARD_REVEAL_ASPECT, CardReveal } from '@/components/cards/card-reveal';
 import { ChevronRightIcon } from '@/components/icons/chevron-right-icon';
 import { CloseIcon } from '@/components/icons/close-icon';
 import { PageDots } from '@/components/onboarding/page-dots';
-import { playerForCardId } from '@/lib/cards/mappers';
 import type { CardsPack } from '@/lib/colyseus/types';
 import { colors, withAlpha } from '@/theme/colors';
+
+import type { CardsPackViewModel } from './use-view-model';
 
 const MODAL_MAX_WIDTH = 380;
 const MODAL_PADDING = 20;
@@ -20,8 +21,6 @@ const SCREEN_GUTTER = 24;
 const CARD_MAX_WIDTH = 230;
 /** Altura do resto do modal (cabeçalho, pontos, dica, botão e espaçamentos), para a carta caber em telas baixas. */
 const MODAL_CHROME_HEIGHT = 320;
-/** Espera o fade de entrada do modal antes de vibrar. */
-const HAPTIC_DELAY_MS = 250;
 
 const PACK_TITLE = {
   initial: 'cardsPack.titleInitial',
@@ -29,76 +28,48 @@ const PACK_TITLE = {
   found: 'cardsPack.titleFound',
 } as const satisfies Record<CardsPack['type'], string>;
 
-type CardsPackModalProps = {
-  /** Pack da vez (`null` fecha o modal). */
-  pack: CardsPack | null;
+/** Moldura do modal do pack (fundo escuro, fade). */
+export function CardsPackFrame({
+  visible,
+  onClose,
+  children,
+}: {
+  visible: boolean;
   onClose: () => void;
-};
-
-/**
- * Abertura de um pack de cartas (boas-vindas com 5, diário com 2): uma carta por vez, o jogador
- * toca para revelar e avança. As cartas já são dele (o servidor criou as cópias), então fechar no
- * meio não perde nada. Tamanho da carta se ajusta à tela e os pontos, à quantidade de cartas.
- */
-export function CardsPackModal({ pack, onClose }: CardsPackModalProps) {
-  // Mantém o último pack durante o fade de saída do Modal (senão ele some vazio).
-  const [shown, setShown] = useState(pack);
-  if (pack && pack !== shown) setShown(pack);
-
+  children: ReactNode;
+}) {
   return (
-    <Modal visible={pack != null} transparent animationType="fade" statusBarTranslucent onRequestClose={onClose}>
-      <View style={styles.backdrop}>
-        {shown && <PackContent key={shown.cards[0].id} pack={shown} onClose={onClose} />}
-      </View>
+    <Modal visible={visible} transparent animationType="fade" statusBarTranslucent onRequestClose={onClose}>
+      <View style={styles.backdrop}>{children}</View>
     </Modal>
   );
 }
 
-/** Conteúdo de um pack: o `key` do pai zera índice e carta revelada a cada pack novo. */
-function PackContent({ pack, onClose }: { pack: CardsPack; onClose: () => void }) {
+/** Título, progresso (pontos), a carta para revelar (tamanho pela tela), a dica e o botão de avançar. */
+export function CardsPackView({
+  packType,
+  index,
+  total,
+  card,
+  player,
+  revealed,
+  isLast,
+  reveal,
+  next,
+  onClose,
+}: CardsPackViewModel) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
-  const [index, setIndex] = useState(0);
-  const [revealed, setRevealed] = useState(false);
   const progress = useSharedValue(0);
-
-  const total = pack.cards.length;
-  const card = pack.cards[index];
-  const isLast = index >= total - 1;
-  const player = useMemo(() => playerForCardId(card.cardId), [card.cardId]);
 
   const contentWidth = Math.min(screenWidth - SCREEN_GUTTER * 2, MODAL_MAX_WIDTH) - MODAL_PADDING * 2;
   const availableHeight = screenHeight - insets.top - insets.bottom - MODAL_CHROME_HEIGHT;
   const cardWidth = Math.max(160, Math.min(contentWidth, CARD_MAX_WIDTH, availableHeight / CARD_REVEAL_ASPECT));
 
-  // Vibração quando o pack aparece (uma vez por pack: o `key` do pai remonta este conteúdo).
-  // "Sucesso" (dois toques curtos) em vez de impacto leve, que mal se sentia junto com a abertura;
-  // dispara depois do fade do modal. Respeita o ajuste de vibração do iPhone (ex.: modo silencioso).
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
-    }, HAPTIC_DELAY_MS);
-    return () => clearTimeout(timer);
-  }, []);
-
   useEffect(() => {
     progress.set(withTiming(index, { duration: 250 }));
   }, [index, progress]);
-
-  const next = () => {
-    if (!revealed) {
-      setRevealed(true);
-      return;
-    }
-    if (isLast) {
-      onClose();
-      return;
-    }
-    // Junto com o índice: a carta nova nunca aparece já revelada.
-    setRevealed(false);
-    setIndex(index + 1);
-  };
 
   const buttonLabel = !revealed ? t('cardsPack.reveal') : isLast ? t('cardsPack.done') : t('cardsPack.nextCard');
   const helper = !revealed ? t('cardsPack.helperTap') : isLast ? t('cardsPack.helperDone') : t('cardsPack.helperNext');
@@ -108,7 +79,7 @@ function PackContent({ pack, onClose }: { pack: CardsPack; onClose: () => void }
       <View style={styles.header}>
         <View style={styles.titles}>
           <Text style={styles.title} accessibilityRole="header">
-            {t(PACK_TITLE[pack.type])}
+            {t(PACK_TITLE[packType])}
           </Text>
           <Text style={styles.subtitle}>{t('cardsPack.progress', { current: index + 1, total })}</Text>
         </View>
@@ -131,7 +102,7 @@ function PackContent({ pack, onClose }: { pack: CardsPack; onClose: () => void }
           serialMax={card.serialMax}
           serialClass={card.serialClass}
           revealed={revealed}
-          onReveal={() => setRevealed(true)}
+          onReveal={reveal}
           width={cardWidth}
         />
       </Animated.View>
