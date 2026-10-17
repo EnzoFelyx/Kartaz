@@ -8,3 +8,6 @@ mobile/Kartazapp/assets/data/*.json.gz
 # Backend da Rocketseat (repositório próprio, com .env local): não vai para este repositório.
 # Código original: https://github.com/rocketseat-education/go-rocket-league-backend
 backend/
+
+# Contexto para passar ao projeto do Claude (local)
+CONTEXTO_KARTAZ.md
