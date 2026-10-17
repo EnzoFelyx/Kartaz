@@ -105,3 +105,28 @@ export type CardsPack = {
   type: CardsPackType;
   cards: PackCard[];
 };
+
+/** Dados do próprio jogador na sala: autoritativos no servidor (energia, XP, áreas, km). */
+export type CellSelf = {
+  fuel: number;
+  maxFuel: number;
+  xp: number;
+  level: number;
+  /** Faixa de XP do nível atual (regra de níveis do servidor), para a barra de progresso. */
+  levelXpStart: number;
+  levelXpEnd: number;
+  coverage: number;
+  distanceKm: number;
+};
+
+/** Motivo de uma compra de energia recusada (do servidor ou do app). */
+export type FuelPurchaseError = 'already_full' | 'insufficient_coins' | 'not_connected' | 'timeout' | 'server_error';
+
+/** Motivo de um uso do radar recusado. */
+export type RadarError = 'cooldown' | 'no_energy' | 'not_connected' | 'timeout' | 'server_error';
+
+/** Radar recusado: o motivo e, na espera, até quando ela vai. */
+export type RadarFailure = { reason: RadarError; cooldownUntil?: number };
+
+/** Radar aceito: as cartas da sala (área res 8) e até quando o radar fica em espera. */
+export type RadarResult = { cards: CellCard[]; cooldownUntil: number };
