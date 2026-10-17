@@ -25,7 +25,9 @@ import { ShareIcon } from '@/components/icons/share-icon';
 import { StarIcon } from '@/components/icons/star-icon';
 import { EdgeFade } from '@/components/ui/edge-fade';
 import { IconButton } from '@/components/ui/icon-button';
-import { colors, rarityColors, withAlpha } from '@/theme/colors';
+import { colors, withAlpha } from '@/theme/colors';
+import { rarityColors } from '@/theme/game-colors';
+import { spacing } from '@/theme/spacing';
 import { formatShortDate, getNationName, getPositionLabel, getPositionName } from '@/utils/card-labels';
 
 import type { CardDetailsViewModel } from './use-view-model';
@@ -352,7 +354,7 @@ const styles = StyleSheet.create({
   },
   body: {
     gap: 12,
-    paddingHorizontal: 20,
+    paddingHorizontal: spacing.screen,
     paddingTop: SCROLL_FADE_HEIGHT / 2 + 12,
   },
   sectionTitle: {
@@ -365,11 +367,11 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   similarList: {
-    marginHorizontal: -20,
+    marginHorizontal: -spacing.screen,
   },
   similarContent: {
     gap: 14,
-    paddingHorizontal: 20,
+    paddingHorizontal: spacing.screen,
   },
   actions: {
     flexDirection: 'row',

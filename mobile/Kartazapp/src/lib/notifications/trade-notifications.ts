@@ -5,6 +5,7 @@ import i18n from '@/i18n';
 import { getTrades } from '@/lib/api/trades-api';
 import { queryKeys } from '@/lib/query/keys';
 import { queryClient } from '@/lib/query/query-client';
+import { storageKeys } from '@/lib/storage/keys';
 
 /*
  * Notificações LOCAIS (disparadas pelo próprio app): funcionam com a conta gratuita da Apple.
@@ -38,15 +39,13 @@ async function notify(title: string, body: string) {
 }
 
 /** Até quando (data de aceite) o jogador já foi avisado — por usuário, para não avisar duas vezes. */
-const seenKey = (userId: string) => `tradesAcceptedSeenAt.${userId}`;
-
 async function getSeenAt(userId: string) {
-  return SecureStore.getItemAsync(seenKey(userId));
+  return SecureStore.getItemAsync(storageKeys.tradesAcceptedSeenAt(userId));
 }
 
 async function setSeenAt(userId: string, iso: string) {
   const current = await getSeenAt(userId);
-  if (!current || iso > current) await SecureStore.setItemAsync(seenKey(userId), iso);
+  if (!current || iso > current) await SecureStore.setItemAsync(storageKeys.tradesAcceptedSeenAt(userId), iso);
 }
 
 /** As cartas trocaram de dono: coleção, time e trocas mudaram. */

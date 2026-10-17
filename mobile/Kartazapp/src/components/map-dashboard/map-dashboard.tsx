@@ -11,19 +11,14 @@ import { UsersIcon } from '@/components/icons/users-icon';
 import { WalkingIcon } from '@/components/icons/walking-icon';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { colors, withAlpha } from '@/theme/colors';
+import { zoneDifficultyColors } from '@/theme/game-colors';
+import { motion } from '@/theme/motion';
+import type { ZoneDifficulty } from '@/types/zone';
 import { formatDecimal } from '@/utils/card-labels';
 
 import { RadarButton } from './radar-button';
 import { RadarFab } from './radar-fab';
 import { ZoneStat } from './zone-stat';
-
-export type ZoneDifficulty = 'low' | 'medium' | 'high';
-
-const DIFFICULTY_COLOR: Record<ZoneDifficulty, string> = {
-  low: colors.primary,
-  medium: colors.gold,
-  high: colors.accent,
-};
 
 const STAT_ICON_SIZE = 14;
 const EMPTY = '—';
@@ -88,8 +83,8 @@ export function MapDashboard({
       {expanded ? (
         <Animated.View
           key="panel"
-          entering={FadeInDown.duration(220)}
-          exiting={FadeOutDown.duration(160)}
+          entering={FadeInDown.duration(motion.enterMs)}
+          exiting={FadeOutDown.duration(motion.exitMs)}
           style={styles.panel}>
           <Pressable
             accessibilityRole="button"
@@ -107,7 +102,7 @@ export function MapDashboard({
                 <Text style={styles.zone} numberOfLines={1}>
                   {location ?? EMPTY}
                 </Text>
-                <Text style={[styles.difficulty, { color: DIFFICULTY_COLOR[difficulty] }]}>
+                <Text style={[styles.difficulty, { color: zoneDifficultyColors[difficulty] }]}>
                   {t(`mapDashboard.difficulty.${difficulty}`)}
                 </Text>
               </View>
@@ -167,7 +162,7 @@ export function MapDashboard({
           </View>
         </Animated.View>
       ) : (
-        <Animated.View key="fab" entering={ZoomIn.duration(200)} exiting={ZoomOut.duration(150)}>
+        <Animated.View key="fab" entering={ZoomIn.duration(motion.enterMs)} exiting={ZoomOut.duration(motion.exitMs)}>
           <RadarFab onPress={() => setExpanded(true)} />
         </Animated.View>
       )}

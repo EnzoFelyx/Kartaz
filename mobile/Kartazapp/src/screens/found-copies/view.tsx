@@ -8,11 +8,11 @@ import { FoundCopyCard } from '@/components/found-copies/found-copy-card';
 import { ListLoadingMore, ListState } from '@/components/ui/list-state';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
 import { LIST_END_THRESHOLD, LIST_RENDER_PROPS, listItemEntering } from '@/utils/list-loading';
 
 import type { FoundCopiesViewModel } from './use-view-model';
 
-const H_PADDING = 20;
 const GAP = 16;
 const STAT_ICON_SIZE = 15;
 
@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
   },
   summary: {
     gap: 16,
-    paddingHorizontal: H_PADDING,
+    paddingHorizontal: spacing.screen,
     paddingVertical: 20,
     marginBottom: 20,
     borderBottomWidth: 1,
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   item: {
-    paddingHorizontal: H_PADDING,
+    paddingHorizontal: spacing.screen,
   },
   empty: {
     marginTop: 24,

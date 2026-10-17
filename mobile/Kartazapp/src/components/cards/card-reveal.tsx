@@ -20,6 +20,7 @@ import { SvgGradientRect } from '@/components/ui/svg-gradient-rect';
 import type { SerialClass } from '@/lib/colyseus/types';
 import type { Player } from '@/types/player-card';
 import { colors, withAlpha } from '@/theme/colors';
+import { serialClassStyles } from '@/theme/game-colors';
 import { formatNumber } from '@/utils/card-labels';
 
 const BORDER_WIDTH = 2;
@@ -32,13 +33,6 @@ const ART_RATIO = 0.6;
 const BACK_ICON_SIZE = 40;
 const FLIP_MS = 680;
 const GLOW_IN_MS = 300;
-
-/** Estilo de cada classe de série: gradiente da borda, cor do selo e brilho em volta ao revelar. */
-const SERIAL_STYLE: Record<SerialClass, { gradient: [string, string]; badge: string; glow: number }> = {
-  extreme: { gradient: [colors.fuelEnd, colors.gold], badge: colors.gold, glow: 0.7 },
-  elite: { gradient: [colors.violet, colors.magenta], badge: colors.magenta, glow: 0.55 },
-  standard: { gradient: [colors.primary, colors.progressEnd], badge: colors.fuelEnd, glow: 0 },
-};
 
 export type CardRevealProps = {
   player: Player;
@@ -70,7 +64,7 @@ export function CardReveal({
 }: CardRevealProps) {
   const { t } = useTranslation();
   const height = width * CARD_REVEAL_ASPECT;
-  const serial = SERIAL_STYLE[serialClass];
+  const serial = serialClassStyles[serialClass];
   // Padrão fica neutro nas costas (como no layout); elite/extreme já mostram a cor da classe.
   const backClassColor = serialClass === 'standard' ? colors.foreground : serial.badge;
 

@@ -1,3 +1,5 @@
+import { CLUB_BONUS_TABLE, LINEUP_SIZE, NATION_BONUS_TABLE, type BonusTier } from '@/lib/game/rules';
+
 /** Jogador do time para a pontuação (overall, seleção e clube). */
 export type ScoringPlayer = {
   ovr: number | null;
@@ -21,25 +23,6 @@ export type TeamScore = {
   /** Maior grupo de titulares do mesmo clube. */
   maxSameClub: number;
 };
-
-export type BonusTier = { count: number; percent: number };
-
-/**
- * Bônus por seleção pelo tamanho do grupo (mesma tabela do backend, `teamService.js`).
- * Para em 4 jogadores: um grupo de 5 vale o mesmo que um de 4.
- */
-export const NATION_BONUS_TABLE: readonly BonusTier[] = [
-  { count: 2, percent: 0.625 },
-  { count: 3, percent: 1.25 },
-  { count: 4, percent: 3.75 },
-];
-
-/** Bônus por clube pelo tamanho do grupo (mesma tabela do backend). Soma com o de seleção. */
-export const CLUB_BONUS_TABLE: readonly BonusTier[] = [
-  { count: 2, percent: 0.5 },
-  { count: 3, percent: 1 },
-  { count: 4, percent: 3 },
-];
 
 function bonusForGroupSize(table: readonly BonusTier[], size: number) {
   let percent = 0;
@@ -97,7 +80,6 @@ export type LineupCandidate = ScoringPlayer & {
   cardId: number;
 };
 
-const LINEUP_SIZE = 5;
 /** Melhores no geral que entram na busca. */
 const TOP_OVERALL = 25;
 /** Por seleção e por clube, os melhores que entram (para achar combinações com bônus). */

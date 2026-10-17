@@ -11,11 +11,11 @@ import { GradientBox } from '@/components/ui/gradient-box';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { TextField } from '@/components/ui/text-field';
 import { colors, withAlpha } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
 import { listItemEntering } from '@/utils/list-loading';
 
 import type { EditProfileViewModel } from './use-view-model';
 
-const H_PADDING = 20;
 const AVATAR_SIZE = 120;
 const AVATAR_RADIUS = 30;
 const CAMERA_BADGE_SIZE = 44;
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
   },
   form: {
     gap: 22,
-    paddingHorizontal: H_PADDING,
+    paddingHorizontal: spacing.screen,
     paddingTop: 24,
   },
 });

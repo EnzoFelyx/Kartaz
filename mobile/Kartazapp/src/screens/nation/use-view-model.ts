@@ -3,8 +3,7 @@ import { useState } from 'react';
 
 import { useNationPlayersCount, usePlayersCatalog } from '@/hooks/queries/use-players-catalog';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
-
-const SEARCH_DEBOUNCE_MS = 250;
+import { LOCAL_SEARCH_DEBOUNCE_MS } from '@/lib/query/config';
 
 /**
  * Jogadores de uma seleção (catálogo completo), com busca e paginação. O parâmetro `code` é o nome
@@ -15,7 +14,7 @@ export function useNationViewModel() {
   const nation = code?.trim() ?? '';
   const [query, setQuery] = useState('');
 
-  const search = useDebouncedValue(query, SEARCH_DEBOUNCE_MS);
+  const search = useDebouncedValue(query, LOCAL_SEARCH_DEBOUNCE_MS);
   const catalog = usePlayersCatalog({ query: search, nation });
   const total = useNationPlayersCount(nation);
 

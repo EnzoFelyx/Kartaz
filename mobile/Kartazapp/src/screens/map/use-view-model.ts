@@ -9,8 +9,8 @@ import { useCellRoom, type CellRoomProfile, type RadarFailure } from '@/hooks/us
 import { useInitialLocation } from '@/hooks/use-initial-location';
 import { usePlaceName } from '@/hooks/use-place-name';
 import { resolveApiUri } from '@/lib/api/image-uri';
+import { DEFAULT_MAX_ENERGY, RADAR_COST_PERCENT } from '@/lib/game/rules';
 
-import { DEFAULT_MAX_ENERGY, RADAR_COST_PERCENT } from './constants';
 import type { MapRoomActions } from './room-actions';
 import { isExploreZoom, useMapCamera } from './use-map-camera';
 import { useMapHud } from './use-map-hud';

@@ -12,11 +12,7 @@ export const CAMERA_SETTLE_MS = 400;
 /** Movimentos menores que isso (graus) são ruído do mapa, não arrasto. */
 export const MOVE_EPSILON_DEG = 1e-6;
 
-/** Energia máxima padrão (antes de a sala responder). */
-export const DEFAULT_MAX_ENERGY = 100;
-
-/** Radar: energia gasta por uso (% da máxima; quem cobra é o servidor) e a sequência da câmera. */
-export const RADAR_COST_PERCENT = 10;
+// Radar: sequência da câmera (quanto gasta fica em `lib/game/rules`).
 /** Zoom out até enquadrar a sala inteira. */
 export const RADAR_ZOOM_OUT_MS = 800;
 /** Tempo com as cartas reveladas (tela travada). */

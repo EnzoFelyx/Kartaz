@@ -8,13 +8,13 @@ import { ListLoadingMore, ListState } from '@/components/ui/list-state';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { SearchInput } from '@/components/ui/search-input';
 import { colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
 import { getNationName } from '@/utils/card-labels';
 import { LIST_END_THRESHOLD, LIST_RENDER_PROPS, listItemEntering } from '@/utils/list-loading';
 
 import type { NationViewModel } from './use-view-model';
 
 const GAP = 12;
-const H_PADDING = 20;
 
 /** Cabeçalho com a seleção e o total, busca e a lista paginada dos jogadores. */
 export function NationView({
@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   content: {
-    paddingHorizontal: H_PADDING,
+    paddingHorizontal: spacing.screen,
     paddingTop: 20,
   },
   search: {

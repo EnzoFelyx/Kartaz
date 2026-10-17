@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { ModalCard } from '@/components/ui/modal-card';
-import { CLUB_BONUS_TABLE, NATION_BONUS_TABLE, type BonusTier } from '@/lib/team/team-scoring';
+import { CLUB_BONUS_TABLE, NATION_BONUS_TABLE, type BonusTier } from '@/lib/game/rules';
 import { colors } from '@/theme/colors';
 import { formatNumber } from '@/utils/card-labels';
 

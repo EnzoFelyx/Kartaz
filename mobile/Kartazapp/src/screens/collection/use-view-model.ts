@@ -7,11 +7,10 @@ import { useCollectionCount } from '@/hooks/queries/use-my-collection';
 import { useNations } from '@/hooks/queries/use-nations';
 import { usePlayersCatalog } from '@/hooks/queries/use-players-catalog';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
+import { LOCAL_SEARCH_DEBOUNCE_MS } from '@/lib/query/config';
 import type { Player } from '@/types/player-card';
 import { compareLocale, getNationName } from '@/utils/card-labels';
 
-/** Espera para buscar no SQLite enquanto digita. */
-const SEARCH_DEBOUNCE_MS = 250;
 export const GRID_COLUMNS = 2;
 
 /**
@@ -49,7 +48,7 @@ export function useCollectionViewModel() {
   const isNations = listMode === 'nations';
 
   // Grade/lista: catálogo paginado do SQLite (20 por página), buscando por nome, time ou seleção.
-  const playersQuery = useDebouncedValue(isNations ? '' : query, SEARCH_DEBOUNCE_MS);
+  const playersQuery = useDebouncedValue(isNations ? '' : query, LOCAL_SEARCH_DEBOUNCE_MS);
   const catalog = usePlayersCatalog({ query: playersQuery });
   const nations = useNations();
   const collectionCount = useCollectionCount();

@@ -8,6 +8,7 @@ import { TradeProposalCard } from '@/components/trades/trade-proposal-card';
 import { TradeStatusFilter } from '@/components/trades/trade-status-filter';
 import { ListState } from '@/components/ui/list-state';
 import { colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
 import { listItemEntering } from '@/utils/list-loading';
 
 import type { TradesViewModel } from './use-view-model';
@@ -82,7 +83,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 12,
-    paddingHorizontal: 20,
+    paddingHorizontal: spacing.screen,
     paddingBottom: 14,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,

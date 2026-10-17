@@ -10,12 +10,12 @@ import { ListLoadingMore, ListState } from '@/components/ui/list-state';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { SearchInput } from '@/components/ui/search-input';
 import { colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
 import { LIST_END_THRESHOLD, LIST_RENDER_PROPS, listItemEntering } from '@/utils/list-loading';
 
 import type { MyCollectionViewModel } from './use-view-model';
 
 const GAP = 14;
-const H_PADDING = 20;
 const FILTER_BUTTON_SIZE = 52;
 
 /** Coleção do jogador: busca com botão de filtros, lista paginada das cópias e o modal de filtros. */
@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   content: {
-    paddingHorizontal: H_PADDING,
+    paddingHorizontal: spacing.screen,
     paddingTop: 20,
   },
   searchRow: {

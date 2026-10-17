@@ -7,8 +7,7 @@ import {
   refreshTokens,
   type SocialProvider,
 } from '@/lib/api/auth-api';
-
-const SESSION_KEY = 'kartaz_session';
+import { storageKeys } from '@/lib/storage/keys';
 
 /** Dados básicos do usuário: iguais para convidado e logado, só muda `isGuest`. */
 export type Session = {
@@ -45,11 +44,11 @@ export function getSession() {
 
 async function saveSession(session: Session) {
   current = session;
-  await SecureStore.setItemAsync(SESSION_KEY, JSON.stringify(session));
+  await SecureStore.setItemAsync(storageKeys.session, JSON.stringify(session));
 }
 
 async function loadSession(): Promise<Session | null> {
-  const raw = await SecureStore.getItemAsync(SESSION_KEY);
+  const raw = await SecureStore.getItemAsync(storageKeys.session);
   if (!raw) return null;
   try {
     const stored = JSON.parse(raw) as Partial<Session>;
@@ -143,7 +142,7 @@ export async function linkAccount(provider: SocialProvider, idToken: string): Pr
 /** Apaga a sessão do aparelho. Para um convidado, não há como recuperar a conta depois. */
 export async function signOut() {
   current = null;
-  await SecureStore.deleteItemAsync(SESSION_KEY);
+  await SecureStore.deleteItemAsync(storageKeys.session);
 }
 
 /**

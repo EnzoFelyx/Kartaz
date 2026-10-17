@@ -15,6 +15,7 @@ import { StatCard } from '@/components/profile/stat-card';
 import { TAB_BAR_BOTTOM_GAP, TAB_BAR_HEIGHT } from '@/components/tab-bar';
 import { IconButton } from '@/components/ui/icon-button';
 import { colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
 import { formatNumber } from '@/utils/card-labels';
 import { listItemEntering } from '@/utils/list-loading';
 
@@ -135,7 +136,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   content: {
-    paddingHorizontal: 20,
+    paddingHorizontal: spacing.screen,
   },
   sections: {
     gap: 20,

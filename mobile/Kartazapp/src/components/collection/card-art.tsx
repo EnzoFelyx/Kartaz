@@ -3,7 +3,8 @@ import { useState } from 'react';
 import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import type { Rarity } from '@/types/player-card';
-import { colors, rarityColors, withAlpha } from '@/theme/colors';
+import { colors, withAlpha } from '@/theme/colors';
+import { rarityColors } from '@/theme/game-colors';
 import { getNationShortCode, getPositionLabel } from '@/utils/card-labels';
 
 import { CardArtwork } from './card-artwork';

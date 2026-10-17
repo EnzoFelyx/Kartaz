@@ -47,7 +47,7 @@ export function useLinkAccount() {
       queryClient.setQueryData<Session | null>(queryKeys.session, session);
       // Vinculado no Perfil (telas montadas): recarrega os dados — pode ter virado outro usuário.
       await Promise.all(
-        [queryKeys.currentUser, queryKeys.userInstances.all, ['playerInstances']].map((queryKey) =>
+        [queryKeys.currentUser, queryKeys.userInstances.all, queryKeys.playerInstances.all].map((queryKey) =>
           queryClient.resetQueries({ queryKey }),
         ),
       );

@@ -12,6 +12,7 @@ import { CloseIcon } from '@/components/icons/close-icon';
 import { PageDots } from '@/components/onboarding/page-dots';
 import type { CardsPack } from '@/lib/colyseus/types';
 import { colors, withAlpha } from '@/theme/colors';
+import { motion } from '@/theme/motion';
 
 import type { CardsPackViewModel } from './use-view-model';
 
@@ -95,7 +96,7 @@ export function CardsPackView({
 
       {total > 1 && <PageDots count={total} scrollX={progress} pageWidth={1} />}
 
-      <Animated.View key={card.id} entering={FadeIn.duration(220)} style={styles.cardSlot}>
+      <Animated.View key={card.id} entering={FadeIn.duration(motion.enterMs)} style={styles.cardSlot}>
         <CardReveal
           player={player}
           serialNumber={card.serialNumber}

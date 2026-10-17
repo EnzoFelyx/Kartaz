@@ -8,12 +8,11 @@ import {
   type CollectionFilters,
 } from '@/lib/collection/collection-filters';
 import { userInstanceToPlayerCard } from '@/lib/cards/mappers';
+import { LIST_PAGE_SIZE } from '@/lib/query/config';
 import { queryKeys } from '@/lib/query/keys';
 import { prefetchPhotos } from '@/utils/list-loading';
 
 import { useSession } from './use-session';
-
-export const COLLECTION_PAGE_SIZE = 20;
 
 /**
  * Cartas do usuário (`GET /user/instances`), paginadas por limit/offset.
@@ -30,7 +29,7 @@ export function useMyCollection(search: string, filters: CollectionFilters = DEF
     queryFn: async ({ pageParam }) => {
       const page = await getUserInstances({
         ...buildCollectionParams(term, filters),
-        limit: COLLECTION_PAGE_SIZE,
+        limit: LIST_PAGE_SIZE,
         offset: pageParam,
       });
       const cards = page.instances.map(userInstanceToPlayerCard);

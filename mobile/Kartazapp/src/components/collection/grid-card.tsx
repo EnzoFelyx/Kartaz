@@ -3,8 +3,9 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { StarIcon } from '@/components/icons/star-icon';
 import { SvgGradientRect } from '@/components/ui/svg-gradient-rect';
-import type { Player, Rarity } from '@/types/player-card';
+import type { Player } from '@/types/player-card';
 import { colors } from '@/theme/colors';
+import { rarityGradients } from '@/theme/game-colors';
 import { formatNumber, getNationName } from '@/utils/card-labels';
 
 import { CardArtwork } from './card-artwork';
@@ -14,14 +15,6 @@ const BORDER_WIDTH = 1;
 const CARD_RADIUS = 16;
 const OUTER_RADIUS = CARD_RADIUS + BORDER_WIDTH;
 const IMAGE_HEIGHT = 160;
-
-/** Gradiente da borda por raridade. */
-const RARITY_GRADIENT: Record<Rarity, [string, string]> = {
-  legendary: [colors.fuelEnd, colors.gold],
-  epic: [colors.violet, colors.magenta],
-  rare: [colors.info, colors.violet],
-  common: [colors.primary, colors.progressEnd],
-};
 
 type GridCardProps = {
   card: Player;
@@ -34,7 +27,7 @@ type GridCardProps = {
  */
 export function GridCard({ card, onPress }: GridCardProps) {
   const { t } = useTranslation();
-  const [start, end] = RARITY_GRADIENT[card.rarity];
+  const [start, end] = rarityGradients[card.rarity];
   const nation = getNationName(card.nation);
 
   return (

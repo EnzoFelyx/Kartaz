@@ -3,7 +3,7 @@
  * Arrays (alternativePositions, playStyle) são armazenados como JSON text.
  */
 
-export const DB_NAME = 'gorocketleague.db';
+export const DB_NAME = 'kartaz.db';
 
 export const CREATE_VERSION_TABLE = `
 CREATE TABLE IF NOT EXISTS database_players_version (

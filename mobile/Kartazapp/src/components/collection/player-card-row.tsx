@@ -4,7 +4,8 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { StarIcon } from '@/components/icons/star-icon';
 import type { Player } from '@/types/player-card';
 import { formatNumber, getNationName } from '@/utils/card-labels';
-import { colors, rarityColors } from '@/theme/colors';
+import { colors } from '@/theme/colors';
+import { rarityColors } from '@/theme/game-colors';
 
 import { CardArt } from './card-art';
 

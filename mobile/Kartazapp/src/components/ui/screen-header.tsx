@@ -5,10 +5,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ArrowLeftIcon } from '@/components/icons/arrow-left-icon';
 import { colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
 
 import { IconButton } from './icon-button';
 
-const H_PADDING = 20;
 /** Largura do botão de voltar: a ação da direita reserva o mesmo espaço para o título ficar no centro. */
 const BACK_SIZE = 44;
 
@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
-    paddingHorizontal: H_PADDING,
+    paddingHorizontal: spacing.screen,
     paddingBottom: 16,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,

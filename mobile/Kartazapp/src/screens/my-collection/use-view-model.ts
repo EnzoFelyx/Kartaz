@@ -4,14 +4,12 @@ import { useState } from 'react';
 import { useMyCollection } from '@/hooks/queries/use-my-collection';
 import { useSession } from '@/hooks/queries/use-session';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
+import { REMOTE_SEARCH_DEBOUNCE_MS } from '@/lib/query/config';
 import {
   DEFAULT_COLLECTION_FILTERS,
   isCollectionFiltersActive,
   type CollectionFilters,
 } from '@/lib/collection/collection-filters';
-
-/** A busca vai para o servidor: espera o usuário parar de digitar. */
-const SEARCH_DEBOUNCE_MS = 400;
 
 /** Coleção do jogador: busca, filtros, paginação e estados de carregamento/erro. */
 export function useMyCollectionViewModel() {
@@ -19,7 +17,7 @@ export function useMyCollectionViewModel() {
   const [filters, setFilters] = useState<CollectionFilters>(DEFAULT_COLLECTION_FILTERS);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
-  const search = useDebouncedValue(query, SEARCH_DEBOUNCE_MS);
+  const search = useDebouncedValue(query, REMOTE_SEARCH_DEBOUNCE_MS);
   const session = useSession();
   const collection = useMyCollection(search, filters);
   const filtersActive = isCollectionFiltersActive(filters);

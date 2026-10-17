@@ -2,12 +2,10 @@ import { playerPhotoUri } from '@/lib/api/image-uri';
 import type { PlayerInstanceDto } from '@/lib/api/player-instances-api';
 import type { UserInstanceDto } from '@/lib/api/user-instances-api';
 import { getPlayerById } from '@/lib/db/playersDb';
+import { DEFAULT_MAX_SUPPLY } from '@/lib/game/rules';
 import type { PlayerRow } from '@/types/player';
 import type { FoundCopy, Player, PlayerCard, Rarity } from '@/types/player-card';
 import { getFlagEmojiForCountry } from '@/utils/flags';
-
-/** Total de cópias quando o backend não informa (default do Prisma). */
-const DEFAULT_MAX_SUPPLY = 1000;
 
 /** Raridade pelo overall (mesmas faixas do projeto de referência). */
 export function rarityFromRating(rating: number): Rarity {

@@ -36,5 +36,8 @@ export const queryKeys = {
     byCard: (cardId: number) => ['userInstances', 'byCard', cardId] as const,
   },
 
-  playerInstances: (playerId: number) => ['playerInstances', playerId] as const,
+  playerInstances: {
+    all: ['playerInstances'] as const,
+    byPlayer: (playerId: number) => ['playerInstances', playerId] as const,
+  },
 };

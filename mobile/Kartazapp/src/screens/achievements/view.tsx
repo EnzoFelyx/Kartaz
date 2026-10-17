@@ -14,6 +14,7 @@ import { TrophyIcon } from '@/components/icons/trophy-icon';
 import { WalkingIcon } from '@/components/icons/walking-icon';
 import { TAB_BAR_BOTTOM_GAP, TAB_BAR_HEIGHT } from '@/components/tab-bar';
 import { colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
 import { listItemEntering } from '@/utils/list-loading';
 
 import type { Achievement, AchievementKey, AchievementsViewModel } from './use-view-model';
@@ -115,7 +116,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   content: {
-    paddingHorizontal: 20,
+    paddingHorizontal: spacing.screen,
     gap: 16,
   },
   header: {

@@ -21,6 +21,7 @@ import { IconButton } from '@/components/ui/icon-button';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { TextField } from '@/components/ui/text-field';
 import { colors, withAlpha } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
 import { formatNumber } from '@/utils/card-labels';
 import { listItemEntering } from '@/utils/list-loading';
 
@@ -208,7 +209,7 @@ const styles = StyleSheet.create({
   },
   content: {
     gap: 14,
-    paddingHorizontal: 20,
+    paddingHorizontal: spacing.screen,
     paddingTop: 20,
   },
   overallCard: {

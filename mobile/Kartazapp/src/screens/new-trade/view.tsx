@@ -11,6 +11,7 @@ import { ListState } from '@/components/ui/list-state';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { SearchInput } from '@/components/ui/search-input';
 import { colors, withAlpha } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
 
 import type { NewTradeViewModel } from './use-view-model';
 
@@ -105,7 +106,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   content: {
-    paddingHorizontal: 20,
+    paddingHorizontal: spacing.screen,
     paddingTop: 20,
     paddingBottom: 24,
   },

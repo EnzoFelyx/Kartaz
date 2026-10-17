@@ -2,16 +2,8 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { TradeTab } from '@/hooks/queries/use-trades';
-import type { TradeStatus } from '@/lib/api/trades-api';
 import { colors, withAlpha } from '@/theme/colors';
-
-/** Cor de cada status: pendente azul, aceita verde, recusada vermelha, cancelada âmbar. */
-export const TRADE_STATUS_COLOR: Record<TradeStatus, string> = {
-  PENDING: colors.primary,
-  ACCEPTED: colors.success,
-  DECLINED: colors.danger,
-  CANCELLED: colors.fuelEnd,
-};
+import { tradeStatusColors } from '@/theme/game-colors';
 
 type TradeStatusFilterProps = {
   statuses: TradeTab[];
@@ -29,7 +21,7 @@ export function TradeStatusFilter({ statuses, selected, counts, onSelect }: Trad
     <View style={styles.bar} accessibilityRole="tablist">
       {statuses.map((status) => {
         const active = status === selected;
-        const color = TRADE_STATUS_COLOR[status];
+        const color = tradeStatusColors[status];
         const label = t(`trades.status.${status}`);
         const count = counts[status];
         return (

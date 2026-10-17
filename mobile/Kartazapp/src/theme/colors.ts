@@ -1,5 +1,3 @@
-import type { Rarity } from '@/types/player-card';
-
 import baseColors from './base-colors.json';
 
 /**
@@ -52,14 +50,6 @@ export const colors = {
 } as const;
 
 export type ColorToken = keyof typeof colors;
-
-/** Cor de cada raridade de carta (protótipo: common/rare/epic/legendary). */
-export const rarityColors: Record<Rarity, string> = {
-  common: '#6b7280',
-  rare: colors.info,
-  epic: colors.violet,
-  legendary: colors.gold,
-};
 
 /** Aplica transparência a uma cor hex do tema (#rrggbb) → `rgba(r, g, b, alpha)`. */
 export function withAlpha(hex: string, alpha: number) {

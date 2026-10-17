@@ -8,7 +8,8 @@ import { MessageCircleIcon } from '@/components/icons/message-circle-icon';
 import { ShieldIcon } from '@/components/icons/shield-icon';
 import type { PlayerCard } from '@/types/player-card';
 import { formatLocation, formatShortDate, getNationName } from '@/utils/card-labels';
-import { colors, rarityColors, withAlpha } from '@/theme/colors';
+import { colors, withAlpha } from '@/theme/colors';
+import { rarityColors } from '@/theme/game-colors';
 
 import { CardArt } from './card-art';
 

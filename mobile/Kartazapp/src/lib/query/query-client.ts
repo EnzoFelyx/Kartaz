@@ -3,12 +3,13 @@ import { AppState, Platform } from 'react-native';
 
 import { onSessionChange } from '@/lib/auth/session';
 
+import { DEFAULT_STALE_TIME_MS } from './config';
 import { queryKeys } from './keys';
 
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 60 * 1000,
+      staleTime: DEFAULT_STALE_TIME_MS,
       retry: 1,
     },
   },
@@ -24,7 +25,7 @@ export function clearUserQueries(client: QueryClient = queryClient) {
   client.removeQueries({ queryKey: queryKeys.userTeam });
   client.removeQueries({ queryKey: queryKeys.trades.all });
   client.removeQueries({ queryKey: queryKeys.userInstances.all });
-  client.removeQueries({ queryKey: ['playerInstances'] });
+  client.removeQueries({ queryKey: queryKeys.playerInstances.all });
 }
 
 // Sessão encerrada fora da UI (refresh recusado): limpa os dados e o app volta para o login.

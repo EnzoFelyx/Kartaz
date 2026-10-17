@@ -5,6 +5,7 @@ import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
 
 import { InfoIcon } from '@/components/icons/info-icon';
 import { colors, withAlpha } from '@/theme/colors';
+import { motion } from '@/theme/motion';
 
 export type ExplorerHintVariant = 'zoomIn' | 'noEnergy';
 
@@ -27,8 +28,8 @@ export function ExplorerHint({ variant, style }: ExplorerHintProps) {
   return (
     <>
       <Animated.View
-        entering={FadeInDown.duration(200)}
-        exiting={FadeOutDown.duration(150)}
+        entering={FadeInDown.duration(motion.enterMs)}
+        exiting={FadeOutDown.duration(motion.exitMs)}
         style={[styles.bar, isWarning && styles.warningBar, style]}
         accessibilityRole="alert">
         <Text style={[styles.text, isWarning && styles.warningText]} numberOfLines={2}>

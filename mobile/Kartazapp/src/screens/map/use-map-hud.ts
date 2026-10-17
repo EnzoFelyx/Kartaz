@@ -1,7 +1,6 @@
-import type { CurrentUserDto } from '@/lib/api/user-api';
 import type { CellSelf } from '@/hooks/use-cell-room';
-
-import { DEFAULT_MAX_ENERGY } from './constants';
+import type { CurrentUserDto } from '@/lib/api/user-api';
+import { DEFAULT_MAX_ENERGY } from '@/lib/game/rules';
 
 /**
  * Números do HUD (energia, nível/XP, distância): valores do servidor, da sala em tempo real quando

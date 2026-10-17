@@ -12,6 +12,7 @@ import { TAB_BAR_BOTTOM_GAP, TAB_BAR_HEIGHT } from '@/components/tab-bar';
 import { ListLoadingMore, ListState } from '@/components/ui/list-state';
 import { SearchInput } from '@/components/ui/search-input';
 import { colors } from '@/theme/colors';
+import { spacing } from '@/theme/spacing';
 import { getFlagEmojiForCountry } from '@/utils/flags';
 import { LIST_END_THRESHOLD, LIST_RENDER_PROPS, listItemEntering } from '@/utils/list-loading';
 
@@ -20,7 +21,6 @@ import { GRID_COLUMNS } from './use-view-model';
 import type { CollectionViewModel } from './use-view-model';
 
 const GAP = 12;
-const H_PADDING = 20;
 
 /** Título com o toggle de exibição, botão "Minha coleção", busca e a lista (grade, lista ou seleções). */
 export function CollectionView({
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   content: {
-    paddingHorizontal: H_PADDING,
+    paddingHorizontal: spacing.screen,
   },
   header: {
     gap: 20,

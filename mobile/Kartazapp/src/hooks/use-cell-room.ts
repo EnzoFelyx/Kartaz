@@ -5,6 +5,7 @@ import { AppState } from 'react-native';
 
 import i18n from '@/i18n';
 import { enterCell } from '@/lib/colyseus/cells';
+import { RECONNECT_BASE_MS, RECONNECT_MAX_MS, ROOM_REQUEST_TIMEOUT_MS } from '@/lib/colyseus/config';
 import type {
   CardsPack,
   CellBattery,
@@ -55,10 +56,6 @@ type UseCellRoomOptions = {
   /** O servidor recusou o movimento (sem energia): o jogador continua em lat/lng. */
   onMoveRejected?: (lat: number, lng: number) => void;
 };
-
-/** Espera entre tentativas de reconexão: 1s, 2s, 4s… até 15s. */
-const RECONNECT_BASE_MS = 1000;
-const RECONNECT_MAX_MS = 15000;
 
 /** Lista os outros jogadores da sala (sem o próprio usuário, mesmo com sessões duplicadas). */
 function readUsers(state: unknown, selfUserId: string): CellUser[] {
@@ -125,8 +122,6 @@ function readBatteries(state: unknown): CellBattery[] {
 /** Motivo de uma compra de energia recusada (do servidor ou do app). */
 export type FuelPurchaseError = 'already_full' | 'insufficient_coins' | 'not_connected' | 'timeout' | 'server_error';
 
-const FUEL_PURCHASE_TIMEOUT_MS = 10_000;
-
 /** Motivo de um uso do radar recusado. */
 export type RadarError = 'cooldown' | 'no_energy' | 'not_connected' | 'timeout' | 'server_error';
 
@@ -136,7 +131,6 @@ export type RadarFailure = { reason: RadarError; cooldownUntil?: number };
 /** Radar aceito: as cartas da sala (área res 8) e até quando o radar fica em espera. */
 export type RadarResult = { cards: CellCard[]; cooldownUntil: number };
 
-const RADAR_TIMEOUT_MS = 10_000;
 const KNOWN_PURCHASE_ERRORS: FuelPurchaseError[] = ['already_full', 'insufficient_coins'];
 
 /** Ganho de moedas para o HUD animar o "+N" (`at` distingue duas coletas de mesmo valor). */
@@ -623,7 +617,7 @@ export function useCellRoom(profile: CellRoomProfile | null, { enabled, onMoveRe
           if (pendingPurchaseRef.current?.timer !== timer) return;
           pendingPurchaseRef.current = null;
           reject('timeout');
-        }, FUEL_PURCHASE_TIMEOUT_MS);
+        }, ROOM_REQUEST_TIMEOUT_MS);
         pendingPurchaseRef.current = { room, resolve, reject, timer };
         // Chave única por compra: se a mensagem for repetida, o servidor não cobra duas vezes.
         const idempotencyKey = `fuel-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
@@ -645,7 +639,7 @@ export function useCellRoom(profile: CellRoomProfile | null, { enabled, onMoveRe
           if (pendingRadarRef.current?.timer !== timer) return;
           pendingRadarRef.current = null;
           reject({ reason: 'timeout' });
-        }, RADAR_TIMEOUT_MS);
+        }, ROOM_REQUEST_TIMEOUT_MS);
         pendingRadarRef.current = { room, resolve, reject, timer };
         room.send('radarScan', {});
       }),

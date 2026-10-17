@@ -5,10 +5,10 @@ import { AuthButton } from '@/components/auth/auth-button';
 import { SwapIcon } from '@/components/icons/swap-icon';
 import type { UserInstanceDto } from '@/lib/api/user-instances-api';
 import { colors, withAlpha } from '@/theme/colors';
+import { tradeStatusColors } from '@/theme/game-colors';
 import { formatShortDate } from '@/utils/card-labels';
 
 import { TradeCardTile } from '../trade-card-tile';
-import { TRADE_STATUS_COLOR } from '../trade-status-filter';
 import type { TradeProposalCardViewModel } from './use-view-model';
 
 /**
@@ -28,7 +28,7 @@ export function TradeProposalCardView({
   onAction,
 }: TradeProposalCardViewModel) {
   const { t } = useTranslation();
-  const statusColor = TRADE_STATUS_COLOR[status];
+  const statusColor = tradeStatusColors[status];
 
   const give = <TradeSide label={t('trades.youGive')} cards={iGive} />;
   const get = <TradeSide label={t('trades.youGet')} cards={iGet} />;
