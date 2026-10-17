@@ -1,5 +1,5 @@
 import type { ConfigContext, ExpoConfig } from 'expo/config';
-import { withInfoPlist, type ConfigPlugin } from 'expo/config-plugins';
+import { withEntitlementsPlist, withInfoPlist, type ConfigPlugin } from 'expo/config-plugins';
 
 // Cores que o app.config precisa ficam em JSON (o config não carrega os .ts do app); o tema lê o mesmo arquivo.
 import baseColors from './src/theme/base-colors.json';
@@ -20,6 +20,17 @@ const withGoogleAuthScheme: ConfigPlugin<string> = (config, scheme) =>
   });
 
 /**
+ * Tira a permissão de push remoto (`aps-environment`) que o expo-notifications coloca sozinho ao gerar o
+ * projeto iOS: ela exige a conta paga da Apple e quebra o build com a conta gratuita. O app só usa
+ * notificações locais, que não precisam dela.
+ */
+const withoutRemotePush: ConfigPlugin = (config) =>
+  withEntitlementsPlist(config, (mod) => {
+    delete mod.modResults['aps-environment'];
+    return mod;
+  });
+
+/**
  * Estende o app.json com configs que dependem de variáveis de ambiente.
  * A chave do Google Maps vem de GOOGLE_MAPS_API_KEY (defina em .env.local, que não vai pro git).
  * O esquema do login do Google vem de EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID; sem ele, nada é registrado.
@@ -30,7 +41,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 
   const expoConfig: ExpoConfig = {
     ...config,
-    name: config.name ?? 'Kartazapp',
+    name: config.name ?? 'Kartaz',
     slug: config.slug ?? 'Kartazapp',
     // Fundo da splash e do ícone adaptativo do Android: a cor de fundo do app (do tema).
     android: {
@@ -44,7 +55,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         {
           backgroundColor: baseColors.background,
           image: './assets/images/splash-icon.png',
-          imageWidth: 76,
+          imageWidth: 180,
         },
       ],
       [
@@ -57,5 +68,6 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     ],
   };
 
-  return googleAuthScheme ? withGoogleAuthScheme(expoConfig, googleAuthScheme) : expoConfig;
+  const withPlugins = withoutRemotePush(expoConfig);
+  return googleAuthScheme ? withGoogleAuthScheme(withPlugins, googleAuthScheme) : withPlugins;
 };
