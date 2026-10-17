@@ -15,6 +15,8 @@ type CardArtworkProps = {
   pointerEvents?: ViewProps['pointerEvents'];
   /** Sombra da foto (padrão `card`). */
   depth?: PhotoDepth;
+  /** Enquadramento só da foto (o fundo da carta continua cobrindo tudo). */
+  photoStyle?: StyleProp<ViewStyle>;
 };
 
 /**
@@ -26,7 +28,7 @@ type CardArtworkProps = {
  * Sem animação própria de entrada: a cascata da lista e a transição da foto já cuidam disso,
  * e uma animação a mais por card pesava na troca de visualização.
  */
-export function CardArtwork({ uri, style, pointerEvents = 'auto', depth }: CardArtworkProps) {
+export function CardArtwork({ uri, style, pointerEvents = 'auto', depth, photoStyle }: CardArtworkProps) {
   return (
     <View pointerEvents={pointerEvents} style={[styles.container, style]}>
       <Image
@@ -36,7 +38,7 @@ export function CardArtwork({ uri, style, pointerEvents = 'auto', depth }: CardA
         cachePolicy="memory-disk"
         transition={0}
       />
-      <PlayerPhoto key={uri} uri={uri} depth={depth} />
+      <PlayerPhoto key={uri} uri={uri} depth={depth} style={photoStyle} />
     </View>
   );
 }

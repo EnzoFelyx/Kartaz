@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { getUniqueNations } from '@/lib/db/playersDb';
+import { getUniqueNations } from '@/lib/db/players-read';
 import { queryKeys } from '@/lib/query/keys';
 
 /** Seleções existentes na base local (nomes como vêm do backend). */

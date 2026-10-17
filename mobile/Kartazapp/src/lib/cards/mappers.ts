@@ -1,7 +1,7 @@
 import { playerPhotoUri } from '@/lib/api/image-uri';
 import type { PlayerInstanceDto } from '@/lib/api/player-instances-api';
 import type { UserInstanceDto } from '@/lib/api/user-instances-api';
-import { getPlayerById } from '@/lib/db/playersDb';
+import { getPlayerById } from '@/lib/db/players-read';
 import { DEFAULT_MAX_SUPPLY } from '@/lib/game/rules';
 import type { PlayerRow } from '@/types/player';
 import type { FoundCopy, Player, PlayerCard, Rarity } from '@/types/player-card';

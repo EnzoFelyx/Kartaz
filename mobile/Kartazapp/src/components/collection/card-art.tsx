@@ -21,6 +21,8 @@ type CardArtProps = {
   /** Tamanho do código da seleção (escala com o tamanho da arte). */
   codeSize?: number;
   style?: StyleProp<ViewStyle>;
+  /** Enquadramento da foto (repassado ao `CardArtwork`). */
+  photoStyle?: StyleProp<ViewStyle>;
 };
 
 /**
@@ -29,11 +31,11 @@ type CardArtProps = {
  *   transparente do jogador se mistura com o fundo da carta.
  * - Sem foto: placeholder Skia com gradiente na cor da raridade, grid sutil e a sigla da seleção.
  */
-export function CardArt({ rarity, nation, position, imageUri, codeSize = 44, style }: CardArtProps) {
+export function CardArt({ rarity, nation, position, imageUri, codeSize = 44, style, photoStyle }: CardArtProps) {
   const [size, setSize] = useState({ width: 0, height: 0 });
 
   if (imageUri) {
-    return <CardArtwork uri={imageUri} style={style} pointerEvents="none" />;
+    return <CardArtwork uri={imageUri} style={style} photoStyle={photoStyle} pointerEvents="none" />;
   }
 
   const tint = rarityColors[rarity];

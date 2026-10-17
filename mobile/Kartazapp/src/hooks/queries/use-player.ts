@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { playerRowToPlayer } from '@/lib/cards/mappers';
-import { getPlayerById, getSimilarPlayers } from '@/lib/db/playersDb';
+import { getPlayerById, getSimilarPlayers } from '@/lib/db/players-read';
 import { queryKeys } from '@/lib/query/keys';
 
 const SIMILAR_LIMIT = 6;

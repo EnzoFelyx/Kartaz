@@ -5,15 +5,14 @@ import {
   getPlayersProgress,
   getPlayersVersion,
 } from '@/lib/api/players-sync-api';
+import { initPlayersDb } from '@/lib/db/connection';
 import {
-  applyPlayersProgressUpdates,
   getCardsProgressVersion,
   getLocalPlayersVersion,
-  initPlayersDb,
   setCardsProgressVersion,
   setLocalPlayersVersion,
-  upsertPlayers,
-} from '@/lib/db/playersDb';
+} from '@/lib/db/metadata';
+import { applyPlayersProgressUpdates, upsertPlayers } from '@/lib/db/players-write';
 import type { PlayerRow } from '@/types/player';
 
 const BATCH_SIZE = 500;

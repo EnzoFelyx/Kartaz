@@ -14,6 +14,12 @@ import { rarityColors } from '@/theme/game-colors';
 import { CardArt } from './card-art';
 
 const THUMB_SIZE = 88;
+/**
+ * Enquadramento da foto na miniatura: sobe e amplia um pouco, para o rosto ficar no centro (a foto
+ * vem com espaço vazio em cima e a barra do serial cobre a parte de baixo).
+ */
+const PHOTO_SCALE = 1.01;
+const PHOTO_LIFT = 5;
 const STAT_ICON_SIZE = 16;
 const META_ICON_SIZE = 15;
 
@@ -63,6 +69,7 @@ export function OwnedCardItem({ card, onPress }: OwnedCardItemProps) {
             imageUri={card.imageUri}
             codeSize={22}
             style={StyleSheet.absoluteFill}
+            photoStyle={styles.photoFraming}
           />
           {/* Serial desta cópia. */}
           <View style={styles.serialBar}>
@@ -168,6 +175,9 @@ const styles = StyleSheet.create({
     height: THUMB_SIZE,
     overflow: 'hidden',
     borderRadius: 14,
+  },
+  photoFraming: {
+    transform: [{ translateY: -PHOTO_LIFT }, { scale: PHOTO_SCALE }],
   },
   serialBar: {
     position: 'absolute',

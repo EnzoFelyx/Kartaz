@@ -2,7 +2,7 @@ import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-qu
 import { useMemo } from 'react';
 
 import { playerRowToPlayer } from '@/lib/cards/mappers';
-import { countPlayers, searchPlayers } from '@/lib/db/playersDb';
+import { countPlayers, searchPlayers } from '@/lib/db/players-read';
 import { LIST_PAGE_SIZE } from '@/lib/query/config';
 import { queryKeys } from '@/lib/query/keys';
 import { prefetchPhotos } from '@/utils/list-loading';

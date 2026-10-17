@@ -1,13 +1,9 @@
 import { Asset } from 'expo-asset';
 import * as FileSystem from 'expo-file-system';
 import { inflate } from 'pako';
-import {
-  clearPlayers,
-  initPlayersDb,
-  getLocalPlayersVersion,
-  setLocalPlayersVersion,
-  upsertPlayers,
-} from '@/lib/db/playersDb';
+import { initPlayersDb } from '@/lib/db/connection';
+import { getLocalPlayersVersion, setLocalPlayersVersion } from '@/lib/db/metadata';
+import { clearPlayers, upsertPlayers } from '@/lib/db/players-write';
 import type { PlayerRow } from '@/types/player';
 
 const BATCH_SIZE = 500;

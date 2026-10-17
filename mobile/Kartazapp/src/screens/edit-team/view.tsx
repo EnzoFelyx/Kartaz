@@ -12,17 +12,15 @@ import {
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { HelpCircleIcon } from '@/components/icons/help-circle-icon';
-import { SparklesIcon } from '@/components/icons/sparkles-icon';
+import { AutoLineupButton } from '@/components/team/auto-lineup-button';
 import { LineupSlot } from '@/components/team/lineup-slot';
 import { PlayerPickerModal } from '@/components/team/player-picker-modal';
+import { TeamOverallCard } from '@/components/team/team-overall-card';
 import { TeamRulesModal } from '@/components/team/team-rules-modal';
-import { IconButton } from '@/components/ui/icon-button';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { TextField } from '@/components/ui/text-field';
 import { colors, withAlpha } from '@/theme/colors';
 import { spacing } from '@/theme/spacing';
-import { formatNumber } from '@/utils/card-labels';
 import { listItemEntering } from '@/utils/list-loading';
 
 import type { EditTeamViewModel } from './use-view-model';
@@ -115,49 +113,13 @@ export function EditTeamView({
             />
           </Animated.View>
 
-          <Animated.View entering={listItemEntering(1)} style={styles.overallCard}>
-            <View style={styles.overallRow}>
-              <Text style={styles.overall}>{t('team.overall', { overall: score.overall })}</Text>
-              <IconButton
-                icon={<HelpCircleIcon color={colors.primary} size={22} />}
-                accessibilityLabel={t('team.rulesTitle')}
-                onPress={openRules}
-              />
-            </View>
-            <Text style={styles.overallBase}>
-              {t('team.baseBonus', { base: score.baseSum, bonus: formatNumber(score.bonusPercent) })}
-            </Text>
-            <Text style={styles.overallSplit}>
-              {t('team.bonusSplit', {
-                nation: formatNumber(score.nationBonusPercent),
-                club: formatNumber(score.clubBonusPercent),
-              })}
-            </Text>
-            <Text style={styles.overallGroup}>
-              {t('team.maxGroups', { nation: score.maxSameNation, club: score.maxSameClub })}
-            </Text>
-          </Animated.View>
+          <TeamOverallCard score={score} onOpenRules={openRules} enteringIndex={1} />
 
           <View style={styles.sectionRow}>
             <Text style={styles.sectionTitle} accessibilityRole="header">
               {t('team.starters', { count: lineup.length })}
             </Text>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('team.autoA11y')}
-              accessibilityState={{ disabled: !canAutoBuild, busy: autoBuilding }}
-              disabled={!canAutoBuild}
-              onPress={autoBuild}
-              style={({ pressed }) => [styles.autoButton, (pressed || !canAutoBuild) && styles.pressed]}>
-              {autoBuilding ? (
-                <ActivityIndicator color={colors.primary} size="small" />
-              ) : (
-                <>
-                  <SparklesIcon color={colors.primary} size={18} />
-                  <Text style={styles.autoText}>{t('team.auto')}</Text>
-                </>
-              )}
-            </Pressable>
+            <AutoLineupButton disabled={!canAutoBuild} busy={autoBuilding} onPress={autoBuild} />
           </View>
           {lineup.map((instance, index) => (
             <Animated.View key={`${index}-${instance.id}`} entering={listItemEntering(index + 2)}>
@@ -212,37 +174,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.screen,
     paddingTop: 20,
   },
-  overallCard: {
-    gap: 4,
-    padding: 18,
-    borderRadius: 20,
-    backgroundColor: colors.glass,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  overallRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  overall: {
-    color: colors.primary,
-    fontSize: 26,
-    fontWeight: '900',
-  },
-  overallBase: {
-    color: colors.secondaryForeground,
-    fontSize: 14,
-  },
-  overallSplit: {
-    color: colors.violet,
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  overallGroup: {
-    color: colors.mutedForeground,
-    fontSize: 12,
-  },
   sectionRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -252,24 +183,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     color: colors.foreground,
     fontSize: 18,
-    fontWeight: '800',
-  },
-  autoButton: {
-    minWidth: 84,
-    height: 38,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingHorizontal: 14,
-    borderRadius: 12,
-    backgroundColor: withAlpha(colors.primary, 0.14),
-    borderWidth: 1,
-    borderColor: withAlpha(colors.primary, 0.5),
-  },
-  autoText: {
-    color: colors.primary,
-    fontSize: 14,
     fontWeight: '800',
   },
   center: {

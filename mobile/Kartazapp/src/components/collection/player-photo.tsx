@@ -1,6 +1,6 @@
 import { Image, type ImageContentFit } from 'expo-image';
 import { useEffect, useState } from 'react';
-import { StyleSheet, View, type LayoutChangeEvent } from 'react-native';
+import { StyleSheet, View, type LayoutChangeEvent, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, {
   cancelAnimation,
   Easing,
@@ -32,6 +32,8 @@ type PlayerPhotoProps = {
   uri?: string;
   contentFit?: ImageContentFit;
   depth?: PhotoDepth;
+  /** Enquadramento da foto dentro da arte (ex.: subir e ampliar um pouco numa miniatura). */
+  style?: StyleProp<ViewStyle>;
 };
 
 /**
@@ -40,7 +42,7 @@ type PlayerPhotoProps = {
  * A foto projeta uma sombra no fundo seguindo o contorno do jogador (efeito de profundidade).
  * Ocupa todo o pai (absoluteFill): o fundo da carta fica por conta de quem usa.
  */
-export function PlayerPhoto({ uri, contentFit = 'cover', depth = 'card' }: PlayerPhotoProps) {
+export function PlayerPhoto({ uri, contentFit = 'cover', depth = 'card', style }: PlayerPhotoProps) {
   // Fim do carregamento (sucesso ou erro).
   const [settled, setSettled] = useState(!uri);
   const [showShimmer, setShowShimmer] = useState(false);
@@ -52,7 +54,7 @@ export function PlayerPhoto({ uri, contentFit = 'cover', depth = 'card' }: Playe
   }, [settled]);
 
   return (
-    <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+    <View pointerEvents="none" style={[StyleSheet.absoluteFill, style]}>
       {uri && (
         /*
          * Sombra no contorno do jogador: sem cor de fundo, o iOS calcula a sombra pelos pixels
@@ -111,9 +113,7 @@ function Shimmer({ active }: { active: boolean }) {
 
   const bandStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
-    transform: [
-      { translateY: -SHIMMER_HEIGHT + progress.value * (height.value + SHIMMER_HEIGHT * 2) },
-    ],
+    transform: [{ translateY: -SHIMMER_HEIGHT + progress.value * (height.value + SHIMMER_HEIGHT * 2) }],
   }));
 
   return (
