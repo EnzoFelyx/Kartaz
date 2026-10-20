@@ -19,7 +19,7 @@ Jogo mobile multiplayer de exploração no mapa com cartas colecionáveis de fut
   <img src="https://img.youtube.com/vi/I-fDqdkY11U/hqdefault.jpg" alt="Vídeo de demonstração do Kartaz no YouTube" width="560">
 </a>
 
-▶️ [Assista no YouTube](https://youtu.be/I-fDqdkY11U): dois celulares jogando ao mesmo tempo, mostrando o mapa multiplayer, a disputa por cartas e as trocas em tempo real.
+▶️ [Assista no YouTube](https://youtu.be/I-fDqdkY11U): dois celulares jogando ao mesmo tempo, mostrando o mapa multiplayer e as trocas em tempo real.
 
 ## Sobre o Projeto
 

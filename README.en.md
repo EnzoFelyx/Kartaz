@@ -19,7 +19,7 @@ Multiplayer mobile map exploration game with collectible football cards, built i
   <img src="https://img.youtube.com/vi/I-fDqdkY11U/hqdefault.jpg" alt="Kartaz demo video on YouTube" width="560">
 </a>
 
-▶️ [Watch on YouTube](https://youtu.be/I-fDqdkY11U): two phones playing at the same time, showing the multiplayer map, the race for cards and real-time trades.
+▶️ [Watch on YouTube](https://youtu.be/I-fDqdkY11U): two phones playing at the same time, showing the multiplayer map and real-time trades.
 
 ## About the Project
 
