@@ -13,6 +13,14 @@ Multiplayer mobile map exploration game with collectible football cards, built i
 
 > ⚠️ **Educational, non-profit project.** The cards use names and images based on photos of **real people** (football players). That's why Kartaz exists only as a study and portfolio project: it isn't sold, has no ads or real purchases, makes no money and won't be published on app stores. Read the [Legal notice](#legal-notice).
 
+## Demo
+
+<a href="https://youtu.be/I-fDqdkY11U" title="Kartaz demo video on YouTube">
+  <img src="https://img.youtube.com/vi/I-fDqdkY11U/hqdefault.jpg" alt="Kartaz demo video on YouTube" width="560">
+</a>
+
+▶️ [Watch on YouTube](https://youtu.be/I-fDqdkY11U): two phones playing at the same time, showing the multiplayer map, the race for cards and real-time trades.
+
 ## About the Project
 
 Kartaz is a Pokémon GO-style game without augmented reality: the player "walks" by dragging the map, finds cards, coins, batteries and flags, builds a collection, picks a team of 5 starters and trades cards with other players in real time.

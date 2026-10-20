@@ -9,15 +9,29 @@ export type UserCoordinates = {
 type LocationStatus = 'pending' | 'granted' | 'denied';
 
 /**
+ * Ponto de partida fixo para gravações (EXPO_PUBLIC_DEMO_LOCATION="lat,lng"): substitui o GPS,
+ * que nem chega a ser consultado. Sem valor (ou inválido), o app usa a posição real.
+ */
+function parseDemoLocation(raw: string | undefined): UserCoordinates | null {
+  const [latitude, longitude] = (raw ?? '').split(',').map((part) => Number(part.trim()));
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null;
+  if (Math.abs(latitude) > 90 || Math.abs(longitude) > 180) return null;
+  return { latitude, longitude };
+}
+
+const DEMO_LOCATION = parseDemoLocation(process.env.EXPO_PUBLIC_DEMO_LOCATION);
+
+/**
  * Posição real do aparelho, lida uma vez (permissão "durante o uso"): é o ponto de partida do jogador.
  * Depois disso ele se move arrastando o mapa, então não acompanhamos o GPS.
  * Usa a última posição conhecida (instantânea) e refina com a posição atual.
  */
 export function useInitialLocation() {
-  const [coords, setCoords] = useState<UserCoordinates | null>(null);
-  const [status, setStatus] = useState<LocationStatus>('pending');
+  const [coords, setCoords] = useState<UserCoordinates | null>(DEMO_LOCATION);
+  const [status, setStatus] = useState<LocationStatus>(DEMO_LOCATION ? 'granted' : 'pending');
 
   useEffect(() => {
+    if (DEMO_LOCATION) return;
     let cancelled = false;
 
     const toCoords = (location: Location.LocationObject) => ({
