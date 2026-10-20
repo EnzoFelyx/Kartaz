@@ -11,7 +11,7 @@ Regras gerais
 - **Paleta principal = tokens do `@theme` de `UI_REACT_para_referencia/src/index.css`**, com os mesmos nomes. Nenhuma cor fora do tema.
 - Nenhuma cor, fonte, espaçamento ou número de balanceamento hardcoded em tela: tokens em src/theme, expostos ao Tailwind via tailwind.config; balanceamento em config (mock remoto).
 - Lógica de jogo sensível é do servidor: o app só exibe e envia intenções. Enquanto não há backend, mocks com o mesmo formato dos contratos da API.
-- Sem marcas oficiais FIFA/World Cup; nomes/imagens de jogadores são placeholders.
+- Sem marcas oficiais FIFA/World Cup; a base de jogadores e as fotos não ficam no repositório (ver "Aviso legal" no README).
 
 ## Fase 0.1 — Projeto base
 - [ ] Criar o app dentro de `mobile/` (rodar na raiz `Kartaz/`, com a pasta `mobile/` vazia):

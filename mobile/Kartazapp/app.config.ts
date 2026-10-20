@@ -34,6 +34,7 @@ const withoutRemotePush: ConfigPlugin = (config) =>
  * Estende o app.json com configs que dependem de variáveis de ambiente.
  * A chave do Google Maps vem de GOOGLE_MAPS_API_KEY (defina em .env.local, que não vai pro git).
  * O esquema do login do Google vem de EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID; sem ele, nada é registrado.
+ * O time da Apple que assina o build iOS vem de APPLE_TEAM_ID (opcional).
  */
 export default ({ config }: ConfigContext): ExpoConfig => {
   const googleMapsApiKey = process.env.GOOGLE_MAPS_API_KEY;
@@ -43,6 +44,10 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     ...config,
     name: config.name ?? 'Kartaz',
     slug: config.slug ?? 'Kartazapp',
+    ios: {
+      ...config.ios,
+      appleTeamId: process.env.APPLE_TEAM_ID || config.ios?.appleTeamId,
+    },
     // Fundo da splash e do ícone adaptativo do Android: a cor de fundo do app (do tema).
     android: {
       ...config.android,

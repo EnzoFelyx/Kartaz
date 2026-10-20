@@ -12,9 +12,9 @@ interface SourceCodeModule extends TurboModule {
 }
 
 /**
- * Host do Mac que está rodando o Metro (ex.: "192.168.0.151").
+ * Host do Mac que está rodando o Metro (ex.: "192.168.0.10").
  * - `hostUri`: só existe com expo-dev-client / Expo Go.
- * - `scriptURL`: URL do bundle (ex.: "http://192.168.0.151:8081/index.bundle?..."); funciona no
+ * - `scriptURL`: URL do bundle (ex.: "http://192.168.0.10:8081/index.bundle?..."); funciona no
  *   build de desenvolvimento do `expo run:ios`, que é o caso deste projeto.
  */
 function getDevServerHost(): string | undefined {

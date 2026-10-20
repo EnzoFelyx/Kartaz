@@ -48,7 +48,7 @@ The project was a deliberate exercise in **authoritative multiplayer on mobile**
 | expo-sqlite | ~57.0 | Offline player catalog |
 | i18next | 26 | Portuguese, English and Spanish |
 
-### Backend (separate repository)
+### Backend (Rocketseat)
 
 | Technology | Role in the project |
 |------------|---------------------|
@@ -190,7 +190,7 @@ The rules the app needs to know (max energy, radar cost, bonus tables) are **dup
 
 ### 1. Backend
 
-The backend lives in a separate repository, [kartaz-backend](https://github.com/EnzoFelyx/kartaz-backend), derived from Rocketseat's [go-rocket-league-backend](https://github.com/rocketseat-education/go-rocket-league-backend). It needs PostgreSQL and a `.env` with at least `DATABASE_URL`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `JWT_SECRET` and `ADMIN_API_TOKEN`.
+The backend is Rocketseat's [go-rocket-league-backend](https://github.com/rocketseat-education/go-rocket-league-backend) and is not part of this repository. It needs PostgreSQL and a `.env` with at least `DATABASE_URL`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `JWT_SECRET` and `ADMIN_API_TOKEN`.
 
 ```bash
 node --env-file=.env src/server.js
@@ -326,7 +326,7 @@ Kartaz/
 └── LICENSE
 ```
 
-The backend (`backend/`) is its own git repository and is in this one's `.gitignore`.
+The backend (`backend/`) is Rocketseat's project and is in this repository's `.gitignore`.
 
 ## Features
 
@@ -374,7 +374,7 @@ Known gaps and ideas for the future:
 
 **[Rocketseat](https://www.rocketseat.com.br)**, for the course and the **Go Rocket League** project this work is based on:
 
-- The [go-rocket-league-backend](https://github.com/rocketseat-education/go-rocket-league-backend), which [kartaz-backend](https://github.com/EnzoFelyx/kartaz-backend) is derived from.
+- The [go-rocket-league-backend](https://github.com/rocketseat-education/go-rocket-league-backend) backend, used by this app.
 - Ported and adapted from the course's mobile project: the local SQLite database (`src/lib/db`) and the initial import (`src/lib/sync/seedFromBundle.ts`), server sync (`src/lib/sync/players-sync.ts`), the grid-mode card, the card art with the loading shimmer, the details screen entrance animation and the country-to-emoji-flag mapping (`src/utils/flags.ts`).
 - Card background images: `assets/images/bg-card.png` and `assets/images/bg-card-details.png`.
 
